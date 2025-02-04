@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulário Terapeuta - NAPESE</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/formulario_napese.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="shortcut icon" type="imagex/png" href="{{ url_for('static', filename='images/logo_subfooter.png') }}">
+</head>
+<body>
+    <div class="napese-form-container">
+        <div class="form-box">
+            <div class="form-header">
+                <h2>Formulário do Terapeuta</h2>
+                <p>Complete seu cadastro para começar.</p>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}" style="position: relative; padding-right: 2rem; margin-bottom: 1rem;">
+                            {{ message }}
+                            <button 
+                                style="position: absolute; right: 0.7rem; background: none; border: none; font-size: 1.2rem; cursor: pointer;" 
+                                onclick="fecharAlerta(this)">
+                                &times;
+                            </button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="{{ url_for('formulario_terapeuta') }}" enctype="multipart/form-data" class="registration-form">
+                {{ form.csrf_token }}
+
+                <div class="form-section">
+                    <h3><i class="fas fa-user"></i> Informações Pessoais</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nome_completo">Nome Completo</label>
+                            <input type="text" id="nome_completo" name="nome_completo" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="endereco_consultorio">Endereço do Consultório</label>
+                            <input type="text" id="endereco_consultorio" name="endereco_consultorio">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="online" name="online">
+                                <label for="online">Atendimento Online</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="cidade">Cidade</label>
+                            <input type="text" id="cidade" name="cidade" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="estado">Estado</label>
+                            <select id="estado" name="estado" required>
+                                <option value="">Selecione o Estado</option>
+                                <option value="AC">Acre</option>
+                                <option value="AL">Alagoas</option>
+                                <option value="AP">Amapá</option>
+                                <option value="AM">Amazonas</option>
+                                <option value="BA">Bahia</option>
+                                <option value="CE">Ceará</option>
+                                <option value="DF">Distrito Federal</option>
+                                <option value="ES">Espírito Santo</option>
+                                <option value="GO">Goiás</option>
+                                <option value="MA">Maranhão</option>
+                                <option value="MT">Mato Grosso</option>
+                                <option value="MS">Mato Grosso do Sul</option>
+                                <option value="MG">Minas Gerais</option>
+                                <option value="PA">Pará</option>
+                                <option value="PB">Paraíba</option>
+                                <option value="PR">Paraná</option>
+                                <option value="PE">Pernambuco</option>
+                                <option value="PI">Piauí</option>
+                                <option value="RJ">Rio de Janeiro</option>
+                                <option value="RN">Rio Grande do Norte</option>
+                                <option value="RS">Rio Grande do Sul</option>
+                                <option value="RO">Rondônia</option>
+                                <option value="RR">Roraima</option>
+                                <option value="SC">Santa Catarina</option>
+                                <option value="SP">São Paulo</option>
+                                <option value="SE">Sergipe</option>
+                                <option value="TO">Tocantins</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="telefone">Telefone</label>
+                            <input type="tel" id="telefone" name="telefone" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="celular">Celular (WhatsApp)</label>
+                            <input type="tel" id="celular" name="celular" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cpf">CPF</label>
+                            <input type="text" id="cpf" name="cpf" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3><i class="fas fa-graduation-cap"></i> Formação e Certificações</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nivel_atual">Nível Atual</label>
+                            <select id="nivel_atual" name="nivel_atual" required>
+                                <option value="">Selecione o Nível</option>
+                                <option value="Avançado Completo">Avançado Completo</option>
+                                <option value="Certificado SEP">Certificado SEP</option>
+                                <option value="Supervisor">Supervisor</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="carta_recomendacao">Carta de Recomendação (PDF)</label>
+                            <input type="file" id="carta_recomendacao" name="carta_recomendacao" accept=".pdf" required>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-nav btn-submit-terapeuta">
+                    <i class="fas fa-save"></i> Salvar Cadastro
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- jQuery Mask Plugin -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+    <script src="{{ url_for('static', filename='js/form-validation.js') }}"></script>
+    <script>
+        function fecharAlerta(botao) {
+            const alerta = botao.parentElement;
+            alerta.style.transition = "opacity 0.5s";
+            alerta.style.opacity = "0";
+
+            setTimeout(() => {
+                alerta.remove();
+            }, 500); // Tempo para a animação de transição antes de remover o elemento
+        }
+
+        // Máscara para telefone e celular
+        function maskPhone(input) {
+            let value = input.value.replace(/\D/g, '');
+            if (value.length > 11) value = value.slice(0, 11);
+            if (value.length > 2) value = '(' + value.slice(0, 2) + ') ' + value.slice(2);
+            if (value.length > 9) value = value.slice(0, 9) + '-' + value.slice(9);
+            input.value = value;
+        }
+
+        document.getElementById('telefone').addEventListener('input', function() {
+            maskPhone(this);
+        });
+
+        document.getElementById('celular').addEventListener('input', function() {
+            maskPhone(this);
+        });
+
+        // Habilitar/desabilitar campo de endereço quando online é marcado
+        document.getElementById('online').addEventListener('change', function() {
+            const enderecoInput = document.getElementById('endereco_consultorio');
+            enderecoInput.disabled = this.checked;
+            if (this.checked) {
+                enderecoInput.value = '';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Terapeuta - NAPESE</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cadastro.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="shortcut icon" type="imagex/png" href="{{ url_for('static', filename='images/logo_subfooter.png') }}">
+</head>
+<body>
+    <div class="bg-top"></div>
+    <div class="bg-bottom"></div>
+
+    <div class="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <div class="logo_container">
+                    <img class="logo_img" id="logo_img" src="{{ url_for('static', filename='images/logo_rodape.png') }}">
+                </div>
+                <h1>Cadastro de Terapeuta</h1>
+                <p>Bem-vindo ao NAPESE! <br> Complete seu cadastro para começar.</p>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            <i class="fas fa-info-circle"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="{{ url_for('cadastro_usuario_terapeuta') }}" class="registration-form">
+                {{ form.csrf_token }}
+
+                <div class="form-section">
+                    <!-- <h3><i class="fas fa-user"></i> Informações Pessoais</h3> -->
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="senha">Senha</label>
+                            <input type="password" id="senha" name="senha" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirma_senha">Confirmar Senha</label>
+                            <input type="password" id="confirma_senha" name="confirma_senha" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row" style="margin-bottom: 10px;">
+                    <!-- <h3><i class="fas fa-shield-alt"></i> Termos e Condições</h3> -->
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="concordou_termos" name="concordou_termos" required>
+                        <label for="concordou_termos">
+                            Li e concordo com os <a href="#" class="terms-link">termos de uso</a> e <a href="#" class="terms-link">política de privacidade</a>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-user-plus"></i> Criar Conta
+                    </button>
+                </div>
+
+                <div class="divider">
+                    <span>ou</span>
+                </div>
+
+                <div class="links">
+                    <a href="{{ url_for('login_terapeuta') }}">Já tem uma conta? Faça login</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Validação de senha em tempo real
+        document.getElementById('confirma_senha').addEventListener('input', function() {
+            const senha = document.getElementById('senha').value;
+            const confirmaSenha = this.value;
+            
+            if (senha !== confirmaSenha) {
+                this.setCustomValidity('As senhas não coincidem');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+    </script>
+</body>
+</html>

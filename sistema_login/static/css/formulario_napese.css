@@ -1,0 +1,592 @@
+/* Variáveis de cores */
+:root {
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --secondary: #4dabf7;
+    --text-primary: #2c3e50;
+    --text-secondary: #34495e;
+    --border-color: #ddd;
+    --error: #e74c3c;
+    --gray-50: #f8f9fa;
+    --gray-100: #f5f6fa;
+    --gray-200: #e2e8f0;
+    --gray-300: #cbd5e0;
+    --gray-600: #4a5568;
+    --white: #ffffff;
+    --info-blue: #0066cc;
+    --info-light: #f1f8ff;
+    --info-border: #b3e0ff;
+}
+
+/* Reset e Estilos Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--gray-100);
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    line-height: 1.6;
+}
+
+/* Container Principal */
+.napese-form-container {
+    background-color: var(--white);
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+/* Tipografia */
+h2, h3, h4 {
+    color: var(--text-primary);
+    margin-bottom: 20px;
+}
+
+h2 {
+    font-size: 24px;
+    text-align: center;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--secondary);
+}
+
+h3 {
+    font-size: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Grid e Layout */
+.form-section {
+    background-color: var(--gray-50);
+    border-radius: 8px;
+    margin-bottom: 25px;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    overflow: auto;
+}
+
+/* Nova classe para modais menores */
+.form-section.modal-small {
+    max-width: 500px;
+    padding: 20px;
+    margin: 0 auto;
+}
+
+.form-section form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-step {
+    display: none;
+    background-color: var(--gray-50);
+    padding: 25px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+}
+
+.form-step.active {
+    display: block;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+/* Formulário e Inputs */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 14px;
+}
+
+input, 
+select, 
+textarea {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    background-color: var(--white);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* Checkboxes e Radios */
+input[type="checkbox"],
+input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--gray-300);
+    border-radius: 4px;
+    margin-right: 8px;
+    position: relative;
+    cursor: pointer;
+    vertical-align: middle;
+    padding: 0;
+}
+
+input[type="radio"] {
+    border-radius: 50%;
+}
+
+input[type="checkbox"]:checked,
+input[type="radio"]:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 2px;
+    width: 6px;
+    height: 10px;
+    border: solid var(--white);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+input[type="radio"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 4px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--white);
+}
+
+/* Range Input */
+input[type="range"] {
+    height: 5px;
+    background: linear-gradient(to right, var(--secondary) var(--value-percent, 50%), var(--gray-50) var(--value-percent, 50%));
+    border: none;
+    padding: 0;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    background: var(--secondary);
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid var(--white);
+    box-shadow: 0 0 4px rgba(0,0,0,0.2);
+}
+
+/* Info Box */
+.info-box {
+    background-color: var(--info-light);
+    border: 1px solid var(--info-border);
+    border-radius: 6px;
+    padding: 15px;
+    margin: 15px 0;
+}
+
+.info-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--info-blue);
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+
+.info-text {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+/* White Box */
+.white-box {
+    background-color: var(--white);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Likert Scale */
+.likert-item {
+    margin-bottom: 30px;
+    padding: 15px;
+    background-color: var(--white);
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.likert-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.likert-label {
+    flex: 1;
+    font-size: 14px;
+    color: var(--text-secondary);
+    padding-right: 15px;
+}
+
+.likert-value {
+    background-color: var(--primary);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 12px;
+    min-width: 100px;
+    text-align: center;
+}
+
+.likert-range {
+    /* -webkit-appearance: none; */
+    width: 100%;
+    height: 6px;
+    background: linear-gradient(to right, var(--primary) 50%, var(--gray-200) 50%);
+    border-radius: 3px;
+    outline: none;
+    margin: 15px 0;
+}
+
+.likert-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background-color: var(--primary);
+    border: 2px solid white;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.likert-range::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background-color: var(--primary);
+    border: 2px solid white;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.likert-scale {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--gray-600);
+    margin-top: 8px;
+}
+
+.scale-point {
+    text-align: center;
+    flex: 1;
+    padding: 0 5px;
+}
+
+/* Progress Bar */
+.progress-bar {
+    margin: 30px 0;
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    padding: 0 20px;
+}
+
+/* Linha de progresso */
+.progress-bar::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--gray-200);
+    z-index: 0;
+}
+
+/* Linha de progresso ativa */
+.progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 0;
+    height: 2px;
+    background: var(--primary);
+    z-index: 0;
+    width: var(--progress-width, 25%);
+    transition: width 0.3s ease;
+}
+
+/* Círculos de progresso */
+.progress-step {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--white);
+    border: 2px solid var(--gray-200);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+/* Estilo para etapa ativa */
+.progress-step.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--white);
+}
+
+/* Estilo para etapas completadas */
+.progress-step.completed {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--white);
+}
+
+/* Adicionar números grandes */
+.progress-step::after {
+    content: attr(data-step);
+    font-size: 18px;
+    font-weight: 500;
+}
+/* Navegação */
+.form-navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+    padding: 20px 0;
+    border-top: 1px solid var(--gray-200);
+}
+
+.btn-nav {
+    padding: 12px 25px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-prev {
+    background-color: var(--gray-200);
+    color: var(--gray-600);
+}
+
+.btn-next,
+.btn-submit,
+.btn-submit-terapeuta {
+    background-color: var(--primary);
+    color: var(--white);
+}
+
+.btn-nav:hover {
+    transform: translateY(-1px);
+}
+
+.btn-prev:hover {
+    background-color: var(--gray-300);
+}
+
+.btn-next:hover,
+.btn-submit:hover,
+.btn-submit-terapeuta:hover {
+    background-color: var(--primary-hover);
+}
+
+/* Estados de Validação */
+.invalid {
+    border-color: var(--error) !important;
+}
+
+.error-message {
+    color: var(--error);
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .napese-form-container,
+    .form-section {
+        padding: 15px;
+    }
+    
+    .btn-nav {
+        padding: 10px 20px;
+    }
+}
+
+/* Estilos para campos inválidos e mensagens de erro */
+.invalid {
+    border-color: var(--error) !important;
+    background-color: #fff5f5 !important;
+}
+
+.error-message {
+    color: var(--error);
+    font-size: 12px;
+    margin-top: 5px;
+    padding-left: 4px;
+    display: flex;
+    align-items: center;
+}
+
+.error-message::before {
+    content: '⚠️';
+    margin-right: 4px;
+    font-size: 14px;
+}
+
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
+.alert-success {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+.alert-error {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+li{
+    margin-left: 17px;
+}
+
+#filtro-tabela {
+    background-image: url('/css/searchicon.png');
+    background-position: 10px 10px;
+    background-repeat: no-repeat;
+    width: 100%;
+    font-size: 16px;
+    padding: 12px 20px 12px 40px;
+    border: 1px solid #ddd;
+    margin-bottom: 12px;
+  }
+
+ /* #user-table tr:nth-child(even) {
+    background-color: #e6e6e6dd;
+  } */
+
+/* Estilos base para modais */
+.modal-content {
+    background-color: var(--gray-50);
+    border-radius: 8px;
+    margin: 20px auto;
+    padding: 20px;
+    width: fit-content;  /* Ajusta ao conteúdo */
+    min-width: 300px;   /* Largura mínima */
+    max-width: 500px;   /* Largura máxima */
+}
+
+/* Modal grande específico para avaliação de pacientes */
+#avaliarPacientesModal .modal-content-lg {
+    background-color: var(--gray-50);
+    border-radius: 8px;
+    margin: 20px auto;
+    padding: 20px;
+    width: 100%;
+    max-width: 800px;
+}
+
+/* Ajustes para o conteúdo do form dentro dos modais */
+.modal-content form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Ajuste do espaçamento dos modais menores */
+#editModal .form-section,
+#createUserModal .form-section,
+#vincularPacientesModal .form-section {
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+/* Estilo para o grupo de checkboxes */
+.checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    margin: 15px 0;
+}
+
+/* Estilo para cada item de checkbox */
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Ajuste específico para os checkboxes dentro do modal de avaliação */
+#avaliarPacientesModal .checkbox-item {
+    margin-bottom: 5px;
+}
+
+#avaliarPacientesModal .checkbox-item input[type="checkbox"] {
+    margin: 0;
+    flex-shrink: 0;
+}
+
+#avaliarPacientesModal .checkbox-item label {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-secondary);
+}

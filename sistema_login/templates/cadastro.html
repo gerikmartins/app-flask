@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro - NAPESE</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cadastro.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="shortcut icon" type="imagex/png" href="{{ url_for('static', filename='images/logo_subfooter.png') }}">
+</head>
+<body>
+    <div class="bg-top"></div>
+    <div class="bg-bottom"></div>
+
+    <div class="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <div class="logo_container">
+                    <img class="logo_img" id="logo_img" src="{{ url_for('static', filename='images/logo_rodape.png') }}">
+                </div>
+                <h2>Cadastro de Paciente</h2>
+                <p>Bem-vindo ao NAPESE! <br> Complete seu cadastro para começar.</p>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="flash flash-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="{{ url_for('cadastro') }}">
+                {{ form.csrf_token }}
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="senha">Senha</label>
+                    <input type="password" id="senha" name="senha" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirma_senha">Confirme a Senha</label>
+                    <input type="password" id="confirma_senha" name="confirma_senha" required>
+                </div>
+
+                <!-- <button type="submit" class="btn btn-primary">Cadastrar</button> -->
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i> Criar Conta
+                </button>
+
+                <div class="divider">
+                    <span>ou</span>
+                </div>
+
+                <div class="login-links">
+                    <a href="{{ url_for('login') }}">Já tem uma conta? Faça login</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

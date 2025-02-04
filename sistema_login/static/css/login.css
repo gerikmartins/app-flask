@@ -1,0 +1,260 @@
+/* * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+} */
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #f5f6fa;
+}
+
+.login-container {
+    min-height: 50vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    padding-top: 20px;
+}
+.logo_container{
+    padding-top: 20px;
+    width: 250px;
+    display: inline-block;
+}
+.logo_img{
+    width: 250px;
+    display: inline-block;
+}
+
+.login-box {
+    position: relative;  /* Adicionado para permitir posicionamento absoluto do link */
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.login-header h2 {
+    color: #2d3748;
+    margin-bottom: 8px;
+}
+
+.login-header p {
+    color: #718096;
+    font-size: 0.9rem;
+}
+
+
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    color: #4a5568;
+    margin-bottom: 5px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+.form-group-checkbox {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.form-group-checkbox input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+.form-group-checkbox label {
+    color: #7f8c8d;
+    font-size: 0.9rem;
+}
+
+.login-links {
+    text-align: center;
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.login-links a {
+    color: #4dabf7;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.login-links a:hover {
+    text-decoration: underline;
+}
+
+.login-button {
+    width: 100%;
+    padding: 10px;
+    background: #22a800;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-bottom: 15px;
+}
+
+.login-button:hover {
+    background: #1c8d00;
+}
+
+.btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary {
+    background-color: #3498db;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #2980b9;
+}
+
+.divider {
+    text-align: center;
+    margin: 20px 0;
+    position: relative;
+}
+
+.divider::before,
+.divider::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 45%;
+    height: 1px;
+    background-color: #dcdde1;
+}
+
+.divider::before {
+    left: 0;
+}
+
+.divider::after {
+    right: 0;
+}
+
+.divider span {
+    background-color: white;
+    padding: 0 10px;
+    color: #7f8c8d;
+    font-size: 0.9rem;
+}
+
+.links {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.links a {
+    color: #3498db;
+    text-decoration: none;
+    font-size: 0.9rem;
+    display: inline-block;
+    margin: 5px 0;
+}
+
+.links a:hover {
+    text-decoration: underline;
+}
+
+.flash-messages {
+    width: 100%;
+    max-width: 400px;
+    margin-bottom: 20px;
+}
+
+.flash {
+    padding: 12px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.flash-success {
+    background-color: #2ecc71;
+    color: white;
+}
+
+.flash-error {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.flash-info {
+    background-color: #3498db;
+    color: white;
+}
+
+@media (max-width: 480px) {
+    form {
+        padding: 20px;
+    }
+    
+    .login-header h1 {
+        font-size: 2rem;
+    }
+    
+    .login-header p {
+        font-size: 1rem;
+    }
+}
+
+.bg-top {
+    top: 0;  /* Adicionado */
+    left: 0;  /* Adicionado */
+    position: absolute;
+    background-color: #a7e400;
+    width: 100vw;
+    height: 50vh;
+    z-index: -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+}
+.bg-bottom {
+    position: absolute;
+    background-color: #fdffef;
+    width: 100vw;
+    height: 50vh;
+    top: 50%;
+    z-index: -1;
+}

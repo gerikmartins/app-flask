@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Dashboard Administrador</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cadastro_terapeuta.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/formulario_napese.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="shortcut icon" type="imagex/png" href="{{ url_for('static', filename='images/logo_subfooter.png') }}">
+</head>
+<body>
+    <div class="bg-bottom"></div>
+    <div class="login-container">
+        <div class="login-box" style="max-width: 800px;">
+            <div class="login-header">
+                <h2>Listagem de Usuários</h2>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}" style="position: relative; padding-right: 2rem; margin-bottom: 1rem;">
+                            {{ message }}
+                            <button 
+                                style="position: absolute; right: 0.7rem; background: none; border: none; font-size: 1.2rem; cursor: pointer;" 
+                                onclick="fecharAlerta(this)">
+                                &times;
+                            </button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Botão para abrir o modal de criação de novo usuário -->
+            <button onclick="openCreateUserModal()" class="btn-nav btn-submit-terapeuta">Criar Novo Usuário</button>
+
+            <input type="text" id="filtro-tabela" oninput="filtrarTabela()" placeholder="Filtrar..">
+            <table class="user-table" id="user-table">
+                <thead>
+                    <tr>
+                        <th >ID</th>
+                        <th>Email</th>
+                        <th>Tipo</th>
+                        <th>Data do Cadastro</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in usuarios['items'] %}
+                        <tr>
+                            <td>{{ user.id }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.tipo_usuario }}</td>
+                            <td>{{ user.data_cadastro }}</td>
+                            <td>
+                                <!-- Botão de editar com tooltip -->
+                                <button class="action-btn edit-btn" 
+                                        onclick="openEditUserModal('{{ user.id }}', '{{ user.email }}')" 
+                                        title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                
+                                <!-- Botão de remover com tooltip -->
+                                <form action="{{ url_for('remover_usuario', user_id=user.id) }}" 
+                                      method="POST" 
+                                      style="display:inline;">
+                                    {{ form.csrf_token }}
+                                    <button type="submit" 
+                                            class="action-btn delete-btn" 
+                                            onclick="return confirm('Tem certeza que deseja remover este usuário?')" 
+                                            title="Remover">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                
+                                <!-- Botão de vincular pacientes, visível apenas para terapeutas -->
+                                {% if user.tipo_usuario == 'terapeuta' %}
+                                    <button class="action-btn link-btn" 
+                                            onclick="openVincularPacientesModal('{{ user.id }}')"
+                                            title="Vincular Pacientes">
+                                        <i class="fas fa-link"></i>
+                                    </button>
+                                {% endif %}
+
+                                {% if user.tipo_usuario == 'paciente' %}
+                                    <form action="{{ url_for('gerar_pdf', user_email=user.email) }}" 
+                                        method="GET" 
+                                        style="display:inline;">
+                                        <button type="submit" 
+                                                class="action-btn pdf-btn" 
+                                                title="Gerar PDF">
+                                            <i class="fas fa-file-pdf"></i>
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>                
+            </table>
+
+            <div class="pagination">
+                {% if usuarios.has_prev %}
+                    <a href="{{ url_for('admin_usuarios', page=usuarios.prev_num) }}">Anterior</a>
+                {% endif %}
+                <span>Página {{ usuarios.page }} de {{ usuarios.pages }}</span>
+                {% if usuarios.has_next %}
+                    <a href="{{ url_for('admin_usuarios', page=usuarios.next_num) }}">Próxima</a>
+                {% endif %}
+            </div>
+
+            <hr>
+            <!-- Pacientes pendentes     -->
+            <h3>Pacientes pendentes</h3>
+            <table class="user-table" id="patient-table">
+                <thead>
+                    <tr>
+                        <th >ID</th>
+                        <th>Email</th>
+                        <th>Tipo</th>
+                        <th>Data do Cadastro</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in pacientes_pendentes['items'] %}
+                        <tr>
+                            <td>{{ user.id }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.tipo_usuario }}</td>
+                            <td>{{ user.data_cadastro }}</td>
+                            <td>
+
+                                
+                                <button onclick="openAvaliarPacienteModal('{{ user.id }}', '{{ user.email }}')"  
+                                        class="action-btn pdf-btn" 
+                                        title="Avaliar Paciente">
+                                        <i class="fa-solid fa-folder-open"></i>
+                                </button>
+                                    
+                
+                                <!-- Botão de remover com tooltip -->
+                                <form action="{{ url_for('remover_usuario', user_id=user.id) }}"
+                                      method="POST" 
+                                      style="display:inline;">
+                                    {{ form.csrf_token }}
+                                    <button type="submit"
+                                            class="action-btn delete-btn" 
+                                            onclick="return confirm('Tem certeza que deseja remover este usuário?')" 
+                                            title="Remover">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>                
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal de Edição -->
+    <div id="editModal" style="display:none;">
+        <div class="modal-content form-section">
+            <span class="close" onclick="closeEditUserModal()">&times;</span>
+            <h3>Editar Usuário</h3>
+            <form action="{{ url_for('editar_usuario') }}" method="POST">
+                {{ form.csrf_token }}
+                
+                <input type="hidden" id="user_id" name="user_id">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="password">Senha:</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                </div>
+
+
+                <div>
+                    <button type="submit" class="action-btn edit-btn">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Criação de Novo Usuário -->
+    <div id="createUserModal" style="display:none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeCreateUserModal()">&times;</span>
+            <h3>Criar Novo Usuário</h3>
+            <form action="{{ url_for('criar_usuario') }}" method="POST">
+                {{ form.csrf_token }}
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tipo_usuario">Tipo de Usuário:</label>
+                        <select id="tipo_usuario" name="tipo_usuario" required>
+                            <option value="admin">Administrador</option>
+                            <option value="terapeuta">Terapeuta</option>
+                            <option value="paciente">Paciente</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="password">Senha:</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                </div>
+
+                <div>
+                    <button type="submit" class="action-btn edit-btn">Criar Usuário</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Vincular Pacientes -->
+    <div id="vincularPacientesModal" style="display:none;">
+        <div class="modal-content form-section">
+            <span class="close" onclick="closeVincularPacientesModal()">&times;</span>
+            <h3>Vincular Pacientes</h3>
+            <div id="pacientes-list">
+                <h4>Pacientes Vinculados</h4>
+                <ul id="pacientes-ul">
+                    <!-- Pacientes vinculados serão adicionados aqui -->
+                </ul>
+            </div>            
+            <div>
+                <form id="vincularPacientesForm" action="{{ url_for('vincular_paciente') }}" method="POST">
+                    {{ form.csrf_token }}
+                    <input type="hidden" id="terapeuta_id" name="terapeuta_id">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="novo_paciente">Adicionar Paciente:</label>
+                            <select id="novo_paciente" name="novo_paciente" class="form-control">
+                                <option value="" disabled selected>Selecione um paciente</option>
+                                <!-- As opções serão adicionadas dinamicamente -->
+                            </select>                            
+                        </div>
+                    </div>
+                    <div>
+                        <button type="submit" class="btn-nav btn-submit-terapeuta">Vincular</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Avaliar Pacientes -->
+    <div id="avaliarPacientesModal" style="display:none;">
+        <div class="modal-content-lg form-section">
+            <span class="close" onclick="closeAvaliarPacientesModal()">&times;</span>
+            <div class="">
+                <h3>Dados Pessoais</h3>
+                <input type="hidden" id="avaliar_paciente_id" name="avaliar_paciente_id">
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="nome_completo">Nome Completo</label>
+                            <input type="text" id="nome_completo" name="nome_completo" disabled>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="cpf">CPF</label>
+                            <input type="text" id="cpf" name="cpf" disabled>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="telefones">Telefones</label>
+                            <input type="text" id="telefones" name="telefones" disabled>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="data_nascimento">Data de Nascimento</label>
+                            <input type="date" id="data_nascimento" name="data_nascimento" disabled>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="cep">CEP</label>
+                            <input type="text" id="cep" name="cep" disabled>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="cidade">Cidade</label>
+                            <input type="text" id="cidade" name="cidade" disabled>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="estado">Estado</label>
+                            <input type="text" id="estado" name="estado" disabled>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="genero">Gênero</label>
+                            <input type="text" id="genero" name="genero" disabled>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="profissao">Profissão</label>
+                            <input type="text" id="profissao" name="profissao" disabled>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="" style="display: block;">
+                <h3>Preferências</h3>
+                <!-- Preferência de Atendimento -->
+                <div class="form-group">
+                    <label for="preferencia_atendimento">Preferência de Atendimento</label>
+
+                    <select id="preferencia_atendimento" name="preferencia_atendimento" disabled>
+                        <option value="">Selecione uma opção</option>
+                        <option value="ONLINE">Online</option>
+                        <option value="PRESENCIAL">Presencial</option>
+                    </select>
+                </div>
+
+                <!-- Renda Familiar -->
+                <div class="form-group">
+                    <label for="renda_familiar">Renda Familiar</label>
+                    <select id="renda_familiar" name="renda_familiar" disabled>
+                        <option value="ATE_2_SALARIOS">Até 2 salários</option>
+                        <option value="2_A_4_SALARIOS">2 a 4 salários</option>
+                        <option value="4_A_10_SALARIOS">4 a 10 salários</option>
+                        <option value="ACIMA_10_SALARIOS">Acima de 10 salários</option>
+                    </select>
+                </div>
+
+                <!-- Número de Dependentes -->
+                <div class="form-group">
+                    <label for="num_dependentes">Número de Dependentes</label>
+                    <select id="num_dependentes" name="num_dependentes" disabled>
+                        <option value="NENHUM">Nenhum</option>
+                        <option value="1_A_2">1 a 2</option>
+                        <option value="3_A_4">3 a 4</option>
+                        <option value="MAIS_DE_4">Mais de 4</option>
+                    </select>
+                </div>
+
+                <h3>Como Conheceu o NAPESE</h3>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="conheceu_site_trauma" name="conheceu_site_trauma" disabled>
+                        <label for="conheceu_site_trauma">Site Trauma</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="conheceu_instagram" name="conheceu_instagram" disabled>
+                        <label for="conheceu_instagram">Instagram</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="conheceu_indicacao" name="conheceu_indicacao" disabled>
+                        <label for="conheceu_indicacao">Indicação</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="conheceu_treinamentos" name="conheceu_treinamentos" disabled>
+                        <label for="conheceu_treinamentos">Treinamentos</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="conheceu_google" name="conheceu_google" disabled>
+                        <label for="conheceu_google">Google</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="conheceu_rede_social" name="conheceu_rede_social" disabled>
+                        <label for="conheceu_rede_social">Rede Social</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="conheceu_psicologo" name="conheceu_psicologo" disabled>
+                        <label for="conheceu_psicologo">Psicólogo</label>
+                    </div>
+                    <div class="form-group">
+                        <label for="conheceu_outro">Outro</label>
+                        <input type="text" id="conheceu_outro" name="conheceu_outro" disabled>
+                    </div>
+                </div>
+            </div>
+            <div class="" style="display: block;">
+                <h3>Sintomas e Histórico Médico</h3>
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="sintomas_relevantes">Quais os sintomas relevantes que você tem sentido no último mês?</label>
+                            <textarea id="sintomas_relevantes" name="sintomas_relevantes" disabled></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="medicacoes">Toma alguma medicação? Qual?</label>
+                            <textarea id="medicacoes" name="medicacoes" disabled></textarea>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="substancias_psicoativas">Uso de substância psicoativa (álcool e outras drogas)?</label>
+                            <textarea id="substancias_psicoativas" name="substancias_psicoativas" disabled></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="historico_acidentes">Já sofreu algum acidente?</label>
+                            <textarea id="historico_acidentes" name="historico_acidentes" disabled></textarea>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="historico_cirurgias">Já passou por algum procedimento cirúrgico?</label>
+                            <textarea id="historico_cirurgias" name="historico_cirurgias" disabled></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="dores">Sente algum tipo de dor (aguda ou crônica)? Se sim, descreva brevemente:</label>
+                            <textarea id="dores" name="dores" disabled></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Acompanhamento Profissional</h3>
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="acompanhamento_psiquiatrico">Tem tido acompanhamento psiquiátrico?</label>
+                            <select id="acompanhamento_psiquiatrico" name="acompanhamento_psiquiatrico" disabled>
+                                <option value="SIM">Sim</option>
+                                <option value="NAO">Não</option>
+                                <option value="NAO_SEI">Não Sei</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="acompanhamento_psicologico">Tem tido acompanhamento psicológico?</label>
+                            <select id="acompanhamento_psicologico" name="acompanhamento_psicologico" disabled>
+                                <option value="SIM">Sim</option>
+                                <option value="NAO">Não</option>
+                                <option value="NAO_SEI">Não Sei</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="tecnicas_corporais">Já recebeu ou trabalhou com alguma técnica corporal? Se sim, qual (quais)?</label>
+                            <textarea id="tecnicas_corporais" name="tecnicas_corporais" disabled></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="" style="display: block;">
+                <h3>Método Somatic Experiencing® e Histórico de Trauma</h3>
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="conhece_se">Conhece o Método Somatic Experiencing®?</label>
+                            <select id="conhece_se" name="conhece_se" disabled>
+                                <option value="true">Sim</option>
+                                <option value="false">Não</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="motivo_procura">Qual o motivo da sua procura pelo atendimento?</label>
+                            <textarea id="motivo_procura" name="motivo_procura" disabled></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="vivenciou_trauma">Vivenciou Trauma?</label>
+                            <select id="vivenciou_trauma" name="vivenciou_trauma" disabled>
+                                <option value="true">Sim</option>
+                                <option value="false">Não</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="detalhes-trauma" class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="descricao_evento">Descrição do Evento</label>
+                            <textarea id="descricao_evento" name="descricao_evento" disabled></textarea>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="tempo_decorrido">Tempo Decorrido</label>
+                            <input type="text" id="tempo_decorrido" name="tempo_decorrido" disabled>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="envolveu_violencia">Envolveu Violência?</label>
+                            <select id="envolveu_violencia" name="envolveu_violencia" disabled>
+                                <option value="true">Sim</option>
+                                <option value="false">Não</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Vivências</h3>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="vivencia_direta" name="vivencia_direta" disabled>
+                        <label for="vivencia_direta">Vivência Direta</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="vivencia_testemunha" name="vivencia_testemunha" disabled>
+                        <label for="vivencia_testemunha">Testemunha</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="vivencia_familiar_amigo" name="vivencia_familiar_amigo" disabled>
+                        <label for="vivencia_familiar_amigo">Familiar/Amigo</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="vivencia_trabalho" name="vivencia_trabalho" disabled>
+                        <label for="vivencia_trabalho">Trabalho</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="vivencia_nenhuma" name="vivencia_nenhuma" disabled>
+                        <label for="vivencia_nenhuma">Nenhuma</label>
+                    </div>
+                    <div class="form-group">
+                        <label for="vivencia_outro">Outro</label>
+                        <textarea id="vivencia_outro" name="vivencia_outro" disabled></textarea>
+                    </div>
+                </div>
+
+                <h3>No último mês, quanto você foi incomodado por:</h3>
+                <div class="likert-item">
+                    <div class="likert-header">
+                        <span class="likert-label">Lembranças indesejáveis, perturbadoras e repetitivas da experiência estressante?</span>
+                        <span class="likert-value">Neutro</span>
+                    </div>
+                    <input type="range" class="likert-range" id="impacto_lembracas" name="impacto_lembracas" min="0" max="4" value="2" disabled>
+                    <div class="likert-scale">
+                        <span class="scale-point">De modo nenhum</span>
+                        <span class="scale-point">Um pouco</span>
+                        <span class="scale-point">Moderadamente</span>
+                        <span class="scale-point">Muito</span>
+                        <span class="scale-point">Extremamente</span>
+                    </div>
+                </div>
+
+                <div class="likert-item">
+                    <div class="likert-header">
+                        <span class="likert-label">Tentar evitar lembranças externas da experiência estressante?</span>
+                        <span class="likert-value">Neutro</span>
+                    </div>
+                    <input type="range" class="likert-range" id="impacto_evitacao" name="impacto_evitacao" min="0" max="4" value="2" disabled>
+                    <div class="likert-scale">
+                        <span class="scale-point">De modo nenhum</span>
+                        <span class="scale-point">Um pouco</span>
+                        <span class="scale-point">Moderadamente</span>
+                        <span class="scale-point">Muito</span>
+                        <span class="scale-point">Extremamente</span>
+                    </div>
+                </div>
+
+                <div class="likert-item">
+                    <div class="likert-header">
+                        <span class="likert-label">Ter crenças negativas intensas sobre você, outras pessoas ou o mundo?</span>
+                        <span class="likert-value">Neutro</span>
+                    </div>
+                    <input type="range" class="likert-range" id="impacto_crencas" name="impacto_crencas" min="0" max="4" value="2" disabled>
+                    <div class="likert-scale">
+                        <span class="scale-point">De modo nenhum</span>
+                        <span class="scale-point">Um pouco</span>
+                        <span class="scale-point">Moderadamente</span>
+                        <span class="scale-point">Muito</span>
+                        <span class="scale-point">Extremamente</span>
+                    </div>
+                </div>
+
+                <div class="likert-item">
+                    <div class="likert-header">
+                        <span class="likert-label">Sentir-se apreensivo ou assustado facilmente?</span>
+                        <span class="likert-value">Neutro</span>
+                    </div>
+                    <input type="range" class="likert-range" id="impacto_apreensao" name="impacto_apreensao" min="0" max="4" value="2" disabled>
+                    <div class="likert-scale">
+                        <span class="scale-point">De modo nenhum</span>
+                        <span class="scale-point">Um pouco</span>
+                        <span class="scale-point">Moderadamente</span>
+                        <span class="scale-point">Muito</span>
+                        <span class="scale-point">Extremamente</span>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <div class="" style="display: block;">
+                
+                <div class="form-row"></div>
+                
+                    <div class="form-col">
+                        <div class="form-group">
+                            <!--<h3>Avaliação do Paciente</h3> -->
+                            <div>
+                                <button onclick="aprovarPaciente()" class="action-btn edit-btn">Aprovar</button>
+                                <button type="submit" class="action-btn delete-btn">Negar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </div>
+
+    <form action="{{ url_for('remover_vinculo') }}" method="POST" style="display:none;" id="formRemoverVinculo">
+        {{ form.csrf_token }}
+        <input type="hidden" name="terapeuta_id" id="terapeuta_remover_id">
+        <input type="hidden" name="paciente_id" id="paciente_remover_id">
+        <button type="submit" id="btnRemoverVinculo">
+        </button>
+    </form>
+    
+
+
+    <script>
+        // Função para abrir o modal e preencher os campos
+        function openEditUserModal(userId, email) {
+            document.getElementById('editModal').style.display = "flex";
+            document.getElementById('email').value = email;  // Preenche o email no formulário
+            document.getElementById('user_id').value = userId;  // Preenche o ID do usuário
+        }
+
+        // Função para fechar o modal
+        function closeEditUserModal() {
+            document.getElementById('editModal').style.display = "none";
+        }
+
+        function openAvaliarPacienteModal(userId, email) {
+            document.getElementById('avaliarPacientesModal').style.display = "flex";
+            // document.getElementById('email').value = email;  // Preenche o email no formulário
+            // document.getElementById('user_id').value = userId;  // Preenche o ID do usuário
+
+            const selectPaciente = document.getElementById('novo_paciente');
+
+            // Limpar as opções existentes
+            selectPaciente.innerHTML = '<option value="" disabled selected>Selecione um paciente</option>';
+
+            // Fazer requisição à API para obter pacientes disponíveis
+            fetch(`/avaliacao_paciente/${userId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        console.log("data: "+JSON.stringify(data));
+                        document.getElementById('avaliar_paciente_id').value = data[0].id;
+                        document.getElementById('nome_completo').value = data[0].nome_completo;
+                        document.getElementById('cpf').value = data[0].cpf;
+                        document.getElementById('telefones').value = data[0].telefones;
+                        document.getElementById('data_nascimento').value = data[0].data_nascimento;
+                        document.getElementById('cep').value = data[0].cep;
+                        document.getElementById('cidade').value = data[0].cidade;
+                        document.getElementById('estado').value = data[0].estado;
+                        document.getElementById('genero').value = data[0].genero;
+                        document.getElementById('profissao').value = data[0].profissao;
+                        document.getElementById('preferencia_atendimento').value = data[0].preferencia_atendimento;
+                        document.getElementById('renda_familiar').value = data[0].renda_familiar;
+                        document.getElementById('num_dependentes').value = data[0].num_dependentes;
+                        document.getElementById('conheceu_site_trauma').checked = data[0].conheceu_site_trauma;
+                        document.getElementById('conheceu_instagram').checked = data[0].conheceu_instagram;
+                        document.getElementById('conheceu_indicacao').checked = data[0].conheceu_indicacao;
+                        document.getElementById('conheceu_treinamentos').checked = data[0].conheceu_treinamentos;
+                        document.getElementById('conheceu_google').checked = data[0].conheceu_google;
+                        document.getElementById('conheceu_rede_social').checked = data[0].conheceu_rede_social;
+                        document.getElementById('conheceu_psicologo').checked = data[0].conheceu_psicologo;
+                        document.getElementById('conheceu_outro').value = data[0].conheceu_outro;
+                        document.getElementById('sintomas_relevantes').value = data[0].sintomas_relevantes;
+                        document.getElementById('medicacoes').value = data[0].medicacoes;
+                        document.getElementById('substancias_psicoativas').value = data[0].substancias_psicoativas;
+                        document.getElementById('historico_acidentes').value = data[0].historico_acidentes;
+                        document.getElementById('historico_cirurgias').value = data[0].historico_cirurgias;
+                        document.getElementById('dores').value = data[0].dores;
+                        document.getElementById('acompanhamento_psiquiatrico').value = data[0].acompanhamento_psiquiatrico;
+                        document.getElementById('acompanhamento_psicologico').value = data[0].acompanhamento_psicologico;
+                        document.getElementById('tecnicas_corporais').value = data[0].tecnicas_corporais;
+                        document.getElementById('descricao_evento').value = data[0].descricao_evento;
+                        document.getElementById('tempo_decorrido').value = data[0].tempo_decorrido;
+                        document.getElementById('envolveu_violencia').value = data[0].envolveu_violencia;
+                        document.getElementById('vivencia_direta').checked = data[0].vivencia_direta;
+                        document.getElementById('vivencia_testemunha').checked = data[0].vivencia_testemunha;
+                        document.getElementById('vivencia_familiar_amigo').checked = data[0].vivencia_familiar_amigo;
+                        document.getElementById('vivencia_trabalho').checked = data[0].vivencia_trabalho;
+                        document.getElementById('vivencia_nenhuma').checked = data[0].vivencia_nenhuma;
+                        document.getElementById('vivencia_outro').value = data[0].vivencia_outro;
+
+                        document.getElementById('impacto_lembracas').value = data[0].impacto_lembracas;
+                        inputs_lembrancas = document.getElementById('impacto_lembracas');
+                        updateValue(inputs_lembrancas);
+
+                        document.getElementById('impacto_evitacao').value = data[0].impacto_evitacao;
+                        inputs_evitacao = document.getElementById('impacto_evitacao');
+                        updateValue(inputs_evitacao);
+
+                        document.getElementById('impacto_crencas').value = data[0].impacto_crencas;
+                        inputs_crencas = document.getElementById('impacto_crencas');
+                        updateValue(inputs_crencas);
+
+                        document.getElementById('impacto_apreensao').value = data[0].impacto_apreensao;
+                        inputs_apreensao = document.getElementById('impacto_apreensao');
+                        updateValue(inputs_apreensao);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar pacientes disponíveis:', error);
+                });
+        }
+
+        function updateValue(input) {
+            const valueTexts = [
+                'De modo nenhum',
+                'Um pouco',
+                'Moderadamente',
+                'Muito',
+                'Extremamente'
+            ];
+                            
+            const valueDisplay = input.closest('.likert-item').querySelector('.likert-value');
+            if (valueDisplay) {
+                
+                switch(valueTexts[input.value]){
+                    case "De modo nenhum":
+                        input.style.cssText = "background: linear-gradient(to right, var(--secondary) var(--value-percent, 0%), var(--gray-50) var(--value-percent, 0%))";
+                        break
+                    case "Um pouco":
+                        input.style.cssText = "background: linear-gradient(to right, var(--secondary) var(--value-percent, 25%), var(--gray-50) var(--value-percent, 25%))";
+                        break
+                    case "Moderadamente":
+                        input.style.cssText = "background: linear-gradient(to right, var(--secondary) var(--value-percent, 50%), var(--gray-50) var(--value-percent, 50%))";
+                        break
+                    case "Muito":
+                        input.style.cssText = "background: linear-gradient(to right, var(--secondary) var(--value-percent, 75%), var(--gray-50) var(--value-percent, 75%))";
+                        break
+                    case "Extremamente":
+                        input.style.cssText = "background: linear-gradient(to right, var(--secondary) var(--value-percent, 100%), var(--gray-50) var(--value-percent, 100%))";
+                        break
+                }
+
+                valueDisplay.textContent = valueTexts[input.value];
+            }
+        }
+
+        function closeAvaliarPacientesModal() {
+            document.getElementById('avaliarPacientesModal').style.display = "none";
+        }
+
+        function openCreateUserModal() {
+            document.getElementById('createUserModal').style.display = "flex";
+        }
+
+        function closeCreateUserModal() {
+            document.getElementById('createUserModal').style.display = "none";
+        }
+
+        function aprovarPaciente(){
+            const avaliar_paciente_id = document.getElementById('avaliar_paciente_id').value;
+            // Fazer requisição à API para obter pacientes disponíveis
+            fetch(`/aprovar_paciente/${avaliar_paciente_id}`,{
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        const alertDiv = document.createElement('div');
+                        alertDiv.className = `alert alert-${data.status === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+                        alertDiv.role = 'alert';
+                        alertDiv.innerHTML = `
+                            ${data.message}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        `;
+
+                        // Encontrar o container onde o alerta será inserido
+                        const container = document.querySelector('.container'); // ou outro seletor apropriado
+                        
+                        // Inserir o alerta no início do container
+                        container.insertBefore(alertDiv, container.firstChild);
+
+                        // Se foi sucesso, atualizar a tabela ou fazer outras ações necessárias
+                        if (data.status === 'success') {
+                            // Atualizar a interface conforme necessário
+                            // Por exemplo, recarregar a tabela de pacientes
+                            window.location.reload(); // ou atualizar apenas a parte necessária da página
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar pacientes disponíveis:', error);
+                     // Mostrar mensagem de erro
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+                    alertDiv.innerHTML = `
+                        Erro ao processar a requisição
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    `;
+                    document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.container').firstChild);
+                });
+            
+            closeAvaliarPacientesModal();
+        }
+
+        function negarPaciente(){
+            document.getElementById('formNegarPaciente').submit();
+        }
+
+        function buscarPacientesDisponiveis(){
+            // const terapeutaId = document.getElementById('terapeuta_id').value;
+            const selectPaciente = document.getElementById('novo_paciente');
+
+            // Limpar as opções existentes
+            selectPaciente.innerHTML = '<option value="" disabled selected>Selecione um paciente</option>';
+
+            // Fazer requisição à API para obter pacientes disponíveis
+            fetch(`/pacientes_disponiveis`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        data.forEach(paciente => {
+                            const option = document.createElement('option');
+                            option.value = paciente.email;
+                            option.textContent = paciente.email;
+                            selectPaciente.appendChild(option);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar pacientes disponíveis:', error);
+                });
+        };
+
+        function openVincularPacientesModal(terapeutaId) {
+            buscarPacientesDisponiveis();
+
+            document.getElementById('vincularPacientesModal').style.display = 'flex';
+            document.getElementById('terapeuta_id').value = terapeutaId;
+
+            // Fazer a requisição AJAX para buscar pacientes
+            fetch(`/get_pacientes/${terapeutaId}`)
+                .then(response => response.json())
+                .then(pacientes => {
+                    const pacientesUl = document.getElementById('pacientes-ul');
+                    pacientesUl.innerHTML = ''; // Limpar a lista anterior
+
+                    if (pacientes.length === 0) {
+                        pacientesUl.innerHTML = '<li>Nenhum paciente vinculado.</li>';
+                    } else {
+                        pacientes.forEach(paciente => {
+                        const pacienteItem = document.createElement('li');
+                        pacienteItem.textContent = paciente.email;
+
+                        const removeBtn = document.createElement('button');
+                        removeBtn.textContent = '✖';
+                        removeBtn.classList.add('action-btn-list');
+                        removeBtn.classList.add('delete-btn');
+                        removeBtn.title = 'Remover vínculo';
+                        removeBtn.onclick = () => removerVinculo(terapeutaId, paciente.id);
+
+                        pacienteItem.appendChild(removeBtn);
+                        pacientesUl.appendChild(pacienteItem);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar pacientes:', error);
+                });
+        }
+
+        function removerVinculo(terapeutaId, pacienteId) {
+            if (!confirm('Tem certeza que deseja remover este vínculo?')) return;
+
+            // Definindo os valores dos campos ocultos
+            document.getElementById('terapeuta_remover_id').value = terapeutaId;
+            document.getElementById('paciente_remover_id').value = pacienteId;
+
+            // Submetendo o formulário programaticamente
+            document.getElementById('formRemoverVinculo').submit();
+        }
+
+        function closeVincularPacientesModal() {
+            document.getElementById('vincularPacientesModal').style.display = 'none';
+        }
+
+        // Fechar o modal se o usuário clicar fora da área do modal
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('editModal')) {
+                closeEditUserModal();
+            }
+            if (event.target == document.getElementById('createUserModal')) {
+                closeCreateUserModal();
+            }
+            if (event.target == document.getElementById('vincularPacientesModal')) {
+                closeVincularPacientesModal();
+            }
+        }
+
+        function fecharAlerta(botao) {
+            const alerta = botao.parentElement;
+            alerta.style.transition = "opacity 0.5s";
+            alerta.style.opacity = "0";
+
+            setTimeout(() => {
+                alerta.remove();
+            }, 500); // Tempo para a animação de transição antes de remover o elemento
+        }
+
+        function filtrarTabela() {
+            var input, filter, table, tr, td, i, txtValue;
+            input = document.getElementById("filtro-tabela");
+            filter = input.value.trim().toUpperCase();
+            table = document.getElementById("user-table");
+            tr = table.getElementsByTagName("tr");
+            let match = false;
+            for (i = 1; i < tr.length; i++) {
+                match = false;
+                td = tr[i].getElementsByTagName("td");
+                if (td) {
+                    for (j = 0; j < td.length; j++) {
+                        if (td[j].textContent.trim().toUpperCase().includes(filter)) {
+                            match = true;
+                            break;
+                        }
+                    }
+                }
+                if (match) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    </script>
+</body>
+</html>

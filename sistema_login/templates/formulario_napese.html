@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulário NAPESE</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/formulario_napese.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="shortcut icon" type="imagex/png" href="{{ url_for('static', filename='images/logo_subfooter.png') }}">
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- jQuery Mask Plugin -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+    <!-- Seu arquivo de validação -->
+    <script src="{{ url_for('static', filename='js/form-validation.js') }}"></script>
+</head>
+<body>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}" style="position: relative; padding-right: 2rem; margin-bottom: 1rem;">
+                    {{ message }}
+                    <button 
+                        style="position: absolute; right: 0.7rem; background: none; border: none; font-size: 1.2rem; cursor: pointer;" 
+                        onclick="fecharAlerta(this)">
+                        &times;
+                    </button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="napese-form-container">
+        <h2>Formulário NAPESE</h2>
+        
+        <form method="POST" action="{{ url_for('formulario_napese') }}">
+            {{ form.csrf_token }}
+            
+            <!-- Progress Bar -->
+            <div class="progress-bar">
+                <div class="progress-step active">1</div>
+                <div class="progress-step">2</div>
+                <div class="progress-step">3</div>
+                <div class="progress-step">4</div>
+            </div><!-- Etapa 1: Dados Pessoais -->
+            <div class="form-step active">
+                <h3>Dados Pessoais</h3>
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="nome_completo">Nome Completo</label>
+                            <input type="text" id="nome_completo" name="nome_completo" required>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="cpf">CPF</label>
+                            <input type="text" id="cpf" name="cpf" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="telefones">Telefones</label>
+                            <input type="text" id="telefones" name="telefones" required>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="data_nascimento">Data de Nascimento</label>
+                            <input type="date" id="data_nascimento" name="data_nascimento" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="cep">CEP</label>
+                            <input type="text" id="cep" name="cep" required>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="cidade">Cidade</label>
+                            <input type="text" id="cidade" name="cidade" required readonly>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="estado">Estado</label>
+                            <input type="text" id="estado" name="estado" required readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="genero">Gênero</label>
+                            <input type="text" id="genero" name="genero" required>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="profissao">Profissão</label>
+                            <input type="text" id="profissao" name="profissao" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Etapa 2: Preferências e Como Conheceu -->
+            <div class="form-step">
+                <h3>Preferências</h3>
+                <div class="white-box">
+                    <!-- Preferência de Atendimento -->
+                    <div class="form-group">
+                        <label for="preferencia_atendimento">Preferência de Atendimento</label>
+                        
+                        <div class="info-box">
+                            <div class="info-title">
+                                <i class="fas fa-info-circle"></i>
+                                Informação Importante
+                            </div>
+                            <div class="info-text">
+                                <p>Os atendimentos são realizados <strong>prioritariamente na modalidade online</strong>.</p>
+                                <p>Caso você tenha uma necessidade específica para atendimento presencial:</p>
+                                <ol>
+                                    <li>Selecione sua preferência abaixo (Online ou Presencial)</li>
+                                    <li>Envie um e-mail para <a href="mailto:napese@traumatemcura.com.br">napese@traumatemcura.com.br</a></li>
+                                    <li>Sua solicitação será analisada conforme disponibilidade dos terapeutas</li>
+                                </ol>
+                            </div>
+                        </div>
+
+                        <select id="preferencia_atendimento" name="preferencia_atendimento" required>
+                            <option value="">Selecione uma opção</option>
+                            <option value="ONLINE">Online</option>
+                            <option value="PRESENCIAL">Presencial</option>
+                        </select>
+                    </div>
+
+                    <!-- Renda Familiar -->
+                    <div class="form-group">
+                        <label for="renda_familiar">Renda Familiar</label>
+                        <select id="renda_familiar" name="renda_familiar" required>
+                            <option value="ATE_2_SALARIOS">Até 2 salários</option>
+                            <option value="2_A_4_SALARIOS">2 a 4 salários</option>
+                            <option value="4_A_10_SALARIOS">4 a 10 salários</option>
+                            <option value="ACIMA_10_SALARIOS">Acima de 10 salários</option>
+                        </select>
+                    </div>
+
+                    <!-- Número de Dependentes -->
+                    <div class="form-group">
+                        <label for="num_dependentes">Número de Dependentes</label>
+                        <select id="num_dependentes" name="num_dependentes" required>
+                            <option value="NENHUM">Nenhum</option>
+                            <option value="1_A_2">1 a 2</option>
+                            <option value="3_A_4">3 a 4</option>
+                            <option value="MAIS_DE_4">Mais de 4</option>
+                        </select>
+                    </div>
+                </div>
+
+                <h3>Como Conheceu o NAPESE</h3>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="conheceu_site_trauma" name="conheceu_site_trauma">
+                        <label for="conheceu_site_trauma">Site Trauma</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="conheceu_instagram" name="conheceu_instagram">
+                        <label for="conheceu_instagram">Instagram</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="conheceu_indicacao" name="conheceu_indicacao">
+                        <label for="conheceu_indicacao">Indicação</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="conheceu_treinamentos" name="conheceu_treinamentos">
+                        <label for="conheceu_treinamentos">Treinamentos</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="conheceu_google" name="conheceu_google">
+                        <label for="conheceu_google">Google</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="conheceu_rede_social" name="conheceu_rede_social">
+                        <label for="conheceu_rede_social">Rede Social</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="conheceu_psicologo" name="conheceu_psicologo">
+                        <label for="conheceu_psicologo">Psicólogo</label>
+                    </div>
+                    <div class="form-group">
+                        <label for="conheceu_outro">Outro</label>
+                        <input type="text" id="conheceu_outro" name="conheceu_outro">
+                    </div>
+                </div>
+            </div>
+<!-- Etapa 3: Histórico Médico e Acompanhamento -->
+<div class="form-step">
+    <h3>Sintomas e Histórico Médico</h3>
+    <div class="form-row">
+        <div class="form-col">
+            <div class="form-group">
+                <label for="sintomas_relevantes">Quais os sintomas relevantes que você tem sentido no último mês?</label>
+                <textarea id="sintomas_relevantes" name="sintomas_relevantes" required></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-col">
+            <div class="form-group">
+                <label for="medicacoes">Toma alguma medicação? Qual?</label>
+                <textarea id="medicacoes" name="medicacoes"></textarea>
+            </div>
+        </div>
+        <div class="form-col">
+            <div class="form-group">
+                <label for="substancias_psicoativas">Uso de substância psicoativa (álcool e outras drogas)?</label>
+                <textarea id="substancias_psicoativas" name="substancias_psicoativas"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-col">
+            <div class="form-group">
+                <label for="historico_acidentes">Já sofreu algum acidente?</label>
+                <textarea id="historico_acidentes" name="historico_acidentes"></textarea>
+            </div>
+        </div>
+        <div class="form-col">
+            <div class="form-group">
+                <label for="historico_cirurgias">Já passou por algum procedimento cirúrgico?</label>
+                <textarea id="historico_cirurgias" name="historico_cirurgias"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-col">
+            <div class="form-group">
+                <label for="dores">Sente algum tipo de dor (aguda ou crônica)? Se sim, descreva brevemente:</label>
+                <textarea id="dores" name="dores"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <h3>Acompanhamento Profissional</h3>
+    <div class="form-row">
+        <div class="form-col">
+            <div class="form-group">
+                <label for="acompanhamento_psiquiatrico">Tem tido acompanhamento psiquiátrico?</label>
+                <select id="acompanhamento_psiquiatrico" name="acompanhamento_psiquiatrico" required>
+                    <option value="SIM">Sim</option>
+                    <option value="NAO">Não</option>
+                    <option value="NAO_SEI">Não Sei</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-col">
+            <div class="form-group">
+                <label for="acompanhamento_psicologico">Tem tido acompanhamento psicológico?</label>
+                <select id="acompanhamento_psicologico" name="acompanhamento_psicologico" required>
+                    <option value="SIM">Sim</option>
+                    <option value="NAO">Não</option>
+                    <option value="NAO_SEI">Não Sei</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-col">
+            <div class="form-group">
+                <label for="tecnicas_corporais">Já recebeu ou trabalhou com alguma técnica corporal? Se sim, qual (quais)?</label>
+                <textarea id="tecnicas_corporais" name="tecnicas_corporais"></textarea>
+            </div>
+        </div>
+    </div>
+</div><!-- Etapa 4: Questionário TEPT e Vivências -->
+<div class="form-step">
+    <h3>Método Somatic Experiencing® e Histórico de Trauma</h3>
+    <div class="form-row">
+        <div class="form-col">
+            <div class="form-group">
+                <label for="conhece_se">Conhece o Método Somatic Experiencing®?</label>
+                <select id="conhece_se" name="conhece_se" required>
+                    <option value="true">Sim</option>
+                    <option value="false">Não</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-col">
+            <div class="form-group">
+                <label for="motivo_procura">Qual o motivo da sua procura pelo atendimento?</label>
+                <textarea id="motivo_procura" name="motivo_procura" required></textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- Questionário TEPT -->
+    <div class="info-box questionnaire-info">
+        <div class="info-title">
+            <i class="fas fa-clipboard-list"></i>
+            Questionário para sinalização de Transtorno de Estresse Pós-Traumático
+        </div>
+        <div class="info-text">
+            <p>Para podermos atender você pelo NAPESE, precisamos saber se os sintomas que você vem apresentando são condizentes com o Transtorno de Estresse Pós-Traumático. Então pedimos que você preencha o questionário abaixo.</p>
+            
+            <div class="citation">
+                <small>Versão autorizada, traduzida e adaptada para o português do Brasil em junho 2016.</small>
+                <small>Autores: Flávia L. Osório, Marcos N. H. Chagas, Natalia M. Souza, Rafael G.Santos, Thiago D. A. Silva, Rafael F. Sanches, José Alexandre S. Crippa</small>
+            </div>
+
+            <div class="instructions">
+                <h4>Instruções:</h4>
+                <p>Este questionário pergunta sobre problemas que você possa ter tido após uma experiência muito estressante envolvendo morte real ou ameaça de morte, ferimentos graves ou violência sexual. Estas experiências podem ser algo que aconteceu diretamente com você, algo que você testemunhou, ou algo que você ficou sabendo ter acontecido com um familiar próximo ou amigo próximo.</p>
+                
+                <p>Alguns exemplos são:</p>
+                <ul>
+                    <li>Grave acidente</li>
+                    <li>Incêndio</li>
+                    <li>Assalto</li>
+                    <li>Catástrofes (enchentes, furacão, tornado, tremor/deslizamento de terra)</li>
+                    <li>Agressão ou abuso físico ou sexual</li>
+                    <li>Guerra</li>
+                    <li>Homicídio</li>
+                    <li>Suicídio</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-col">
+            <div class="form-group">
+                <label for="vivenciou_trauma">Vivenciou Trauma?</label>
+                <select id="vivenciou_trauma" name="vivenciou_trauma" required>
+                    <option value="true">Sim</option>
+                    <option value="false">Não</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div id="detalhes-trauma" class="form-row">
+        <div class="form-col">
+            <div class="form-group">
+                <label for="descricao_evento">Descrição do Evento</label>
+                <textarea id="descricao_evento" name="descricao_evento"></textarea>
+            </div>
+        </div>
+        <div class="form-col">
+            <div class="form-group">
+                <label for="tempo_decorrido">Tempo Decorrido</label>
+                <input type="text" id="tempo_decorrido" name="tempo_decorrido">
+            </div>
+        </div>
+        <div class="form-col">
+            <div class="form-group">
+                <label for="envolveu_violencia">Envolveu Violência?</label>
+                <select id="envolveu_violencia" name="envolveu_violencia">
+                    <option value="true">Sim</option>
+                    <option value="false">Não</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <h3>Vivências</h3>
+    <div class="checkbox-group">
+        <div class="checkbox-item">
+            <input type="checkbox" id="vivencia_direta" name="vivencia_direta">
+            <label for="vivencia_direta">Vivência Direta</label>
+        </div>
+        <div class="checkbox-item">
+            <input type="checkbox" id="vivencia_testemunha" name="vivencia_testemunha">
+            <label for="vivencia_testemunha">Testemunha</label>
+        </div>
+        <div class="checkbox-item">
+            <input type="checkbox" id="vivencia_familiar_amigo" name="vivencia_familiar_amigo">
+            <label for="vivencia_familiar_amigo">Familiar/Amigo</label>
+        </div>
+        <div class="checkbox-item">
+            <input type="checkbox" id="vivencia_trabalho" name="vivencia_trabalho">
+            <label for="vivencia_trabalho">Trabalho</label>
+        </div>
+        <div class="checkbox-item">
+            <input type="checkbox" id="vivencia_nenhuma" name="vivencia_nenhuma">
+            <label for="vivencia_nenhuma">Nenhuma</label>
+        </div>
+        <div class="form-group">
+            <label for="vivencia_outro">Outro</label>
+            <textarea id="vivencia_outro" name="vivencia_outro"></textarea>
+        </div>
+    </div>
+
+    <h3>No último mês, quanto você foi incomodado por:</h3>
+    <div class="likert-item">
+        <div class="likert-header">
+            <span class="likert-label">Lembranças indesejáveis, perturbadoras e repetitivas da experiência estressante?</span>
+            <span class="likert-value">Neutro</span>
+        </div>
+        <input type="range" class="likert-range" id="impacto_lembracas" name="impacto_lembracas" min="0" max="4" value="2">
+        <div class="likert-scale">
+            <span class="scale-point">De modo nenhum</span>
+            <span class="scale-point">Um pouco</span>
+            <span class="scale-point">Moderadamente</span>
+            <span class="scale-point">Muito</span>
+            <span class="scale-point">Extremamente</span>
+        </div>
+    </div>
+
+    <div class="likert-item">
+        <div class="likert-header">
+            <span class="likert-label">Tentar evitar lembranças externas da experiência estressante?</span>
+            <span class="likert-value">Neutro</span>
+        </div>
+        <input type="range" class="likert-range" id="impacto_evitacao" name="impacto_evitacao" min="0" max="4" value="2">
+        <div class="likert-scale">
+            <span class="scale-point">De modo nenhum</span>
+            <span class="scale-point">Um pouco</span>
+            <span class="scale-point">Moderadamente</span>
+            <span class="scale-point">Muito</span>
+            <span class="scale-point">Extremamente</span>
+        </div>
+    </div>
+
+    <div class="likert-item">
+        <div class="likert-header">
+            <span class="likert-label">Ter crenças negativas intensas sobre você, outras pessoas ou o mundo?</span>
+            <span class="likert-value">Neutro</span>
+        </div>
+        <input type="range" class="likert-range" id="impacto_crencas" name="impacto_crencas" min="0" max="4" value="2">
+        <div class="likert-scale">
+            <span class="scale-point">De modo nenhum</span>
+            <span class="scale-point">Um pouco</span>
+            <span class="scale-point">Moderadamente</span>
+            <span class="scale-point">Muito</span>
+            <span class="scale-point">Extremamente</span>
+        </div>
+    </div>
+
+    <div class="likert-item">
+        <div class="likert-header">
+            <span class="likert-label">Sentir-se apreensivo ou assustado facilmente?</span>
+            <span class="likert-value">Neutro</span>
+        </div>
+        <input type="range" class="likert-range" id="impacto_apreensao" name="impacto_apreensao" min="0" max="4" value="2">
+        <div class="likert-scale">
+            <span class="scale-point">De modo nenhum</span>
+            <span class="scale-point">Um pouco</span>
+            <span class="scale-point">Moderadamente</span>
+            <span class="scale-point">Muito</span>
+            <span class="scale-point">Extremamente</span>
+        </div>
+    </div>
+</div>
+
+<!-- Adicionar botões de navegação -->
+<div class="form-navigation">
+    <button type="button" class="btn-nav btn-prev">Anterior</button>
+    <button type="button" class="btn-nav btn-next">Próximo</button>
+    <button type="submit" class="btn-nav btn-submit">Enviar</button>
+</div>
+
+</form>
+</div>
+
+<!-- Scripts necessários -->
+<script src="{{ url_for('static', filename='js/form-validation.js') }}"></script>
+<script>
+    function fecharAlerta(botao) {
+        const alerta = botao.parentElement;
+        alerta.style.transition = "opacity 0.5s";
+        alerta.style.opacity = "0";
+
+        setTimeout(() => {
+            alerta.remove();
+        }, 500); // Tempo para a animação de transição antes de remover o elemento
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Seleciona todos os inputs do tipo range
+        const rangeInputs = document.querySelectorAll('.likert-range');
+
+        const valueTexts = [
+            'De modo nenhum',
+            'Um pouco',
+            'Moderadamente',
+            'Muito',
+            'Extremamente'
+        ];
+
+        function updateValue(input) {
+            
+            const valueDisplay = input.closest('.likert-item').querySelector('.likert-value');
+            if (valueDisplay) {
+                
+                switch(valueTexts[input.value]){
+                    case "De modo nenhum":
+                        input.style.cssText = "background: linear-gradient(to right, var(--secondary) var(--value-percent, 0%), var(--gray-50) var(--value-percent, 0%))";
+                        break
+                    case "Um pouco":
+                        input.style.cssText = "background: linear-gradient(to right, var(--secondary) var(--value-percent, 25%), var(--gray-50) var(--value-percent, 25%))";
+                        break
+                    case "Moderadamente":
+                        input.style.cssText = "background: linear-gradient(to right, var(--secondary) var(--value-percent, 50%), var(--gray-50) var(--value-percent, 50%))";
+                        break
+                    case "Muito":
+                        input.style.cssText = "background: linear-gradient(to right, var(--secondary) var(--value-percent, 75%), var(--gray-50) var(--value-percent, 75%))";
+                        break
+                    case "Extremamente":
+                        input.style.cssText = "background: linear-gradient(to right, var(--secondary) var(--value-percent, 100%), var(--gray-50) var(--value-percent, 100%))";
+                        break
+                }
+
+                valueDisplay.textContent = valueTexts[input.value];
+            }
+        }
+
+        rangeInputs.forEach(input => {
+            // Atualiza valor inicial
+            updateValue(input);
+
+            // Listeners para diferentes tipos de eventos
+            input.addEventListener('input', function() {
+                updateValue(this);
+            });
+
+            input.addEventListener('change', function() {
+                updateValue(this);
+            });
+        });
+    });
+</script>
+</body>
+</html>

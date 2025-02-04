@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NAPESE - Bem-vindo</title>
+    <link rel="shortcut icon" type="imagex/png" href="{{ url_for('static', filename='images/logo_subfooter.png') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .selection-container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #666;
+            margin: 0;
+        }
+
+        .options {
+            display: grid;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .option-button {
+            padding: 1rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: block;
+        }
+
+        .patient {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .patient:hover {
+            background-color: #218838;
+        }
+
+        .therapist {
+            background-color: #db9a00;
+            color: white;
+        }
+
+        .therapist:hover {
+            background-color: #b37d00;
+        }
+
+        .admin {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .admin:hover {
+            background-color: #545b62;
+        }
+        .bg-top {
+            top: 0;  /* Adicionado */
+            left: 0;  /* Adicionado */
+            position: absolute;
+            background-color: #a7e400;
+            width: 100vw;
+            height: 50vh;
+            z-index: -1;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+        .bg-bottom {
+            position: absolute;
+            background-color: #fdffef;
+            width: 100vw;
+            height: 50vh;
+            top: 50%;
+            z-index: -1;
+        }
+        .logo_container{
+            width: 250px;
+            display: inline-block;
+        }
+        .logo_img{
+            width: 250px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-top"></div>
+    <div class="bg-bottom"></div>
+    <div class="selection-container">
+        <div class="header">
+            <div class="logo_container">
+                <img class="logo_img" id="logo_img" src="../static/images/logo-grande.png">
+            </div>
+            
+            <h1>Bem-vindo ao NAPESE</h1>
+            <p>Selecione seu perfil de acesso</p>
+        </div>
+
+        <div class="options">
+            <a href="{{ url_for('login') }}" class="option-button patient">
+                Área do Paciente
+            </a>
+            
+            <a href="{{ url_for('login_terapeuta') }}" class="option-button therapist">
+                Área do Terapeuta
+            </a>
+            
+            <a href="{{ url_for('login_admin') }}" class="option-button admin">
+                Área do Administrador
+            </a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,14 @@
+<nav>
+    {% if current_user.is_authenticated %}
+        {% if current_user.is_admin() %}
+            <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('admin_usuarios') }}">Usuários</a>
+        {% elif current_user.is_terapeuta() %}
+            <a href="{{ url_for('terapeuta_dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('terapeuta_pacientes') }}">Meus Pacientes</a>
+        {% else %}
+            <a href="{{ url_for('paciente_perfil') }}">Meu Perfil</a>
+        {% endif %}
+        <a href="{{ url_for('logout') }}">Sair</a>
+    {% endif %}
+</nav>
