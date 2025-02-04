@@ -11,7 +11,7 @@ git clone https://github.com/gerikmartins/app-flask.git
 Entre no diretório do projeto:
 
 ```bash
-cd seu-repositorio
+cd app-flask
 ```
 
 ## Verificando a Instalação do Python
