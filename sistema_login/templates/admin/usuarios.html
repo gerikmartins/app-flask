@@ -295,7 +295,7 @@
                     <div class="form-col">
                         <div class="form-group">
                             <label for="data_nascimento">Data de Nascimento</label>
-                            <input type="date" id="data_nascimento" name="data_nascimento" disabled>
+                            <input type="text" id="data_nascimento" name="data_nascimento" disabled>
                         </div>
                     </div>
                 </div>
@@ -701,7 +701,12 @@
                         document.getElementById('nome_completo').value = data[0].nome_completo;
                         document.getElementById('cpf').value = data[0].cpf;
                         document.getElementById('telefones').value = data[0].telefones;
-                        document.getElementById('data_nascimento').value = data[0].data_nascimento;
+                        const dt = new Date(data[0].data_nascimento );
+                        dt.setDate(dt.getDate() + 1);
+                        const dia = dt.getDate().toString().padStart(2, '0');
+                        const mes = (dt.getMonth() + 1).toString().padStart(2, '0');
+                        const ano = dt.getFullYear();
+                        document.getElementById('data_nascimento').value = `${dia}/${mes}/${ano}`;
                         document.getElementById('cep').value = data[0].cep;
                         document.getElementById('cidade').value = data[0].cidade;
                         document.getElementById('estado').value = data[0].estado;
