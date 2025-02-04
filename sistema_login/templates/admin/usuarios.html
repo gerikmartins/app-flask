@@ -648,7 +648,7 @@
                             <!--<h3>Avaliação do Paciente</h3> -->
                             <div>
                                 <button onclick="aprovarPaciente()" class="action-btn edit-btn">Aprovar</button>
-                                <button type="submit" class="action-btn delete-btn">Negar</button>
+                                <button onclick="negarPaciente()"  class="action-btn delete-btn">Negar</button>
                             </div>
                         </div>
                     </div>
@@ -807,55 +807,64 @@
 
         function aprovarPaciente(){
             const avaliar_paciente_id = document.getElementById('avaliar_paciente_id').value;
-            // Fazer requisição à API para obter pacientes disponíveis
-            fetch(`/aprovar_paciente/${avaliar_paciente_id}`,{
+            fetch(`/definir_status_paciente/${avaliar_paciente_id}/aprovado`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': '{{ csrf_token() }}'
                 }
-                })
-                .then(response => {
-                    if (response.ok) {
-                        const alertDiv = document.createElement('div');
-                        alertDiv.className = `alert alert-${data.status === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
-                        alertDiv.role = 'alert';
-                        alertDiv.innerHTML = `
-                            ${data.message}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        `;
-
-                        // Encontrar o container onde o alerta será inserido
-                        const container = document.querySelector('.container'); // ou outro seletor apropriado
-                        
-                        // Inserir o alerta no início do container
-                        container.insertBefore(alertDiv, container.firstChild);
-
-                        // Se foi sucesso, atualizar a tabela ou fazer outras ações necessárias
-                        if (data.status === 'success') {
-                            // Atualizar a interface conforme necessário
-                            // Por exemplo, recarregar a tabela de pacientes
-                            window.location.reload(); // ou atualizar apenas a parte necessária da página
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.error('Erro ao carregar pacientes disponíveis:', error);
-                     // Mostrar mensagem de erro
-                    const alertDiv = document.createElement('div');
-                    alertDiv.className = 'alert alert-danger alert-dismissible fade show';
-                    alertDiv.innerHTML = `
-                        Erro ao processar a requisição
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    `;
-                    document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.container').firstChild);
-                });
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Paciente aprovado com sucesso!');
+                    window.location.reload();
+                } else {
+                    throw new Error('Erro ao processar a requisição');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+                alertDiv.innerHTML = `
+                    Erro ao processar a requisição
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+                document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.container').firstChild);
+            });
             
             closeAvaliarPacientesModal();
         }
 
         function negarPaciente(){
-            document.getElementById('formNegarPaciente').submit();
+            const avaliar_paciente_id = document.getElementById('avaliar_paciente_id').value;
+            fetch(`/definir_status_paciente/${avaliar_paciente_id}/reprovado`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Paciente reprovado com sucesso!');
+                    window.location.reload();
+                } else {
+                    throw new Error('Erro ao processar a requisição');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+                alertDiv.innerHTML = `
+                    Erro ao processar a requisição
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+                document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.container').firstChild);
+            });
+            
+            closeAvaliarPacientesModal();
         }
 
         function buscarPacientesDisponiveis(){

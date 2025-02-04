@@ -906,7 +906,7 @@ def avaliacao_paciente(userId):
             form.vivencia_nenhuma, form.vivencia_outro, form.impacto_lembracas, form.impacto_evitacao,
             form.impacto_crencas, form.impacto_apreensao 
             from formulario_napese as form inner join usuarios as usu on usu.email = form.email 
-            WHERE usu.id = %s and usu.status = true
+            WHERE usu.id = %s and usu.status = true and form.aprovado = 'pendente'
         """, (userId,))
         
         pacientes = cur.fetchall()
@@ -996,14 +996,14 @@ def pacientes_disponiveis():
         # Obter lista de pacientes disponíveis
         if vinculados:
             query = """
-                SELECT id, email FROM usuarios 
-                WHERE tipo_usuario = 'paciente' AND id NOT IN %s
+                SELECT usuarios.id, usuarios.email FROM usuarios inner join formulario_napese on usuarios.email = formulario_napese.email
+                WHERE tipo_usuario = 'paciente' AND id NOT IN %s and formulario_napese.aprovado = 'aprovado'
             """
             cur.execute(query, (tuple(vinculados),))
         else:
             query = """
-                SELECT id, email FROM usuarios 
-                WHERE tipo_usuario = 'paciente'
+                SELECT usuarios.id, usuarios.email FROM usuarios inner join formulario_napese on usuarios.email = formulario_napese.email
+                WHERE tipo_usuario = 'paciente' and formulario_napese.aprovado = 'aprovado'
             """
             cur.execute(query)
 
@@ -1019,9 +1019,9 @@ def pacientes_disponiveis():
         cur.close()
         conn.close()
 
-@app.route('/aprovar_paciente/<int:formulario_napese_id>', methods=['POST'])
+@app.route('/definir_status_paciente/<int:formulario_napese_id>/<string:aprovado>', methods=['POST'])
 @login_required
-def aprovar_paciente(formulario_napese_id):
+def definir_status_paciente(formulario_napese_id, aprovado):
     if not current_user.is_authenticated or not current_user.is_admin():  # Verifica se o usuário está autenticado e é admin
         flash('Acesso não autorizado!', 'error')
         return redirect(url_for('admin_usuarios'))
@@ -1032,15 +1032,16 @@ def aprovar_paciente(formulario_napese_id):
     try:
         # Obter IDs dos pacientes já vinculados
         cur.execute("""
-            UPDATE formulario_napese SET aprovado = 'aprovado' WHERE id = %s
-        """, (formulario_napese_id,))
+            UPDATE formulario_napese SET aprovado = %s WHERE id = %s
+        """, (aprovado,formulario_napese_id,))
         conn.commit()
-        return jsonify({
-            'status': 'success',
-            'message': 'Paciente aprovado com sucesso!'
-        })
-        # flash('Login realizado com sucesso!', 'success')
-        # return redirect(url_for('admin_usuarios'))
+        if aprovado == 'aprovado':
+            flash('Paciente aprovado com sucesso!', 'success')
+            return redirect(url_for('admin_usuarios'))
+        else:
+            flash('Paciente reprovado!', 'success')
+            return redirect(url_for('admin_usuarios'))
+        
 
     except Exception as e:
         print(f"Erro ao aprovar paciente: {e}")

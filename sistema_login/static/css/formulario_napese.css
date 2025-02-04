@@ -528,6 +528,7 @@ li{
     background-color: var(--gray-50);
     border-radius: 8px;
     margin: 20px auto;
+    height: min-content;
     padding: 20px;
     width: fit-content;  /* Ajusta ao conteúdo */
     min-width: 300px;   /* Largura mínima */
