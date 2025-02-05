@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, Response
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from flask_mail import Mail, Message
 from werkzeug.security import check_password_hash, generate_password_hash
 import psycopg2
 from flask_wtf import CSRFProtect, FlaskForm, CSRFProtect
@@ -23,6 +24,15 @@ app = Flask(__name__,
     static_folder='static',
     template_folder='templates'
 )
+#contexto email
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+# smtp-relay.gmail.com
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USE_SSL'] = True
+app.config['MAIL_USERNAME'] = ''
+app.config['MAIL_PASSWORD'] = ''
+mail = Mail(app)
+
 app.config['SECRET_KEY'] = '1235'  # Mude para uma chave segura
 app.config['UPLOAD_FOLDER'] = 'uploads/cartas_recomendacao'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Limite de 16MB para upload
@@ -58,9 +68,9 @@ def conectar_bd():
         conn = psycopg2.connect(
             dbname="flask",
             user="postgres",
-            password="Postgres2022!",  # Coloque sua senha aqui se houver
+            password="postgres",  # Coloque sua senha aqui se houver
             host="localhost",
-            port="5433"
+            port="5432"
         )
         cur = conn.cursor()
         
@@ -996,14 +1006,21 @@ def pacientes_disponiveis():
         # Obter lista de pacientes disponíveis
         if vinculados:
             query = """
-                SELECT usuarios.id, usuarios.email FROM usuarios inner join formulario_napese on usuarios.email = formulario_napese.email
-                WHERE tipo_usuario = 'paciente' AND id NOT IN %s and formulario_napese.aprovado = 'aprovado'
+                SELECT usuarios.id, usuarios.email FROM usuarios 
+                LEFT JOIN formulario_napese ON usuarios.email = formulario_napese.email
+                WHERE usuarios.tipo_usuario = 'paciente' 
+                AND usuarios.id NOT IN %s 
+                AND formulario_napese.aprovado = 'aprovado'
+                AND usuarios.status = true
             """
             cur.execute(query, (tuple(vinculados),))
         else:
             query = """
-                SELECT usuarios.id, usuarios.email FROM usuarios inner join formulario_napese on usuarios.email = formulario_napese.email
-                WHERE tipo_usuario = 'paciente' and formulario_napese.aprovado = 'aprovado'
+                SELECT usuarios.id, usuarios.email FROM usuarios 
+                LEFT JOIN formulario_napese ON usuarios.email = formulario_napese.email
+                WHERE usuarios.tipo_usuario = 'paciente' 
+                AND formulario_napese.aprovado = 'aprovado'
+                AND usuarios.status = true
             """
             cur.execute(query)
 
@@ -1115,6 +1132,29 @@ def vincular_paciente():
                 VALUES (%s, %s, true)
             """, (terapeuta_id, paciente_id))
             conn.commit()
+            # Buscar dados do formulário do paciente
+            cur.execute("""
+                SELECT 
+                    nome_completo, cpf, telefones, data_nascimento, 
+                    cidade, estado, genero, profissao, 
+                    preferencia_atendimento, sintomas_relevantes,
+                    medicacoes, substancias_psicoativas,
+                    historico_acidentes, historico_cirurgias,
+                    dores, acompanhamento_psiquiatrico,
+                    acompanhamento_psicologico, tecnicas_corporais,
+                    motivo_procura, vivenciou_trauma,
+                    descricao_evento, tempo_decorrido,
+                    envolveu_violencia, impacto_lembracas,
+                    impacto_evitacao, impacto_crencas,
+                    impacto_apreensao
+                FROM formulario_napese 
+                WHERE email = %s
+            """, (paciente_email,))
+            paciente_dados = cur.fetchone()
+            msg = Message('Vinculo de um novo paciente', sender='', recipients=['g@mail.com'])
+            msg.html = render_template("email/vincular_paciente_terapeuta.html", dados=paciente_dados)
+            mail.send(msg)
+            
             flash('Paciente vinculado com sucesso!', 'success')
 
         return redirect(url_for('admin_usuarios'))
