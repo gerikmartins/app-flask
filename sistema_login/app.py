@@ -29,8 +29,8 @@ app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 # smtp-relay.gmail.com
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USE_SSL'] = True
-app.config['MAIL_USERNAME'] = 'erikpereiramartins@gmail.com'
-app.config['MAIL_PASSWORD'] = 'rsmg crgs yaoe qftq'
+app.config['MAIL_USERNAME'] = '@gmail.com'
+app.config['MAIL_PASSWORD'] = ''
 mail = Mail(app)
 
 app.config['SECRET_KEY'] = '1235'  # Mude para uma chave segura
@@ -1232,7 +1232,7 @@ def vincular_paciente():
                     'renda_familiar': paciente_dados[43],
                     'num_dependentes': paciente_dados[44]
                 }
-                msg = Message('Vinculo de um novo paciente', sender='erikpereiramartins@gmail.com', recipients=['gerikpereiramartins@gmail.com'])
+                msg = Message('Vinculo de um novo paciente', sender='@gmail.com', recipients=['@gmail.com'])
                 msg.html = render_template("email/vincular_paciente_terapeuta.html",dados=dados_formatados)
                 print("Enviando email...")
                 mail.send(msg)
