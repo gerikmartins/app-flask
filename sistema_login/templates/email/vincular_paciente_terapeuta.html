@@ -136,7 +136,7 @@
         <div class="form-section">
             {% if dados.conheceu_site_trauma %}
             <div class="form-group">
-                <span class="value">• Site Trauma</span>
+                <span class="value">• Site traumatemcura.com.br</span>
             </div>
             {% endif %}
             
@@ -235,7 +235,7 @@
             </div>
         </div>
 
-        <h3>Método Somatic Experiencing® e Histórico de Trauma</h3>
+        <h3>Histórico de Trauma</h3>
         <div class="form-section">
             <div class="form-group">
                 <span class="label">Conhece o Método Somatic Experiencing®?</span>
@@ -264,9 +264,33 @@
             </div>
             
             <div class="form-group">
-                <span class="label">Envolveu Violência?</span>
+                <span class="label">Envolveu morte real ou ameaça de morte, ferimentos graves ou ameaça de ferimentos
+                    graves ou violência sexual real ou ameaça de violência sexual?</span>
                 <span class="value">{{ 'Sim' if dados.envolveu_violencia else 'Não' }}</span>
             </div>
+            {% if dados.acidente_violencia or dados.causas_naturais or dados.nao_se_aplica %}
+            <div class="form-group">
+                <span class="label">Se o evento envolveu a morte de um membro próximo da família ou amigo próximo, foi
+                    devido a algum tipo de acidente ou violência, ou foi devido a causas naturais?</span>
+                    {% if dados.acidente_violencia %}
+                    <div class="form-group">
+                        <span class="value">• Acidente ou violência</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if dados.causas_naturais %}
+                    <div class="form-group">
+                        <span class="value">• Causas naturais.</span>
+                    </div>
+                    {% endif %}
+                    {% if dados.nao_se_aplica %}
+                    <div class="form-group">
+                        <span class="value">• Não se aplica (O evento não envolveu a morte de um membro próximo da família ou amigo
+                            próximo).</span>
+                    </div>
+                    {% endif %}
+            </div>
+            {% endif %}
             {% endif %}
         </div>
         {% if dados.vivencia_direta or dados.vivencia_testemunha or dados.vivencia_familiar_amigo or dados.vivencia_trabalho or dados.vivencia_nenhuma or dados.vivencia_outro %}
@@ -274,31 +298,31 @@
         <div class="form-section">
             {% if dados.vivencia_direta %}
             <div class="form-group">
-                <span class="value">• Vivência Direta</span>
+                <span class="value">• Aconteceu comigo diretamente</span>
             </div>
             {% endif %}
             
             {% if dados.vivencia_testemunha %}
             <div class="form-group">
-                <span class="value">• Testemunha</span>
+                <span class="value">• Eu testemunhei este evento.</span>
             </div>
             {% endif %}
             
             {% if dados.vivencia_familiar_amigo %}
             <div class="form-group">
-                <span class="value">• Familiar/Amigo</span>
+                <span class="value">• Eu fiquei sabendo que o evento aconteceu com um membro próximo da família ou amigo próximo.</span>
             </div>
             {% endif %}
             
             {% if dados.vivencia_trabalho %}
             <div class="form-group">
-                <span class="value">• Trabalho</span>
+                <span for="value">• Eu fui exposto repetidamente a detalhes deste evento como parte do meu trabalho.</span>
             </div>
             {% endif %}
             
             {% if dados.vivencia_nenhuma %}
             <div class="form-group">
-                <span class="value">• Nenhuma</span>
+                <span for="value">• Não experimentei nenhum evento particularmente estressante.</span>
             </div>
             {% endif %}
             
@@ -314,23 +338,51 @@
         <h3>Impactos no Último Mês</h3>
         <div class="form-section">
             <div class="form-group">
-                <span class="label">Lembranças indesejáveis, perturbadoras e repetitivas da experiência estressante:</span>
+                <span class="label">No último mês, quando você foi incomodado por lembranças indesejáveis, perturbadoras e
+                    repetitivas da experiência estressante?</span>
                 <span class="value">{{ ['De modo nenhum', 'Um pouco', 'Moderadamente', 'Muito', 'Extremamente'][dados.impacto_lembracas] }}</span>
+            </div>
+
+            <div class="form-group">
+                <span class="label">No último mês, quando você foi incomodado por sentir-se muito chateado quando algo
+                    lembra você da experiência estressante?</span>
+                <span class="value">{{ ['De modo nenhum', 'Um pouco', 'Moderadamente', 'Muito', 'Extremamente'][dados.impacto_chateado] }}</span>
             </div>
             
             <div class="form-group">
                 <span class="label">Tentar evitar lembranças externas da experiência estressante:</span>
                 <span class="value">{{ ['De modo nenhum', 'Um pouco', 'Moderadamente', 'Muito', 'Extremamente'][dados.impacto_evitacao] }}</span>
             </div>
-            
+
             <div class="form-group">
-                <span class="label">Ter crenças negativas intensas sobre você, outras pessoas ou o mundo:</span>
-                <span class="value">{{ ['De modo nenhum', 'Um pouco', 'Moderadamente', 'Muito', 'Extremamente'][dados.impacto_crencas] }}</span>
+                <span class="label">No último mês, quando você foi incomodado por evitar lembranças externas da
+                    experiência estressante (por exemplo, pessoas, lugares, conversas, atividades, objetos ou
+                    situações)?</span>
+                <span class="value">{{ ['De modo nenhum', 'Um pouco', 'Moderadamente', 'Muito', 'Extremamente'][dados.impacto_evitar_gatilhos] }}</span>
             </div>
             
             <div class="form-group">
-                <span class="label">Sentir-se apreensivo ou assustado facilmente:</span>
+                <span class="label">No último mês, quando você foi incomodado por ter crenças negativas intensas sobre
+                    você, outras pessoas ou o mundo? (Por exemplo, ter pensamentos tais como: “Eu sou ruim”, “existe algo seriamente errado comigo”,
+                    “ninguém é confiável”, “o mundo todo é perigoso”.)</span>
+                <span class="value">{{ ['De modo nenhum', 'Um pouco', 'Moderadamente', 'Muito', 'Extremamente'][dados.impacto_crencas] }}</span>
+            </div>
+
+            <div class="form-group">
+                <span class="label">No último mês, quando você foi incomodado por perder o interesse em atividades que
+                    você costumava apreciar?</span>
+                <span class="value">{{ ['De modo nenhum', 'Um pouco', 'Moderadamente', 'Muito', 'Extremamente'][dados.impacto_perda_interesse] }}</span>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">No último mês, quando você foi incomodado por ficar “super” alerta, vigilante ou de
+                    sobreaviso?</span>
                 <span class="value">{{ ['De modo nenhum', 'Um pouco', 'Moderadamente', 'Muito', 'Extremamente'][dados.impacto_apreensao] }}</span>
+            </div>
+
+            <div class="form-group">
+                <span class="label">No último mês, quando você foi incomodado por ter dificuldades para se concentrar?</span>
+                <span class="value">{{ ['De modo nenhum', 'Um pouco', 'Moderadamente', 'Muito', 'Extremamente'][dados.impacto_concentracao] }}</span>
             </div>
         </div>
     </div>

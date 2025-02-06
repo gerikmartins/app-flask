@@ -267,7 +267,7 @@
     <div id="avaliarPacientesModal" style="display:none;">
         <div class="modal-content-lg form-section">
             <span class="close" onclick="closeAvaliarPacientesModal()">&times;</span>
-            <div class="">
+            <div class=""> 
                 <h3>Dados Pessoais</h3>
                 <input type="hidden" id="avaliar_paciente_id" name="avaliar_paciente_id">
                 <div class="form-row">
@@ -345,7 +345,7 @@
                     <select id="preferencia_atendimento" name="preferencia_atendimento" disabled>
                         <option value="">Selecione uma opção</option>
                         <option value="ONLINE">Online</option>
-                        <option value="PRESENCIAL">Presencial</option>
+                        <option value="PRESENCIAL">Online ou Presencial</option>
                     </select>
                 </div>
 
@@ -353,10 +353,14 @@
                 <div class="form-group">
                     <label for="renda_familiar">Renda Familiar</label>
                     <select id="renda_familiar" name="renda_familiar" disabled>
-                        <option value="ATE_2_SALARIOS">Até 2 salários</option>
-                        <option value="2_A_4_SALARIOS">2 a 4 salários</option>
-                        <option value="4_A_10_SALARIOS">4 a 10 salários</option>
-                        <option value="ACIMA_10_SALARIOS">Acima de 10 salários</option>
+                        <option value="SEM_RENDA">Sem renda</option>
+                        <option value="ATE_1_SALARIO">Até 1 salário</option>
+                        <option value="1_A_3_SALARIOS">1 a 3 salários</option>
+                        <option value="3_A_6_SALARIOS">3 a 6 salários</option>
+                        <option value="6_A_9_SALARIOS">6 a 9 salários</option>
+                        <option value="9_A_12_SALARIOS">9 a 12 salários</option>
+                        <option value="12_A_15_SALARIOS">12 a 15 salários</option>
+                        <option value="ACIMA_15_SALARIOS">Acima de 15 salários</option>
                     </select>
                 </div>
 
@@ -366,8 +370,8 @@
                     <select id="num_dependentes" name="num_dependentes" disabled>
                         <option value="NENHUM">Nenhum</option>
                         <option value="1_A_2">1 a 2</option>
-                        <option value="3_A_4">3 a 4</option>
-                        <option value="MAIS_DE_4">Mais de 4</option>
+                        <option value="3_A_5">3 a 5</option>
+                        <option value="MAIS_DE_5">Mais de 5</option>
                     </select>
                 </div>
 
@@ -375,7 +379,7 @@
                 <div class="checkbox-group">
                     <div class="checkbox-item">
                         <input type="checkbox" id="conheceu_site_trauma" name="conheceu_site_trauma" disabled>
-                        <label for="conheceu_site_trauma">Site Trauma</label>
+                        <label for="conheceu_site_trauma">Site traumatemcura.com.br</label>
                     </div>
                     <div class="checkbox-item">
                         <input type="checkbox" id="conheceu_instagram" name="conheceu_instagram" disabled>
@@ -491,7 +495,7 @@
                 </div>
             </div>
             <div class="" style="display: block;">
-                <h3>Método Somatic Experiencing® e Histórico de Trauma</h3>
+                <h3>Histórico de Trauma</h3>
                 <div class="form-row">
                     <div class="form-col">
                         <div class="form-group">
@@ -540,7 +544,8 @@
                     </div>
                     <div class="form-col">
                         <div class="form-group">
-                            <label for="envolveu_violencia">Envolveu Violência?</label>
+                            <label for="envolveu_violencia">Envolveu morte real ou ameaça de morte, ferimentos graves ou ameaça de ferimentos
+                                graves ou violência sexual real ou ameaça de violência sexual?</label>
                             <select id="envolveu_violencia" name="envolveu_violencia" disabled>
                                 <option value="true">Sim</option>
                                 <option value="false">Não</option>
@@ -549,27 +554,52 @@
                     </div>
                 </div>
 
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="descricao_evento">Se o evento envolveu a morte de um membro próximo da família ou amigo próximo, foi
+                                devido a algum tipo de acidente ou violência, ou foi devido a causas naturais?</label>
+                            
+                        </div>
+                        <div id="causas-morte-grupo" class="checkbox-group" style="display: flex;">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="acidente_violencia" name="acidente_violencia">
+                                <label for="acidente_violencia">Acidente ou violência</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="causas_naturais" name="causas_naturais">
+                                <label for="causas_naturais">Causas naturais</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="nao_se_aplica" name="nao_se_aplica">
+                                <label for="nao_se_aplica">Não se aplica (O evento não envolveu a morte de um membro próximo da família ou amigo
+                                    próximo).</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <h3>Vivências</h3>
                 <div class="checkbox-group">
                     <div class="checkbox-item">
                         <input type="checkbox" id="vivencia_direta" name="vivencia_direta" disabled>
-                        <label for="vivencia_direta">Vivência Direta</label>
+                        <label for="vivencia_direta">Aconteceu comigo diretamente</label>
                     </div>
                     <div class="checkbox-item">
                         <input type="checkbox" id="vivencia_testemunha" name="vivencia_testemunha" disabled>
-                        <label for="vivencia_testemunha">Testemunha</label>
+                        <label for="vivencia_testemunha">Eu testemunhei este evento.</label>
                     </div>
                     <div class="checkbox-item">
                         <input type="checkbox" id="vivencia_familiar_amigo" name="vivencia_familiar_amigo" disabled>
-                        <label for="vivencia_familiar_amigo">Familiar/Amigo</label>
+                        <label for="vivencia_familiar_amigo">Eu fiquei sabendo que o evento aconteceu com um membro próximo da família ou amigo próximo.</label>
                     </div>
                     <div class="checkbox-item">
                         <input type="checkbox" id="vivencia_trabalho" name="vivencia_trabalho" disabled>
-                        <label for="vivencia_trabalho">Trabalho</label>
+                        <label for="vivencia_trabalho">Eu fui exposto repetidamente a detalhes deste evento como parte do meu trabalho.</label>
                     </div>
                     <div class="checkbox-item">
                         <input type="checkbox" id="vivencia_nenhuma" name="vivencia_nenhuma" disabled>
-                        <label for="vivencia_nenhuma">Nenhuma</label>
+                        <label for="vivencia_nenhuma">Não experimentei nenhum evento particularmente estressante.</label>
                     </div>
                     <div class="form-group">
                         <label for="vivencia_outro">Outro</label>
@@ -580,7 +610,8 @@
                 <h3>No último mês, quanto você foi incomodado por:</h3>
                 <div class="likert-item">
                     <div class="likert-header">
-                        <span class="likert-label">Lembranças indesejáveis, perturbadoras e repetitivas da experiência estressante?</span>
+                        <span class="likert-label">No último mês, quando você foi incomodado por lembranças indesejáveis, perturbadoras e
+                            repetitivas da experiência estressante?</span>
                         <span class="likert-value">Neutro</span>
                     </div>
                     <input type="range" class="likert-range" id="impacto_lembracas" name="impacto_lembracas" min="0" max="4" value="2" disabled>
@@ -595,7 +626,24 @@
 
                 <div class="likert-item">
                     <div class="likert-header">
-                        <span class="likert-label">Tentar evitar lembranças externas da experiência estressante?</span>
+                        <span class="likert-label">No último mês, quando você foi incomodado por sentir-se muito chateado quando algo
+                            lembra você da experiência estressante?</span>
+                        <span class="likert-value">Neutro</span>
+                    </div>
+                    <input type="range" class="likert-range" id="impacto_chateado" name="impacto_chateado" min="0" max="4" value="2" disabled>
+                    <div class="likert-scale">
+                        <span class="scale-point">De modo nenhum</span>
+                        <span class="scale-point">Um pouco</span>
+                        <span class="scale-point">Moderadamente</span>
+                        <span class="scale-point">Muito</span>
+                        <span class="scale-point">Extremamente</span>
+                    </div>
+                </div>
+
+                <div class="likert-item">
+                    <div class="likert-header">
+                        <span class="likert-label">No último mês, quando você foi incomodado por evitar lembranças, pensamentos, ou
+                            sentimentos relacionados à experiência estressante?</span>
                         <span class="likert-value">Neutro</span>
                     </div>
                     <input type="range" class="likert-range" id="impacto_evitacao" name="impacto_evitacao" min="0" max="4" value="2" disabled>
@@ -610,7 +658,26 @@
 
                 <div class="likert-item">
                     <div class="likert-header">
-                        <span class="likert-label">Ter crenças negativas intensas sobre você, outras pessoas ou o mundo?</span>
+                        <span class="likert-label">No último mês, quando você foi incomodado por evitar lembranças externas da
+                            experiência estressante (por exemplo, pessoas, lugares, conversas, atividades, objetos ou
+                            situações)?</span>
+                        <span class="likert-value">Neutro</span>
+                    </div>
+                    <input type="range" class="likert-range" id="impacto_evitar_gatilhos" name="impacto_evitar_gatilhos" min="0" max="4" value="2" disabled>
+                    <div class="likert-scale">
+                        <span class="scale-point">De modo nenhum</span>
+                        <span class="scale-point">Um pouco</span>
+                        <span class="scale-point">Moderadamente</span>
+                        <span class="scale-point">Muito</span>
+                        <span class="scale-point">Extremamente</span>
+                    </div>
+                </div>
+
+                <div class="likert-item">
+                    <div class="likert-header">
+                        <span class="likert-label">No último mês, quando você foi incomodado por ter crenças negativas intensas sobre
+                            você, outras pessoas ou o mundo? (Por exemplo, ter pensamentos tais como: “Eu sou ruim”, “existe algo seriamente errado comigo”,
+                            “ninguém é confiável”, “o mundo todo é perigoso”.)</span>
                         <span class="likert-value">Neutro</span>
                     </div>
                     <input type="range" class="likert-range" id="impacto_crencas" name="impacto_crencas" min="0" max="4" value="2" disabled>
@@ -625,10 +692,42 @@
 
                 <div class="likert-item">
                     <div class="likert-header">
-                        <span class="likert-label">Sentir-se apreensivo ou assustado facilmente?</span>
+                        <span class="likert-label">No último mês, quando você foi incomodado por perder o interesse em atividades que
+                            você costumava apreciar?</span>
+                        <span class="likert-value">Neutro</span>
+                    </div>
+                    <input type="range" class="likert-range" id="impacto_perda_interesse" name="impacto_perda_interesse" min="0" max="4" value="2" disabled>
+                    <div class="likert-scale">
+                        <span class="scale-point">De modo nenhum</span>
+                        <span class="scale-point">Um pouco</span>
+                        <span class="scale-point">Moderadamente</span>
+                        <span class="scale-point">Muito</span>
+                        <span class="scale-point">Extremamente</span>
+                    </div>
+                </div>
+
+                <div class="likert-item">
+                    <div class="likert-header">
+                        <span class="likert-label">No último mês, quando você foi incomodado por ficar “super” alerta, vigilante ou de
+                            sobreaviso?</span>
                         <span class="likert-value">Neutro</span>
                     </div>
                     <input type="range" class="likert-range" id="impacto_apreensao" name="impacto_apreensao" min="0" max="4" value="2" disabled>
+                    <div class="likert-scale">
+                        <span class="scale-point">De modo nenhum</span>
+                        <span class="scale-point">Um pouco</span>
+                        <span class="scale-point">Moderadamente</span>
+                        <span class="scale-point">Muito</span>
+                        <span class="scale-point">Extremamente</span>
+                    </div>
+                </div>
+
+                <div class="likert-item">
+                    <div class="likert-header">
+                        <span class="likert-label">No último mês, quando você foi incomodado por ter dificuldades para se concentrar?</span>
+                        <span class="likert-value">Neutro</span>
+                    </div>
+                    <input type="range" class="likert-range" id="impacto_concentracao" name="impacto_concentracao" min="0" max="4" value="2" disabled>
                     <div class="likert-scale">
                         <span class="scale-point">De modo nenhum</span>
                         <span class="scale-point">Um pouco</span>
@@ -741,6 +840,10 @@
                         document.getElementById('vivencia_trabalho').checked = data[0].vivencia_trabalho;
                         document.getElementById('vivencia_nenhuma').checked = data[0].vivencia_nenhuma;
                         document.getElementById('vivencia_outro').value = data[0].vivencia_outro;
+                        document.getElementById('motivo_procura').value = data[0].motivo_procura;
+                        document.getElementById('acidente_violencia').checked = data[0].acidente_violencia;
+                        document.getElementById('causas_naturais').checked = data[0].causas_naturais;
+                        document.getElementById('nao_se_aplica').checked = data[0].nao_se_aplica;
 
                         document.getElementById('impacto_lembracas').value = data[0].impacto_lembracas;
                         inputs_lembrancas = document.getElementById('impacto_lembracas');
@@ -754,9 +857,25 @@
                         inputs_crencas = document.getElementById('impacto_crencas');
                         updateValue(inputs_crencas);
 
+                        document.getElementById('impacto_concentracao').value = data[0].impacto_concentracao;
+                        inputs_concentracao = document.getElementById('impacto_concentracao');
+                        updateValue(inputs_concentracao);
+
+                        document.getElementById('impacto_chateado').value = data[0].impacto_chateado;
+                        inputs_chateado = document.getElementById('impacto_chateado');
+                        updateValue(inputs_chateado);
+
+                        document.getElementById('impacto_evitar_gatilhos').value = data[0].impacto_evitar_gatilhos;
+                        inputs_evitar_gatilhos = document.getElementById('impacto_evitar_gatilhos');
+                        updateValue(inputs_evitar_gatilhos);
+
                         document.getElementById('impacto_apreensao').value = data[0].impacto_apreensao;
                         inputs_apreensao = document.getElementById('impacto_apreensao');
                         updateValue(inputs_apreensao);
+
+                        document.getElementById('impacto_perda_interesse').value = data[0].impacto_perda_interesse;
+                        inputs_perda_interesse = document.getElementById('impacto_perda_interesse');
+                        updateValue(inputs_perda_interesse);
                     }
                 })
                 .catch(error => {

@@ -29,8 +29,8 @@ app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 # smtp-relay.gmail.com
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USE_SSL'] = True
-app.config['MAIL_USERNAME'] = '@gmail.com'
-app.config['MAIL_PASSWORD'] = ''
+app.config['MAIL_USERNAME'] = 'erikpereiramartins@gmail.com'
+app.config['MAIL_PASSWORD'] = 'rsmg crgs yaoe qftq'
 mail = Mail(app)
 
 app.config['SECRET_KEY'] = '1235'  # Mude para uma chave segura
@@ -373,12 +373,25 @@ def formulario_napese():
                     'tempo_decorrido': request.form['tempo_decorrido'],
                     'envolveu_violencia': request.form['envolveu_violencia'],
                     'impacto_lembracas': request.form['impacto_lembracas'],
+                    'impacto_chateado': request.form['impacto_chateado'],
                     'impacto_evitacao': request.form['impacto_evitacao'],
+                    'impacto_evitar_gatilhos': request.form['impacto_evitar_gatilhos'],
                     'impacto_crencas': request.form['impacto_crencas'],
                     'impacto_apreensao': request.form['impacto_apreensao'],
+                    'impacto_concentracao': request.form['impacto_concentracao'],
+                    'impacto_perda_interesse': request.form['impacto_perda_interesse'],
                 }
 
                 # Adicionando campos condicionais
+                if 'acidente_violencia' in request.form and request.form['acidente_violencia'].strip():
+                    dados['acidente_violencia'] = request.form['acidente_violencia']
+
+                if 'causas_naturais' in request.form and request.form['causas_naturais'].strip():
+                    dados['causas_naturais'] = request.form['causas_naturais']
+
+                if 'nao_se_aplica' in request.form and request.form['nao_se_aplica'].strip():
+                    dados['nao_se_aplica'] = request.form['nao_se_aplica']
+
                 if 'conheceu_site_trauma' in request.form and request.form['conheceu_site_trauma'].strip():
                     dados['conheceu_site_trauma'] = request.form['conheceu_site_trauma']
 
@@ -466,12 +479,12 @@ def init_db():
 
                 -- Criar faixa_renda
                 IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'faixa_renda') THEN
-                    CREATE TYPE faixa_renda AS ENUM ('ATE_2_SALARIOS', '2_A_4_SALARIOS', '4_A_10_SALARIOS', 'ACIMA_10_SALARIOS');
+                    CREATE TYPE faixa_renda AS ENUM ('SEM_RENDA','ATE_1_SALARIO', '1_A_3_SALARIOS', '3_A_6_SALARIOS', '6_A_9_SALARIOS', '9_A_12_SALARIOS', '12_A_15_SALARIOS', 'ACIMA_15_SALARIOS');
                 END IF;
 
                 -- Criar faixa_dependentes
                 IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'faixa_dependentes') THEN
-                    CREATE TYPE faixa_dependentes AS ENUM ('NENHUM', '1_A_2', '3_A_4', 'MAIS_DE_4');
+                    CREATE TYPE faixa_dependentes AS ENUM ('NENHUM', '1_A_2', '3_A_5', 'MAIS_DE_5');
                 END IF;
 
                 -- Criar resposta_sim_nao
@@ -564,10 +577,17 @@ def init_db():
                 vivencia_trabalho BOOLEAN DEFAULT FALSE,
                 vivencia_nenhuma BOOLEAN DEFAULT FALSE,
                 vivencia_outro TEXT,
+                acidente_violencia BOOLEAN DEFAULT FALSE,
+                causas_naturais BOOLEAN DEFAULT FALSE,
+                nao_se_aplica BOOLEAN DEFAULT FALSE,
                 impacto_lembracas INTEGER CHECK (impacto_lembracas BETWEEN 0 AND 4),
+                impacto_chateado INTEGER CHECK (impacto_chateado BETWEEN 0 AND 4),
                 impacto_evitacao INTEGER CHECK (impacto_evitacao BETWEEN 0 AND 4),
+                impacto_evitar_gatilhos INTEGER CHECK (impacto_evitar_gatilhos BETWEEN 0 AND 4),
                 impacto_crencas INTEGER CHECK (impacto_crencas BETWEEN 0 AND 4),
+                impacto_perda_interesse INTEGER CHECK (impacto_perda_interesse BETWEEN 0 AND 4),
                 impacto_apreensao INTEGER CHECK (impacto_apreensao BETWEEN 0 AND 4),
+                impacto_concentracao INTEGER CHECK (impacto_concentracao BETWEEN 0 AND 4),
                 CONSTRAINT email_valido CHECK (email ~ '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$'),
                 CONSTRAINT fk_email FOREIGN KEY (email) REFERENCES usuarios(email)
             )
@@ -914,7 +934,8 @@ def avaliacao_paciente(userId):
             form.vivenciou_trauma, form.descricao_evento, form.tempo_decorrido, form.envolveu_violencia, 
             form.vivencia_direta, form.vivencia_testemunha, form.vivencia_familiar_amigo, form.vivencia_trabalho,
             form.vivencia_nenhuma, form.vivencia_outro, form.impacto_lembracas, form.impacto_evitacao,
-            form.impacto_crencas, form.impacto_apreensao 
+            form.impacto_crencas, form.impacto_apreensao, form.acidente_violencia, form.causas_naturais, form.nao_se_aplica,
+            form.impacto_concentracao, form.impacto_chateado, form.impacto_evitar_gatilhos, form.impacto_perda_interesse
             from formulario_napese as form inner join usuarios as usu on usu.email = form.email 
             WHERE usu.id = %s and usu.status = true and form.aprovado = 'pendente'
         """, (userId,))
@@ -932,8 +953,10 @@ def avaliacao_paciente(userId):
             'vivenciou_trauma': paciente[32], 'descricao_evento': paciente[33], 'tempo_decorrido': paciente[34], 'envolveu_violencia': paciente[35],
             'vivencia_direta': paciente[36], 'vivencia_testemunha': paciente[37], 'vivencia_familiar_amigo': paciente[38], 'vivencia_trabalho': paciente[39],
             'vivencia_nenhuma': paciente[40], 'vivencia_outro': paciente[41], 'impacto_lembracas': paciente[42], 'impacto_evitacao': paciente[43],
-            'impacto_crencas': paciente[44], 'impacto_apreensao': paciente[45]
-            } 
+            'impacto_crencas': paciente[44], 'impacto_apreensao': paciente[45], 'acidente_violencia': paciente[46], 'causas_naturais': paciente[47],
+            'nao_se_aplica': paciente[48], 'impacto_concentracao': paciente[49], 'impacto_chateado': paciente[50], 'impacto_evitar_gatilhos': paciente[51],
+            'impacto_perda_interesse': paciente[52]
+            }
             for paciente in pacientes
         ]
 
@@ -1083,9 +1106,6 @@ def vincular_paciente():
     terapeuta_id = request.form.get('terapeuta_id')
     paciente_email = request.form.get('novo_paciente')
 
-    print('terapeuta_id -----------', terapeuta_id)
-    print('paciente_email -----------', paciente_email)
-
     if not terapeuta_id or not paciente_email:
         flash('Dados incompletos!', 'error')
         return redirect(url_for('admin_usuarios'))
@@ -1097,7 +1117,6 @@ def vincular_paciente():
         # Verificar se o paciente existe
         cur.execute("SELECT id FROM usuarios WHERE email = %s", (paciente_email,))
         paciente = cur.fetchone()
-        print('paciente -----------', paciente)
         if not paciente:
             flash('Paciente não encontrado!', 'error')
             return redirect(url_for('admin_usuarios'))
@@ -1119,7 +1138,6 @@ def vincular_paciente():
             WHERE terapeuta_id = %s AND paciente_id = %s AND status = false
         """, (terapeuta_id, paciente_id))
         vinculo_inativo = cur.fetchone()
-        print('vinculo inativo -----------', vinculo_inativo)
         if vinculo_inativo:
             # Se o vínculo inativo existe, atualize o status para true
             cur.execute("""
@@ -1128,7 +1146,6 @@ def vincular_paciente():
                 WHERE id = %s
             """, (vinculo_inativo[0],))
             conn.commit()
-            print('vinculo atualizado')
             flash('Paciente vinculado com sucesso!', 'success')
         else:
             # Caso contrário, cria um novo vínculo
@@ -1137,7 +1154,6 @@ def vincular_paciente():
                 VALUES (%s, %s, true)
             """, (terapeuta_id, paciente_id))
             conn.commit()
-            print('vinculo criado')
             # Buscar dados do formulário do paciente
             cur.execute("""
                 SELECT 
@@ -1152,7 +1168,13 @@ def vincular_paciente():
                     descricao_evento, tempo_decorrido,
                     envolveu_violencia, impacto_lembracas,
                     impacto_evitacao, impacto_crencas,
-                    impacto_apreensao
+                    impacto_apreensao, impacto_concentracao,
+                    impacto_chateado, impacto_evitar_gatilhos,
+                    impacto_perda_interesse, acidente_violencia,
+                    causas_naturais, nao_se_aplica, conheceu_site_trauma,
+                    conheceu_instagram, conheceu_indicacao, conheceu_treinamentos,
+                    conheceu_google, conheceu_rede_social, conheceu_psicologo,
+                    conheceu_outro, cep, renda_familiar, num_dependentes
                 FROM formulario_napese 
                 WHERE email = %s
             """, (paciente_email,))
@@ -1185,13 +1207,32 @@ def vincular_paciente():
                     'vivenciou_trauma': paciente_dados[19],
                     'descricao_evento': paciente_dados[20],
                     'tempo_decorrido': paciente_dados[21],
+                    'nao_se_aplica': paciente_dados[22],
                     'envolveu_violencia': paciente_dados[22],
                     'impacto_lembracas': paciente_dados[23],
                     'impacto_evitacao': paciente_dados[24],
                     'impacto_crencas': paciente_dados[25],
-                    'impacto_apreensao': paciente_dados[26]
+                    'impacto_apreensao': paciente_dados[26],
+                    'impacto_concentracao': paciente_dados[27],
+                    'impacto_chateado': paciente_dados[28],
+                    'impacto_evitar_gatilhos': paciente_dados[29],
+                    'impacto_perda_interesse': paciente_dados[30],
+                    'acidente_violencia': paciente_dados[31],
+                    'causas_naturais': paciente_dados[32],
+                    'nao_se_aplica': paciente_dados[33],
+                    'conheceu_site_trauma': paciente_dados[34],
+                    'conheceu_instagram': paciente_dados[35],
+                    'conheceu_indicacao': paciente_dados[36],
+                    'conheceu_treinamentos': paciente_dados[37],
+                    'conheceu_google': paciente_dados[38],
+                    'conheceu_rede_social': paciente_dados[39],
+                    'conheceu_psicologo': paciente_dados[40],
+                    'conheceu_outro': paciente_dados[41],
+                    'cep': paciente_dados[42],
+                    'renda_familiar': paciente_dados[43],
+                    'num_dependentes': paciente_dados[44]
                 }
-                msg = Message('Vinculo de um novo paciente', sender='@gmail.com', recipients=['@gmail.com'])
+                msg = Message('Vinculo de um novo paciente', sender='erikpereiramartins@gmail.com', recipients=['gerikpereiramartins@gmail.com'])
                 msg.html = render_template("email/vincular_paciente_terapeuta.html",dados=dados_formatados)
                 print("Enviando email...")
                 mail.send(msg)
