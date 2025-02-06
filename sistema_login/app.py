@@ -19,6 +19,10 @@ from io import BytesIO
 from flask import Response, flash, redirect, url_for
 from flask_login import current_user, login_required
 import datetime
+from dotenv import load_dotenv
+
+# Carregar variáveis de ambiente do arquivo .env
+load_dotenv()
 
 app = Flask(__name__, 
     static_folder='static',
@@ -26,11 +30,10 @@ app = Flask(__name__,
 )
 #contexto email
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-# smtp-relay.gmail.com
-app.config['MAIL_PORT'] = 465
-app.config['MAIL_USE_SSL'] = True
-app.config['MAIL_USERNAME'] = '@gmail.com'
-app.config['MAIL_PASSWORD'] = ''
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 mail = Mail(app)
 
 app.config['SECRET_KEY'] = '1235'  # Mude para uma chave segura
