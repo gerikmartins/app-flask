@@ -29,7 +29,7 @@ app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 # smtp-relay.gmail.com
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USE_SSL'] = True
-app.config['MAIL_USERNAME'] = ''
+app.config['MAIL_USERNAME'] = '@gmail.com'
 app.config['MAIL_PASSWORD'] = ''
 mail = Mail(app)
 
@@ -68,9 +68,9 @@ def conectar_bd():
         conn = psycopg2.connect(
             dbname="flask",
             user="postgres",
-            password="postgres",  # Coloque sua senha aqui se houver
+            password="Postgres2022!",  # Coloque sua senha aqui se houver
             host="localhost",
-            port="5432"
+            port="5433"
         )
         cur = conn.cursor()
         
@@ -1083,6 +1083,9 @@ def vincular_paciente():
     terapeuta_id = request.form.get('terapeuta_id')
     paciente_email = request.form.get('novo_paciente')
 
+    print('terapeuta_id -----------', terapeuta_id)
+    print('paciente_email -----------', paciente_email)
+
     if not terapeuta_id or not paciente_email:
         flash('Dados incompletos!', 'error')
         return redirect(url_for('admin_usuarios'))
@@ -1094,6 +1097,7 @@ def vincular_paciente():
         # Verificar se o paciente existe
         cur.execute("SELECT id FROM usuarios WHERE email = %s", (paciente_email,))
         paciente = cur.fetchone()
+        print('paciente -----------', paciente)
         if not paciente:
             flash('Paciente não encontrado!', 'error')
             return redirect(url_for('admin_usuarios'))
@@ -1115,7 +1119,7 @@ def vincular_paciente():
             WHERE terapeuta_id = %s AND paciente_id = %s AND status = false
         """, (terapeuta_id, paciente_id))
         vinculo_inativo = cur.fetchone()
-
+        print('vinculo inativo -----------', vinculo_inativo)
         if vinculo_inativo:
             # Se o vínculo inativo existe, atualize o status para true
             cur.execute("""
@@ -1124,6 +1128,7 @@ def vincular_paciente():
                 WHERE id = %s
             """, (vinculo_inativo[0],))
             conn.commit()
+            print('vinculo atualizado')
             flash('Paciente vinculado com sucesso!', 'success')
         else:
             # Caso contrário, cria um novo vínculo
@@ -1132,6 +1137,7 @@ def vincular_paciente():
                 VALUES (%s, %s, true)
             """, (terapeuta_id, paciente_id))
             conn.commit()
+            print('vinculo criado')
             # Buscar dados do formulário do paciente
             cur.execute("""
                 SELECT 
@@ -1151,9 +1157,48 @@ def vincular_paciente():
                 WHERE email = %s
             """, (paciente_email,))
             paciente_dados = cur.fetchone()
-            msg = Message('Vinculo de um novo paciente', sender='', recipients=['g@mail.com'])
-            msg.html = render_template("email/vincular_paciente_terapeuta.html", dados=paciente_dados)
-            mail.send(msg)
+
+            if not paciente_dados:
+                flash('Dados do formulário do paciente não encontrados!', 'error')
+                return redirect(url_for('admin_usuarios'))
+            try:
+                dados_formatados = {
+                    'nome_completo': paciente_dados[0],
+                    'cpf': paciente_dados[1],
+                    'telefones': paciente_dados[2],
+                    'data_nascimento': paciente_dados[3],
+                    'cidade': paciente_dados[4],
+                    'estado': paciente_dados[5],
+                    'genero': paciente_dados[6],
+                    'profissao': paciente_dados[7],
+                    'preferencia_atendimento': paciente_dados[8],
+                    'sintomas_relevantes': paciente_dados[9],
+                    'medicacoes': paciente_dados[10],
+                    'substancias_psicoativas': paciente_dados[11],
+                    'historico_acidentes': paciente_dados[12],
+                    'historico_cirurgias': paciente_dados[13],
+                    'dores': paciente_dados[14],
+                    'acompanhamento_psiquiatrico': paciente_dados[15],
+                    'acompanhamento_psicologico': paciente_dados[16],
+                    'tecnicas_corporais': paciente_dados[17],
+                    'motivo_procura': paciente_dados[18],
+                    'vivenciou_trauma': paciente_dados[19],
+                    'descricao_evento': paciente_dados[20],
+                    'tempo_decorrido': paciente_dados[21],
+                    'envolveu_violencia': paciente_dados[22],
+                    'impacto_lembracas': paciente_dados[23],
+                    'impacto_evitacao': paciente_dados[24],
+                    'impacto_crencas': paciente_dados[25],
+                    'impacto_apreensao': paciente_dados[26]
+                }
+                msg = Message('Vinculo de um novo paciente', sender='@gmail.com', recipients=['@gmail.com'])
+                msg.html = render_template("email/vincular_paciente_terapeuta.html",dados=dados_formatados)
+                print("Enviando email...")
+                mail.send(msg)
+            except Exception as e:
+                print(f"Erro ao enviar email: {e}")
+                flash('Erro ao enviar email!', 'error')
+                return redirect(url_for('admin_usuarios'))
             
             flash('Paciente vinculado com sucesso!', 'success')
 

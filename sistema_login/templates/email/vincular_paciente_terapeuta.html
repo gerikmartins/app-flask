@@ -5,385 +5,332 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resumo do Formulário</title>
     <style>
-        body { font-family: Arial, sans-serif; }
-        .container { width: 100%; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
-        .titulo { background: #007BFF; color: white; padding: 10px; text-align: center; font-size: 18px; }
-        .campo { margin-bottom: 15px; }
-        .campo strong { color: #333; }
-        .campo span { color: #555; }
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h3 {
+            color: #2c5282;
+            border-bottom: 2px solid #2c5282;
+            padding-bottom: 5px;
+            margin-top: 25px;
+        }
+        
+        .form-section {
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .label {
+            color: #666;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .value {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .textarea-value {
+            white-space: pre-wrap;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .header h2 {
+            color: #2c5282;
+            margin-bottom: 15px;
+        }
+
+        .header p {
+            color: #4a5568;
+            font-size: 16px;
+            line-height: 1.6;
+        }
     </style>
 </head>
 <body>
+    <div class="header">
+        <h2>Novo Paciente Vinculado</h2>
+        <p>Você foi vinculado a um novo paciente. Abaixo seguem os dados cadastrais completos para sua análise.</p>
+    </div>
+
     <div>
-        <div class="">
-            <h3>Dados Pessoais</h3>
-            <input type="hidden" id="avaliar_paciente_id" name="avaliar_paciente_id">
-            <div class="form-row">
-                <div class="form-col">
-                    <div class="form-group">
-                        <label for="nome_completo">Nome Completo</label>
-                        <input type="text" id="nome_completo" name="nome_completo" value="{{ dados['nome_completo'] }}" disabled>
-                    </div>
-                </div>
-                <div class="form-col">
-                    <div class="form-group">
-                        <label for="cpf">CPF</label>
-                        <input type="text" id="cpf" name="cpf" value="{{ dados['cpf'] }}" disabled>
-                    </div>
-                </div>
+        <h3>Dados Pessoais</h3>
+        <div class="form-section">
+            <div class="form-group">
+                <span class="label">Nome Completo:</span>
+                <span class="value">{{ dados.nome_completo }}</span>
             </div>
-
-            <div class="form-row">
-                <div class="form-col">
-                    <div class="form-group">
-                        <label for="telefones">Telefones</label>
-                        <input type="text" id="telefones" name="telefones" value="{{ dados['telefones'] }}" disabled>
-                    </div>
-                </div>
-                <div class="form-col">
-                    <div class="form-group">
-                        <label for="data_nascimento">Data de Nascimento</label>
-                        <input type="text" id="data_nascimento" name="data_nascimento" value="{{ dados['data_nascimento'] }}" disabled>
-                    </div>
-                </div>
+            
+            <div class="form-group">
+                <span class="label">CPF:</span>
+                <span class="value">{{ dados.cpf }}</span>
             </div>
-
-            <div class="form-row">
-                <div class="form-col">
-                    <div class="form-group">
-                        <label for="cep">CEP</label>
-                        <input type="text" id="cep" name="cep" value="{{ dados['cep'] }}" disabled>
-                    </div>
-                </div>
-                <div class="form-col">
-                    <div class="form-group">
-                        <label for="cidade">Cidade</label>
-                        <input type="text" id="cidade" name="cidade" value="{{ dados['cidade'] }}" disabled>
-                    </div>
-                </div>
-                <div class="form-col">
-                    <div class="form-group">
-                        <label for="estado">Estado</label>
-                        <input type="text" id="estado" name="estado" value="{{ dados['estado'] }}" disabled>
-                    </div>
-                </div>
+            
+            <div class="form-group">
+                <span class="label">Telefones:</span>
+                <span class="value">{{ dados.telefones }}</span>
             </div>
-
-            <div class="form-row">
-                <div class="form-col">
-                    <div class="form-group">
-                        <label for="genero">Gênero</label>
-                        <input type="text" id="genero" name="genero" value="{{ dados['genero'] }}" disabled>
-                    </div>
-                </div>
-                <div class="form-col">
-                    <div class="form-group">
-                        <label for="profissao">Profissão</label>
-                        <input type="text" id="profissao" name="profissao" value="{{ dados['profissao'] }}" disabled>
-                    </div>
-                </div>
+            
+            <div class="form-group">
+                <span class="label">Data de Nascimento:</span>
+                <span class="value">{{ dados.data_nascimento }}</span>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">Endereço:</span>
+                <span class="value">CEP: {{ dados.cep }} - {{ dados.cidade }}/{{ dados.estado }}</span>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">Gênero:</span>
+                <span class="value">{{ dados.genero }}</span>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">Profissão:</span>
+                <span class="value">{{ dados.profissao }}</span>
             </div>
         </div>
-        <div class="" style="display: block;">
-            <h3>Preferências</h3>
-            <!-- Preferência de Atendimento -->
+
+        <h3>Preferências</h3>
+        <div class="form-section">
             <div class="form-group">
-                <label for="preferencia_atendimento">Preferência de Atendimento</label>
-
-                <select id="preferencia_atendimento" name="preferencia_atendimento" value="{{ dados['preferencia_atendimento'] }}" disabled>
-                    <option value="">Selecione uma opção</option>
-                    <option value="ONLINE">Online</option>
-                    <option value="PRESENCIAL">Presencial</option>
-                </select>
+                <span class="label">Preferência de Atendimento:</span>
+                <span class="value">{{ dados.preferencia_atendimento }}</span>
             </div>
-
-            <!-- Renda Familiar -->
+            
             <div class="form-group">
-                <label for="renda_familiar">Renda Familiar</label>
-                <select id="renda_familiar" name="renda_familiar" value="{{ dados['renda_familiar'] }}" disabled>
-                    <option value="ATE_2_SALARIOS">Até 2 salários</option>
-                    <option value="2_A_4_SALARIOS">2 a 4 salários</option>
-                    <option value="4_A_10_SALARIOS">4 a 10 salários</option>
-                    <option value="ACIMA_10_SALARIOS">Acima de 10 salários</option>
-                </select>
+                <span class="label">Renda Familiar:</span>
+                <span class="value">{{ dados.renda_familiar }}</span>
             </div>
-
-            <!-- Número de Dependentes -->
+            
             <div class="form-group">
-                <label for="num_dependentes">Número de Dependentes</label>
-                <select id="num_dependentes" name="num_dependentes" value="{{ dados['num_dependentes'] }}" disabled>
-                    <option value="NENHUM">Nenhum</option>
-                    <option value="1_A_2">1 a 2</option>
-                    <option value="3_A_4">3 a 4</option>
-                    <option value="MAIS_DE_4">Mais de 4</option>
-                </select>
-            </div>
-
-            <h3>Como Conheceu o NAPESE</h3>
-            <div class="checkbox-group">
-                <div class="checkbox-item">
-                    <input type="checkbox" id="conheceu_site_trauma" name="conheceu_site_trauma" checked="{{ dados['conheceu_site_trauma'] }}" disabled>
-                    <label for="conheceu_site_trauma">Site Trauma</label>
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="conheceu_instagram" name="conheceu_instagram" checked="{{ dados['conheceu_instagram'] }}" disabled>
-                    <label for="conheceu_instagram">Instagram</label>
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="conheceu_indicacao" name="conheceu_indicacao" checked="{{ dados['conheceu_indicacao'] }}" disabled>
-                    <label for="conheceu_indicacao">Indicação</label>
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="conheceu_treinamentos" name="conheceu_treinamentos" checked="{{ dados['conheceu_treinamentos'] }}" disabled>
-                    <label for="conheceu_treinamentos">Treinamentos</label>
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="conheceu_google" name="conheceu_google" checked="{{ dados['conheceu_google'] }}" disabled>
-                    <label for="conheceu_google">Google</label>
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="conheceu_rede_social" name="conheceu_rede_social" checked="{{ dados['conheceu_rede_social'] }}" disabled>
-                    <label for="conheceu_rede_social">Rede Social</label>
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="conheceu_psicologo" name="conheceu_psicologo" checked="{{ dados['conheceu_psicologo'] }}" disabled>
-                    <label for="conheceu_psicologo">Psicólogo</label>
-                </div>
-                <div class="form-group">
-                    <label for="conheceu_outro">Outro</label>
-                    <input type="text" id="conheceu_outro" name="conheceu_outro" value="{{ dados['conheceu_outro'] }}" disabled>
-                </div>
+                <span class="label">Número de Dependentes:</span>
+                <span class="value">{{ dados.num_dependentes }}</span>
             </div>
         </div>
-        <div class="" style="display: block;">
-            <h3>Sintomas e Histórico Médico</h3>
-            <div class="form-row">
-                <div class="form-col">
-                    <div class="form-group">
-                        <label for="sintomas_relevantes">Quais os sintomas relevantes que você tem sentido no último mês?</label>
-                        <textarea id="sintomas_relevantes" name="sintomas_relevantes" value="{{ dados['sintomas_relevantes'] }}" disabled></textarea>
-                    </div>
-                </div>
-            </div>
 
-            <div class="form-row">
-                <div class="form-col">
-                    <div class="form-group">
-                        <label for="medicacoes">Toma alguma medicação? Qual?</label>
-                        <textarea id="medicacoes" name="medicacoes" value="{{ dados['medicacoes'] }}" disabled></textarea>
-                    </div>
-                </div>
-                <div class="form-col">
-                    <div class="form-group">
-                        <label for="substancias_psicoativas">Uso de substância psicoativa (álcool e outras drogas)?</label>
-                        <textarea id="substancias_psicoativas" name="substancias_psicoativas" value="{{ dados['substancias_psicoativas'] }}" disabled></textarea>
-                    </div>
-                </div>
+        <h3>Como Conheceu o NAPESE</h3>
+        <div class="form-section">
+            {% if dados.conheceu_site_trauma %}
+            <div class="form-group">
+                <span class="value">• Site Trauma</span>
             </div>
-
-            <div class="form-row">
-                <div class="form-col">
-                    <div class="form-group">
-                        <label for="historico_acidentes">Já sofreu algum acidente?</label>
-                        <textarea id="historico_acidentes" name="historico_acidentes" value="{{ dados['historico_acidentes'] }}" disabled></textarea>
-                    </div>
-                </div>
-                <div class="form-col">
-                    <div class="form-group">
-                        <label for="historico_cirurgias">Já passou por algum procedimento cirúrgico?</label>
-                        <textarea id="historico_cirurgias" name="historico_cirurgias" value="{{ dados['historico_cirurgias'] }}" disabled></textarea>
-                    </div>
-                </div>
+            {% endif %}
+            
+            {% if dados.conheceu_instagram %}
+            <div class="form-group">
+                <span class="value">• Instagram</span>
             </div>
-
-            <div class="form-row">
-                <div class="form-col">
-                    <div class="form-group">
-                        <label for="dores">Sente algum tipo de dor (aguda ou crônica)? Se sim, descreva brevemente:</label>
-                        <textarea id="dores" name="dores" value="{{ dados['dores'] }}" disabled></textarea>
-                    </div>
-                </div>
+            {% endif %}
+            
+            {% if dados.conheceu_indicacao %}
+            <div class="form-group">
+                <span class="value">• Indicação</span>
             </div>
-
-            <h3>Acompanhamento Profissional</h3>
-            <div class="form-row">
-                <div class="form-col">
-                    <div class="form-group">
-                        <label for="acompanhamento_psiquiatrico">Tem tido acompanhamento psiquiátrico?</label>
-                        <select id="acompanhamento_psiquiatrico" name="acompanhamento_psiquiatrico" value="{{ dados['acompanhamento_psiquiatrico'] }}" disabled>
-                            <option value="SIM">Sim</option>
-                            <option value="NAO">Não</option>
-                            <option value="NAO_SEI">Não Sei</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-col">
-                    <div class="form-group">
-                        <label for="acompanhamento_psicologico">Tem tido acompanhamento psicológico?</label>
-                        <select id="acompanhamento_psicologico" name="acompanhamento_psicologico" value="{{ dados['acompanhamento_psicologico'] }}" disabled>
-                            <option value="SIM">Sim</option>
-                            <option value="NAO">Não</option>
-                            <option value="NAO_SEI">Não Sei</option>
-                        </select>
-                    </div>
-                </div>
+            {% endif %}
+            
+            {% if dados.conheceu_treinamentos %}
+            <div class="form-group">
+                <span class="value">• Treinamentos</span>
             </div>
+            {% endif %}
+            
+            {% if dados.conheceu_google %}
+            <div class="form-group">
+                <span class="value">• Google</span>
+            </div>
+            {% endif %}
+            
+            {% if dados.conheceu_rede_social %}
+            <div class="form-group">
+                <span class="value">• Rede Social</span>
+            </div>
+            {% endif %}
+            
+            {% if dados.conheceu_psicologo %}
+            <div class="form-group">
+                <span class="value">• Psicólogo</span>
+            </div>
+            {% endif %}
+            
+            {% if dados.conheceu_outro %}
+            <div class="form-group">
+                <span class="label">Outro:</span>
+                <span class="value">{{ dados.conheceu_outro }}</span>
+            </div>
+            {% endif %}
+        </div>
 
-            <div class="form-row">
-                <div class="form-col">
-                    <div class="form-group">
-                        <label for="tecnicas_corporais">Já recebeu ou trabalhou com alguma técnica corporal? Se sim, qual (quais)?</label>
-                        <textarea id="tecnicas_corporais" name="tecnicas_corporais" value="{{ dados['tecnicas_corporais'] }}" disabled></textarea>
-                    </div>
-                </div>
+        <h3>Sintomas e Histórico Médico</h3>
+        <div class="form-section">
+            <div class="form-group">
+                <span class="label">Quais os sintomas relevantes que você tem sentido no último mês?</span>
+                <div class="textarea-value">{{ dados.sintomas_relevantes }}</div>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">Toma alguma medicação? Qual?</span>
+                <div class="textarea-value">{{ dados.medicacoes }}</div>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">Uso de substância psicoativa (álcool e outras drogas)?</span>
+                <div class="textarea-value">{{ dados.substancias_psicoativas }}</div>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">Já sofreu algum acidente?</span>
+                <div class="textarea-value">{{ dados.historico_acidentes }}</div>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">Já passou por algum procedimento cirúrgico?</span>
+                <div class="textarea-value">{{ dados.historico_cirurgias }}</div>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">Sente algum tipo de dor (aguda ou crônica)?</span>
+                <div class="textarea-value">{{ dados.dores }}</div>
             </div>
         </div>
-        <div class="" style="display: block;">
-            <h3>Método Somatic Experiencing® e Histórico de Trauma</h3>
-            <div class="form-row">
-                <div class="form-col">
-                    <div class="form-group">
-                        <label for="conhece_se">Conhece o Método Somatic Experiencing®?</label>
-                        <select id="conhece_se" name="conhece_se" value="{{ dados['conhece_se'] }}" disabled>
-                            <option value="true">Sim</option>
-                            <option value="false">Não</option>
-                        </select>
-                    </div>
-                </div>
+
+        <h3>Acompanhamento Profissional</h3>
+        <div class="form-section">
+            <div class="form-group">
+                <span class="label">Tem tido acompanhamento psiquiátrico?</span>
+                <span class="value">{{ dados.acompanhamento_psiquiatrico }}</span>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">Tem tido acompanhamento psicológico?</span>
+                <span class="value">{{ dados.acompanhamento_psicologico }}</span>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">Já recebeu ou trabalhou com alguma técnica corporal?</span>
+                <div class="textarea-value">{{ dados.tecnicas_corporais }}</div>
+            </div>
+        </div>
+
+        <h3>Método Somatic Experiencing® e Histórico de Trauma</h3>
+        <div class="form-section">
+            <div class="form-group">
+                <span class="label">Conhece o Método Somatic Experiencing®?</span>
+                <span class="value">{{ 'Sim' if dados.conhece_se else 'Não' }}</span>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">Qual o motivo da sua procura pelo atendimento?</span>
+                <div class="textarea-value">{{ dados.motivo_procura }}</div>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">Vivenciou Trauma?</span>
+                <span class="value">{{ 'Sim' if dados.vivenciou_trauma else 'Não' }}</span>
             </div>
 
-            <div class="form-row">
-                <div class="form-col">
-                    <div class="form-group">
-                        <label for="motivo_procura">Qual o motivo da sua procura pelo atendimento?</label>
-                        <textarea id="motivo_procura" name="motivo_procura" value="{{ dados['motivo_procura'] }}" disabled></textarea>
-                    </div>
-                </div>
+            {% if dados.vivenciou_trauma %}
+            <div class="form-group">
+                <span class="label">Descrição do Evento:</span>
+                <div class="textarea-value">{{ dados.descricao_evento }}</div>
             </div>
-
-            <div class="form-row">
-                <div class="form-col">
-                    <div class="form-group">
-                        <label for="vivenciou_trauma">Vivenciou Trauma?</label>
-                        <select id="vivenciou_trauma" name="vivenciou_trauma" value="{{ dados['vivenciou_trauma'] }}" disabled>
-                            <option value="true">Sim</option>
-                            <option value="false">Não</option>
-                        </select>
-                    </div>
-                </div>
+            
+            <div class="form-group">
+                <span class="label">Tempo Decorrido:</span>
+                <span class="value">{{ dados.tempo_decorrido }}</span>
             </div>
-
-            <div id="detalhes-trauma" class="form-row">
-                <div class="form-col">
-                    <div class="form-group">
-                        <label for="descricao_evento">Descrição do Evento</label>
-                        <textarea id="descricao_evento" name="descricao_evento" value="{{ dados['descricao_evento'] }}" disabled></textarea>
-                    </div>
-                </div>
-                <div class="form-col">
-                    <div class="form-group">
-                        <label for="tempo_decorrido">Tempo Decorrido</label>
-                        <input type="text" id="tempo_decorrido" name="tempo_decorrido" value="{{ dados['tempo_decorrido'] }}" disabled>
-                    </div>
-                </div>
-                <div class="form-col">
-                    <div class="form-group">
-                        <label for="envolveu_violencia">Envolveu Violência?</label>
-                        <select id="envolveu_violencia" name="envolveu_violencia" value="{{ dados['envolveu_violencia'] }}" disabled>
-                            <option value="true">Sim</option>
-                            <option value="false">Não</option>
-                        </select>
-                    </div>
-                </div>
+            
+            <div class="form-group">
+                <span class="label">Envolveu Violência?</span>
+                <span class="value">{{ 'Sim' if dados.envolveu_violencia else 'Não' }}</span>
             </div>
-
-            <h3>Vivências</h3>
-            <div class="checkbox-group">
-                <div class="checkbox-item">
-                    <input type="checkbox" id="vivencia_direta" name="vivencia_direta" checked="{{ dados['vivencia_direta'] }}" disabled>
-                    <label for="vivencia_direta">Vivência Direta</label>
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="vivencia_testemunha" name="vivencia_testemunha" checked="{{ dados['vivencia_testemunha'] }}" disabled>
-                    <label for="vivencia_testemunha">Testemunha</label>
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="vivencia_familiar_amigo" name="vivencia_familiar_amigo" checked="{{ dados['vivencia_familiar_amigo'] }}" disabled>
-                    <label for="vivencia_familiar_amigo">Familiar/Amigo</label>
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="vivencia_trabalho" name="vivencia_trabalho" checked="{{ dados['vivencia_trabalho'] }}" disabled>
-                    <label for="vivencia_trabalho">Trabalho</label>
-                </div>
-                <div class="checkbox-item">
-                    <input type="checkbox" id="vivencia_nenhuma" name="vivencia_nenhuma" checked="{{ dados['vivencia_nenhuma'] }}" disabled>
-                    <label for="vivencia_nenhuma">Nenhuma</label>
-                </div>
-                <div class="form-group">
-                    <label for="vivencia_outro">Outro</label>
-                    <textarea id="vivencia_outro" name="vivencia_outro" value="{{ dados['vivencia_outro'] }}" disabled></textarea>
-                </div>
+            {% endif %}
+        </div>
+        {% if dados.vivencia_direta or dados.vivencia_testemunha or dados.vivencia_familiar_amigo or dados.vivencia_trabalho or dados.vivencia_nenhuma or dados.vivencia_outro %}
+        <h3>Vivências</h3>
+        <div class="form-section">
+            {% if dados.vivencia_direta %}
+            <div class="form-group">
+                <span class="value">• Vivência Direta</span>
             </div>
-
-            <h3>No último mês, quanto você foi incomodado por:</h3>
-            <div class="likert-item">
-                <div class="likert-header">
-                    <span class="likert-label">Lembranças indesejáveis, perturbadoras e repetitivas da experiência estressante?</span>
-                    <span class="likert-value">Neutro</span>
-                </div>
-                <input type="range" class="likert-range" id="impacto_lembracas" name="impacto_lembracas" min="0" max="4" value="{{ dados['impacto_lembracas'] }}" disabled>
-                <div class="likert-scale">
-                    <span class="scale-point">De modo nenhum</span>
-                    <span class="scale-point">Um pouco</span>
-                    <span class="scale-point">Moderadamente</span>
-                    <span class="scale-point">Muito</span>
-                    <span class="scale-point">Extremamente</span>
-                </div>
+            {% endif %}
+            
+            {% if dados.vivencia_testemunha %}
+            <div class="form-group">
+                <span class="value">• Testemunha</span>
             </div>
-
-            <div class="likert-item">
-                <div class="likert-header">
-                    <span class="likert-label">Tentar evitar lembranças externas da experiência estressante?</span>
-                    <span class="likert-value">Neutro</span>
-                </div>
-                <input type="range" class="likert-range" id="impacto_evitacao" name="impacto_evitacao" min="0" max="4" value="{{ dados['impacto_evitacao'] }}"  disabled>
-                <div class="likert-scale">
-                    <span class="scale-point">De modo nenhum</span>
-                    <span class="scale-point">Um pouco</span>
-                    <span class="scale-point">Moderadamente</span>
-                    <span class="scale-point">Muito</span>
-                    <span class="scale-point">Extremamente</span>
-                </div>
+            {% endif %}
+            
+            {% if dados.vivencia_familiar_amigo %}
+            <div class="form-group">
+                <span class="value">• Familiar/Amigo</span>
             </div>
-
-            <div class="likert-item">
-                <div class="likert-header">
-                    <span class="likert-label">Ter crenças negativas intensas sobre você, outras pessoas ou o mundo?</span>
-                    <span class="likert-value">Neutro</span>
-                </div>
-                <input type="range" class="likert-range" id="impacto_crencas" name="impacto_crencas" min="0" max="4" value="{{ dados['impacto_crencas'] }}" disabled>
-                <div class="likert-scale">
-                    <span class="scale-point">De modo nenhum</span>
-                    <span class="scale-point">Um pouco</span>
-                    <span class="scale-point">Moderadamente</span>
-                    <span class="scale-point">Muito</span>
-                    <span class="scale-point">Extremamente</span>
-                </div>
+            {% endif %}
+            
+            {% if dados.vivencia_trabalho %}
+            <div class="form-group">
+                <span class="value">• Trabalho</span>
             </div>
+            {% endif %}
+            
+            {% if dados.vivencia_nenhuma %}
+            <div class="form-group">
+                <span class="value">• Nenhuma</span>
+            </div>
+            {% endif %}
+            
+            {% if dados.vivencia_outro %}
+            <div class="form-group">
+                <span class="label">Outro:</span>
+                <div class="textarea-value">{{ dados.vivencia_outro }}</div>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
 
-            <div class="likert-item">
-                <div class="likert-header">
-                    <span class="likert-label">Sentir-se apreensivo ou assustado facilmente?</span>
-                    <span class="likert-value">Neutro</span>
-                </div>
-                <input type="range" class="likert-range" id="impacto_apreensao" name="impacto_apreensao" min="0" max="4" value="{{ dados['impacto_apreensao'] }}" disabled>
-                <div class="likert-scale">
-                    <span class="scale-point">De modo nenhum</span>
-                    <span class="scale-point">Um pouco</span>
-                    <span class="scale-point">Moderadamente</span>
-                    <span class="scale-point">Muito</span>
-                    <span class="scale-point">Extremamente</span>
-                </div>
+        <h3>Impactos no Último Mês</h3>
+        <div class="form-section">
+            <div class="form-group">
+                <span class="label">Lembranças indesejáveis, perturbadoras e repetitivas da experiência estressante:</span>
+                <span class="value">{{ ['De modo nenhum', 'Um pouco', 'Moderadamente', 'Muito', 'Extremamente'][dados.impacto_lembracas] }}</span>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">Tentar evitar lembranças externas da experiência estressante:</span>
+                <span class="value">{{ ['De modo nenhum', 'Um pouco', 'Moderadamente', 'Muito', 'Extremamente'][dados.impacto_evitacao] }}</span>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">Ter crenças negativas intensas sobre você, outras pessoas ou o mundo:</span>
+                <span class="value">{{ ['De modo nenhum', 'Um pouco', 'Moderadamente', 'Muito', 'Extremamente'][dados.impacto_crencas] }}</span>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">Sentir-se apreensivo ou assustado facilmente:</span>
+                <span class="value">{{ ['De modo nenhum', 'Um pouco', 'Moderadamente', 'Muito', 'Extremamente'][dados.impacto_apreensao] }}</span>
             </div>
         </div>
     </div>
