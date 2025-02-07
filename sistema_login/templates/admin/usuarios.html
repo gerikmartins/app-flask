@@ -7,6 +7,7 @@
     <title>Dashboard Administrador</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/cadastro_terapeuta.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/formulario_napese.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="shortcut icon" type="imagex/png" href="{{ url_for('static', filename='images/logo_subfooter.png') }}">
 </head>
@@ -158,6 +159,7 @@
                     {% endfor %}
                 </tbody>                
             </table>
+            <button onclick="pacientes_reprovados_excel()"  class="action-btn delete-btn">Listar pacientes reprovados</button>
         </div>
     </div>
 
@@ -676,8 +678,8 @@
                 <div class="likert-item">
                     <div class="likert-header">
                         <span class="likert-label">No último mês, quando você foi incomodado por ter crenças negativas intensas sobre
-                            você, outras pessoas ou o mundo? (Por exemplo, ter pensamentos tais como: “Eu sou ruim”, “existe algo seriamente errado comigo”,
-                            “ninguém é confiável”, “o mundo todo é perigoso”.)</span>
+                            você, outras pessoas ou o mundo? (Por exemplo, ter pensamentos tais como: "Eu sou ruim", "existe algo seriamente errado comigo",
+                            "ninguém é confiável", "o mundo todo é perigoso".)</span>
                         <span class="likert-value">Neutro</span>
                     </div>
                     <input type="range" class="likert-range" id="impacto_crencas" name="impacto_crencas" min="0" max="4" value="2" disabled>
@@ -708,7 +710,7 @@
 
                 <div class="likert-item">
                     <div class="likert-header">
-                        <span class="likert-label">No último mês, quando você foi incomodado por ficar “super” alerta, vigilante ou de
+                        <span class="likert-label">No último mês, quando você foi incomodado por ficar "super" alerta, vigilante ou de
                             sobreaviso?</span>
                         <span class="likert-value">Neutro</span>
                     </div>
@@ -776,6 +778,10 @@
         // Função para fechar o modal
         function closeEditUserModal() {
             document.getElementById('editModal').style.display = "none";
+        }
+
+        function pacientes_reprovados_excel(){
+            window.location.href = '/gerar_excel_reprovados';
         }
 
         function openAvaliarPacienteModal(userId, email) {

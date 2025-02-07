@@ -20,6 +20,8 @@ from flask import Response, flash, redirect, url_for
 from flask_login import current_user, login_required
 import datetime
 from dotenv import load_dotenv
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill
 
 # Carregar variáveis de ambiente do arquivo .env
 load_dotenv()
@@ -1186,6 +1188,7 @@ def vincular_paciente():
             if not paciente_dados:
                 flash('Dados do formulário do paciente não encontrados!', 'error')
                 return redirect(url_for('admin_usuarios'))
+            
             try:
                 dados_formatados = {
                     'nome_completo': paciente_dados[0],
@@ -1540,12 +1543,21 @@ def formulario_terapeuta():
                         os.makedirs(UPLOAD_FOLDER)
                     arquivo.save(os.path.join(UPLOAD_FOLDER, filename))
                     carta_path = filename
-            if 'endereco_consultorio' not in request.form:
-                endereco_consultorio = ''
-            else:
+            endereco_consultorio = ''
+            if 'endereco_consultorio' in request.form:
                 endereco_consultorio = request.form['endereco_consultorio']
+            consultorio_acessivel = False
+            if 'consultorio_acessivel' in request.form:
+                if request.form['consultorio_acessivel'] != 'nao':
+                    consultorio_acessivel = True
             print("Carta path:", carta_path) # Debug log
             # Coletar dados do formulário
+            try:
+                numero_supervisoes = request.form.get('numero_supervisoes_ultimo_ano', '0')
+                numero_supervisoes = int(numero_supervisoes) if numero_supervisoes.strip() else 0
+            except (ValueError, TypeError):
+                numero_supervisoes = 0
+
             dados = {
                 'nome_completo': request.form['nome_completo'],
                 'endereco_consultorio': endereco_consultorio,
@@ -1556,37 +1568,24 @@ def formulario_terapeuta():
                 'email': current_user.email,
                 'cpf': request.form['cpf'].replace('.', '').replace('-', ''),
                 'nivel_atual': request.form['nivel_atual'],
-
                 # descomentar após adicionar os campos no html
-                # 'ano_conclusao_avancado2': request.form.get('ano_conclusao_avancado2') or None,
-                # 'ano_conclusao_sep': request.form.get('ano_conclusao_sep') or None,
-                # 'professores_formacao': request.form['professores_formacao'],
-                # 'formacao_academica': request.form['formacao_academica'],
-                # 'participa_grupo_estudo': 'participa_grupo_estudo' in request.form,
-                # 'numero_supervisoes_ultimo_ano': int(request.form.get('numero_supervisoes', 0)),
-                # 'modalidade': request.form['modalidade'],
-                # 'faixa_valor_sessao': request.form['faixa_valor_sessao'],
-                # 'consultorio_acessivel': 'consultorio_acessivel' in request.form,
-                # 'observacao_acessibilidade': request.form.get('observacao_acessibilidade', ''),
-                # 'interesse_producao_cientifica': 'interesse_producao_cientifica' in request.form,
-                # 'associado_abt': 'associado_abt' in request.form,
-                # 'carta_recomendacao_path': carta_path,
-                # 'sugestoes': request.form.get('sugestoes', ''),
-                # 'concordou_termos': 'concordou_termos' in request.form
-
-                # apagar após adicionar os campos no html
-                'ano_conclusao_avancado2': 2020,
-                'ano_conclusao_sep': 2020,
-                'professores_formacao': 'teste',
-                'formacao_academica': 'teste',
-                'participa_grupo_estudo': True,
-                'numero_supervisoes_ultimo_ano': 1,
-                'modalidade': 'teste',
-                'faixa_valor_sessao': 'teste',
-                'consultorio_acessivel': True,
-                'interesse_producao_cientifica': True,
-                'associado_abt': True,
+                'ano_conclusao_avancado2': int(request.form.get('ano_conclusao_avancado2',0)),
+                'ano_conclusao_sep': int(request.form.get('ano_conclusao_sep',0)),
+                'professores_formacao': request.form['professores_formacao'],
+                'formacao_academica': request.form['formacao_academica'],
+                'participa_grupo_estudo': request.form.get('participa_grupo_estudo') == 'sim',
+                'interesse_producao_cientifica': request.form.get('interesse_producao_cientifica') == 'sim',
+                'associado_abt': request.form.get('associado_abt') == 'sim',
                 'carta_recomendacao_path': carta_path,
+                'sugestoes': request.form.get('sugestoes', ''),
+
+                'numero_supervisoes_ultimo_ano': numero_supervisoes,
+                'modalidade': request.form['modalidade'],
+                # 'faixa_valor_sessao': request.form['faixa_valor_sessao'],
+                'consultorio_acessivel': request.form.get('consultorio_acessivel') != 'nao',
+                'observacao_acessibilidade': request.form.get('observacao_acessibilidade', ''),
+                # apagar após adicionar os campos no html
+                'faixa_valor_sessao': '-',
                 'concordou_termos': True
             }
 
@@ -1640,6 +1639,123 @@ def get_pg_placeholder(value):
 def log_request_info():
     print('Headers: %s', request.headers)
     print('Body: %s', request.get_data())
+
+@app.route('/gerar_excel_reprovados')
+@login_required
+def gerar_excel_reprovados():
+    if not current_user.is_authenticated or not current_user.is_admin():
+        flash('Acesso não autorizado!', 'error')
+        return redirect(url_for('admin_usuarios'))
+
+    conn = conectar_bd()
+    cur = conn.cursor()
+
+    try:
+        # Consulta os registros reprovados
+        cur.execute("""
+            SELECT 
+                data_cadastro, email, nome_completo, cpf, telefones,
+                data_nascimento, cidade, estado, genero, profissao,
+                preferencia_atendimento, renda_familiar, num_dependentes,
+                sintomas_relevantes, medicacoes, substancias_psicoativas,
+                historico_acidentes, historico_cirurgias, dores,
+                acompanhamento_psiquiatrico, acompanhamento_psicologico,
+                tecnicas_corporais, motivo_procura, vivenciou_trauma,
+                descricao_evento, tempo_decorrido
+            FROM formulario_napese 
+            WHERE aprovado = 'reprovado'
+            ORDER BY data_cadastro DESC
+        """)
+        
+        registros = cur.fetchall()
+
+        if not registros:
+            flash('Não há registros reprovados para exportar!', 'info')
+            return redirect(url_for('admin_usuarios'))
+
+        # Criar um novo workbook
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Registros Reprovados"
+
+        # Definir cabeçalhos
+        headers = [
+            "Data Cadastro", "Email", "Nome Completo", "CPF", "Telefones",
+            "Data Nascimento", "Cidade", "Estado", "Gênero", "Profissão",
+            "Preferência Atendimento", "Renda Familiar", "Nº Dependentes",
+            "Sintomas Relevantes", "Medicações", "Substâncias Psicoativas",
+            "Histórico Acidentes", "Histórico Cirurgias", "Dores",
+            "Acompanhamento Psiquiátrico", "Acompanhamento Psicológico",
+            "Técnicas Corporais", "Motivo Procura", "Vivenciou Trauma",
+            "Descrição Evento", "Tempo Decorrido"
+        ]
+
+        # Estilizar cabeçalhos
+        header_fill = PatternFill(start_color="96d232", end_color="96d232", fill_type="solid")
+        header_font = Font(bold=True, color="FFFFFF")
+
+        # Adicionar cabeçalhos
+        for col, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col, value=header)
+            cell.fill = header_fill
+            cell.font = header_font
+
+        # Adicionar dados
+        for row, registro in enumerate(registros, 2):
+            for col, valor in enumerate(registro, 1):
+                # Formatar datas
+                if isinstance(valor, (datetime.date, datetime.datetime)):
+                    valor = valor.strftime("%d/%m/%Y")
+                # Formatar booleanos
+                elif isinstance(valor, bool):
+                    valor = "Sim" if valor else "Não"
+                
+                ws.cell(row=row, column=col, value=valor)
+
+        # Ajustar largura das colunas
+        for col in ws.columns:
+            max_length = 0
+            column = col[0].column_letter
+            for cell in col:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(str(cell.value))
+                except:
+                    pass
+            adjusted_width = (max_length + 2)
+            ws.column_dimensions[column].width = adjusted_width
+
+        # Criar o arquivo em memória
+        from io import BytesIO
+        excel_file = BytesIO()
+        wb.save(excel_file)
+        excel_file.seek(0)
+
+        # Nome do arquivo com data atual
+        hoje = datetime.datetime.now().strftime("%Y%m%d")
+        filename = f"registros_reprovados_{hoje}.xlsx"
+
+        return Response(
+            excel_file,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            headers={
+                "Content-Disposition": f"attachment;filename={filename}",
+                "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            }
+        )
+
+    except Exception as e:
+        print(f"Erro ao gerar Excel: {e}")
+        flash('Erro ao gerar arquivo Excel!', 'error')
+        return redirect(url_for('admin_usuarios'))
+
+    finally:
+        cur.close()
+        conn.close()
+
+@app.route('/termos-condicoes')
+def termos_condicoes():
+    return render_template('termos_condicoes.html')
 
 # Adicione no final do arquivo
 if __name__ == '__main__':

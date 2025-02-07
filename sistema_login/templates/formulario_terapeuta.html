@@ -46,17 +46,6 @@
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="endereco_consultorio">Endereço do Consultório</label>
-                            <input type="text" id="endereco_consultorio" name="endereco_consultorio">
-                            <div class="checkbox-group">
-                                <input type="checkbox" id="online" name="online">
-                                <label for="online">Atendimento Online</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
                             <label for="cidade">Cidade</label>
                             <input type="text" id="cidade" name="cidade" required>
                         </div>
@@ -116,6 +105,32 @@
                             <input type="text" id="cpf" name="cpf" required>
                         </div>
                     </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="endereco_consultorio">Endereço do Consultório</label>
+                            <input type="text" id="endereco_consultorio" name="endereco_consultorio">
+                            <div class="checkbox-group" style="margin-top: 8px; display: flex; align-items: center; gap: 5px;">
+                                <input type="checkbox" id="online" name="online" style="margin: 0;" onchange="toggleConsultorioAcessivel()">
+                                <label for="online" style="margin: 0;">Somente atendimento online</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row" id="consultorio-acessivel-row">
+                        <div class="form-group">
+                            <label for="consultorio_acessivel">Seu consultório tem acesso facilitado para pessoas com mobilidade reduzida?</label>
+                            <select id="consultorio_acessivel" name="consultorio_acessivel" required onchange="toggleOutroAcesso()">
+                                <option value="sim">Sim</option>
+                                <option value="nao">Não</option>
+                                <option value="outro">Outro</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="consultorio-acessivel-outro-group" style="display: none;">
+                            <label for="observacao_acessibilidade">Descreva o acesso facilitado para pessoas com mobilidade reduzida</label>
+                            <input type="text" id="observacao_acessibilidade" name="observacao_acessibilidade">
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-section">
@@ -124,7 +139,7 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="nivel_atual">Nível Atual</label>
-                            <select id="nivel_atual" name="nivel_atual" required>
+                            <select id="nivel_atual" name="nivel_atual" required onchange="toggleCartaRecomendacao()">
                                 <option value="">Selecione o Nível</option>
                                 <option value="Avançado Completo">Avançado Completo</option>
                                 <option value="Certificado SEP">Certificado SEP</option>
@@ -133,10 +148,114 @@
                         </div>
                     </div>
 
-                    <div class="form-row">
+                    <div class="form-row" id="carta-recomendacao-row" style="display: none;">
                         <div class="form-group">
                             <label for="carta_recomendacao">Carta de Recomendação (PDF)</label>
-                            <input type="file" id="carta_recomendacao" name="carta_recomendacao" accept=".pdf" required>
+                            <input type="file" id="carta_recomendacao" name="carta_recomendacao" accept=".pdf">
+                            <label class="observacao">Se você concluiu o Avançado 2 mas ainda não obteve o SEP, anexar uma carta de recomendação de um dos professores salva em pdf.</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ano_conclusao_avancado2">Ano de Conclusão do Avançado 2:</label>
+                        <input type="number" id="ano_conclusao_avancado2" name="ano_conclusao_avancado2" required>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3><i class="fas fa-file"></i> Informações Adicionais</h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ano_conclusao_sep">Ano de conclusão do SEP:</label>
+                            <input type="number" id="ano_conclusao_sep" name="ano_conclusao_sep" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="professores_formacao">Quem foram seus professores na formação em SE?</label>
+                            <input type="text" id="professores_formacao" name="professores_formacao" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="participa_grupo_estudo">Você participa atualmente de grupos de estudo em SE?</label>
+                            <select id="participa_grupo_estudo" name="participa_grupo_estudo" required>
+                                <option value="sim">Sim</option>
+                                <option value="nao">Não</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="supervisao_casos">Você participa de sessões de supervisão de casos? </label>
+                            <select id="supervisao_casos" name="supervisao_casos" required onchange="toggleNumeroSupervisoes()">
+                                <option value="sim">Sim</option>
+                                <option value="nao">Não</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="numero-supervisoes-group" style="display: none;">
+                            <label for="numero_supervisoes_ultimo_ano">De quantas supervisões você participou no último ano? </label>
+                            <input type="number" id="numero_supervisoes_ultimo_ano" name="numero_supervisoes_ultimo_ano">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="formacao_academica">Qual a sua formação acadêmica?</label>
+                            <input type="text" id="formacao_academica" name="formacao_academica" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="interesse_producao_cientifica">Gostaria de participar da produção científica da ABT?</label>
+                            <select id="interesse_producao_cientifica" name="interesse_producao_cientifica" required>
+                                <option value="sim">Sim</option>
+                                <option value="nao">Não</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="modalidade">Modalidade do Atendimento:</label>
+                            <select id="modalidade" name="modalidade" required>
+                                <option value="presencial">Presencial</option>
+                                <option value="online">Online</option>
+                                <option value="presencial_online">Online e Presencial</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="sugestoes">Tem alguma sugestão para o NAPESE?</label>
+                            <input type="text" id="sugestoes" name="sugestoes" required>
+                        </div>
+                    </div>
+
+                    <div class="info-box questionnaire-info">
+                        <div class="info-title">
+                            <i class="fas fa-info-circle"></i>
+                            Associação ABT
+                        </div>
+                        <div class="info-text">
+                            <p>Um dos critérios para a seleção das inscrições é de que o terapeuta seja associado a ABT, para mais
+                                informações acesse: <a href="https://traumatemcura.com.br/associado" target="_blank">https://traumatemcura.com.br/associado</a>.</p>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="associado_abt">É associado da ABT?</label>
+                            <select id="associado_abt" name="associado_abt" required>
+                                <option value="sim">Sim</option>
+                                <option value="nao">Não</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -181,14 +300,90 @@
             maskPhone(this);
         });
 
-        // Habilitar/desabilitar campo de endereço quando online é marcado
-        document.getElementById('online').addEventListener('change', function() {
-            const enderecoInput = document.getElementById('endereco_consultorio');
-            enderecoInput.disabled = this.checked;
-            if (this.checked) {
-                enderecoInput.value = '';
+        // Função para mostrar/ocultar campo de descrição do acesso
+        function toggleOutroAcesso() {
+            const selectAcesso = document.getElementById('consultorio_acessivel');
+            const outroGroup = document.getElementById('consultorio-acessivel-outro-group');
+            const outroInput = document.getElementById('observacao_acessibilidade');
+            
+            if (selectAcesso.value === 'outro') {
+                outroGroup.style.display = 'block';
+                outroInput.required = True;
+            } else {
+                outroGroup.style.display = 'none';
+                outroInput.required = False;
+                outroInput.value = '';
             }
-        });
+        }
+
+        // Executar a verificação inicial do campo outro
+        toggleOutroAcesso();
+
+        // Função para mostrar/ocultar campos do consultório acessível
+        function toggleConsultorioAcessivel() {
+            const isOnline = document.getElementById('online').checked;
+            const consultorioAcessivelRow = document.getElementById('consultorio-acessivel-row');
+            const consultorioAcessivelSelect = document.getElementById('consultorio_acessivel');
+            const consultorioAcessivelOutro = document.getElementById('observacao_acessibilidade');
+            const enderecoInput = document.getElementById('endereco_consultorio');
+            
+            if (isOnline) {
+                consultorioAcessivelRow.style.display = 'none';
+                consultorioAcessivelSelect.required = False;
+                consultorioAcessivelSelect.value = '';
+                consultorioAcessivelOutro.value = '';
+                enderecoInput.disabled = True;
+                enderecoInput.value = '';
+            } else {
+                consultorioAcessivelRow.style.display = 'flex';
+                consultorioAcessivelSelect.required = True;
+                enderecoInput.disabled = False;
+            }
+            
+            // Atualizar visibilidade do campo outro
+            toggleOutroAcesso();
+        }
+
+        // Executar a verificação inicial
+        toggleConsultorioAcessivel();
+
+        // Função para mostrar/ocultar campo de carta de recomendação
+        function toggleCartaRecomendacao() {
+            const nivelSelect = document.getElementById('nivel_atual');
+            const cartaRow = document.getElementById('carta-recomendacao-row');
+            const cartaInput = document.getElementById('carta_recomendacao');
+            
+            if (nivelSelect.value === 'Avançado Completo') {
+                cartaRow.style.display = 'flex';
+                cartaInput.required = True;
+            } else {
+                cartaRow.style.display = 'none';
+                cartaInput.required = False;
+                cartaInput.value = ''; // Limpa o arquivo selecionado
+            }
+        }
+
+        // Executar a verificação inicial do campo carta de recomendação
+        toggleCartaRecomendacao();
+
+        // Função para mostrar/ocultar campo de número de supervisões
+        function toggleNumeroSupervisoes() {
+            const supervisaoSelect = document.getElementById('supervisao_casos');
+            const numeroSupervisoesGroup = document.getElementById('numero-supervisoes-group');
+            const numeroSupervisoesInput = document.getElementById('numero_supervisoes_ultimo_ano');
+            
+            if (supervisaoSelect.value === 'sim') {
+                numeroSupervisoesGroup.style.display = 'block';
+                numeroSupervisoesInput.required = true;
+            } else {
+                numeroSupervisoesGroup.style.display = 'none';
+                numeroSupervisoesInput.required = false;
+                numeroSupervisoesInput.value = '0';
+            }
+        }
+
+        // Executar a verificação inicial do campo de número de supervisões
+        toggleNumeroSupervisoes();
     </script>
 </body>
 </html>

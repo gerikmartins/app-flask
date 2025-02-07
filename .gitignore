@@ -31,3 +31,4 @@ build/
 .vscode/
 *.sublime-workspace
 *.sublime-project
+sistema_login/uploads/*
