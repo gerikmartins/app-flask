@@ -556,7 +556,7 @@
                     </div>
                 </div>
 
-                <div class="form-row">
+                <div id="envolveu-morte-grupo" class="form-row">
                     <div class="form-col">
                         <div class="form-group">
                             <label for="descricao_evento">Se o evento envolveu a morte de um membro próximo da família ou amigo próximo, foi
@@ -801,7 +801,6 @@
                     if (data.error) {
                         alert(data.error);
                     } else {
-                        console.log("data: "+JSON.stringify(data));
                         document.getElementById('avaliar_paciente_id').value = data[0].id;
                         document.getElementById('nome_completo').value = data[0].nome_completo;
                         document.getElementById('cpf').value = data[0].cpf;
@@ -840,6 +839,8 @@
                         document.getElementById('descricao_evento').value = data[0].descricao_evento;
                         document.getElementById('tempo_decorrido').value = data[0].tempo_decorrido;
                         document.getElementById('envolveu_violencia').value = data[0].envolveu_violencia;
+                        document.getElementById('vivenciou_trauma').value = data[0].vivenciou_trauma;
+                        document.getElementById('envolveu_morte').value = data[0].envolveu_morte;
                         document.getElementById('vivencia_direta').checked = data[0].vivencia_direta;
                         document.getElementById('vivencia_testemunha').checked = data[0].vivencia_testemunha;
                         document.getElementById('vivencia_familiar_amigo').checked = data[0].vivencia_familiar_amigo;
@@ -854,6 +855,7 @@
                         document.getElementById('impacto_lembracas').value = data[0].impacto_lembracas;
                         inputs_lembrancas = document.getElementById('impacto_lembracas');
                         updateValue(inputs_lembrancas);
+
 
                         document.getElementById('impacto_evitacao').value = data[0].impacto_evitacao;
                         inputs_evitacao = document.getElementById('impacto_evitacao');

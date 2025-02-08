@@ -20,8 +20,6 @@ from flask import Response, flash, redirect, url_for
 from flask_login import current_user, login_required
 import datetime
 from dotenv import load_dotenv
-from openpyxl import Workbook
-from openpyxl.styles import Font, PatternFill
 
 # Carregar variáveis de ambiente do arquivo .env
 load_dotenv()
@@ -73,9 +71,9 @@ def conectar_bd():
         conn = psycopg2.connect(
             dbname="flask",
             user="postgres",
-            password="Postgres2022!",  # Coloque sua senha aqui se houver
+            password="postgres",  # Coloque sua senha aqui se houver
             host="localhost",
-            port="5433"
+            port="5432"
         )
         cur = conn.cursor()
         
