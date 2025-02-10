@@ -559,7 +559,7 @@
                 <div id="envolveu-morte-grupo" class="form-row">
                     <div class="form-col">
                         <div class="form-group">
-                            <label for="descricao_evento">Se o evento envolveu a morte de um membro próximo da família ou amigo próximo, foi
+                            <label>Se o evento envolveu a morte de um membro próximo da família ou amigo próximo, foi
                                 devido a algum tipo de acidente ou violência, ou foi devido a causas naturais?</label>
                             
                         </div>
@@ -581,9 +581,10 @@
                     </div>
                 </div>
 
-                <h3>Vivências</h3>
-                <div class="checkbox-group">
-                    <div class="checkbox-item">
+                <div id="vivencias-grupo">
+                    <h3>Vivências</h3>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
                         <input type="checkbox" id="vivencia_direta" name="vivencia_direta" disabled>
                         <label for="vivencia_direta">Aconteceu comigo diretamente</label>
                     </div>
@@ -607,6 +608,7 @@
                         <label for="vivencia_outro">Outro</label>
                         <textarea id="vivencia_outro" name="vivencia_outro" disabled></textarea>
                     </div>
+                </div>
                 </div>
 
                 <h3>No último mês, quanto você foi incomodado por:</h3>
@@ -826,6 +828,7 @@
                         document.getElementById('conheceu_google').checked = data[0].conheceu_google;
                         document.getElementById('conheceu_rede_social').checked = data[0].conheceu_rede_social;
                         document.getElementById('conheceu_psicologo').checked = data[0].conheceu_psicologo;
+                        document.getElementById('conhece_se').value = data[0].conhece_se;
                         document.getElementById('conheceu_outro').value = data[0].conheceu_outro;
                         document.getElementById('sintomas_relevantes').value = data[0].sintomas_relevantes;
                         document.getElementById('medicacoes').value = data[0].medicacoes;
@@ -840,7 +843,7 @@
                         document.getElementById('tempo_decorrido').value = data[0].tempo_decorrido;
                         document.getElementById('envolveu_violencia').value = data[0].envolveu_violencia;
                         document.getElementById('vivenciou_trauma').value = data[0].vivenciou_trauma;
-                        document.getElementById('envolveu_morte').value = data[0].envolveu_morte;
+                        // document.getElementById('envolveu_morte').value = data[0].envolveu_morte;
                         document.getElementById('vivencia_direta').checked = data[0].vivencia_direta;
                         document.getElementById('vivencia_testemunha').checked = data[0].vivencia_testemunha;
                         document.getElementById('vivencia_familiar_amigo').checked = data[0].vivencia_familiar_amigo;
@@ -851,6 +854,8 @@
                         document.getElementById('acidente_violencia').checked = data[0].acidente_violencia;
                         document.getElementById('causas_naturais').checked = data[0].causas_naturais;
                         document.getElementById('nao_se_aplica').checked = data[0].nao_se_aplica;
+
+                        toggleTraumaFields(data[0].vivenciou_trauma);
 
                         document.getElementById('impacto_lembracas').value = data[0].impacto_lembracas;
                         inputs_lembrancas = document.getElementById('impacto_lembracas');
@@ -1124,6 +1129,20 @@
                 } else {
                     tr[i].style.display = "none";
                 }
+            }
+        }
+        function toggleTraumaFields(vivenciouTrauma) {
+            const detalhesTrauma = document.getElementById('detalhes-trauma');
+            const envolveuMorteGrupo = document.getElementById('envolveu-morte-grupo');
+            const vivenciaGrupo = document.getElementById('vivencias-grupo');
+            if (vivenciouTrauma) {
+                detalhesTrauma.style.display = 'grid';
+                envolveuMorteGrupo.style.display = 'grid';
+                vivenciaGrupo.style.display = 'grid';
+            } else {
+                detalhesTrauma.style.display = 'none';
+                envolveuMorteGrupo.style.display = 'none';
+                vivenciaGrupo.style.display = 'none';
             }
         }
     </script>

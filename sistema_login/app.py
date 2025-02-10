@@ -71,9 +71,9 @@ def conectar_bd():
         conn = psycopg2.connect(
             dbname="flask",
             user="postgres",
-            password="postgres",  # Coloque sua senha aqui se houver
+            password="Postgres2022!",  # Coloque sua senha aqui se houver
             host="localhost",
-            port="5432"
+            port="5433"
         )
         cur = conn.cursor()
         
@@ -1236,7 +1236,7 @@ def vincular_paciente():
                     'renda_familiar': paciente_dados[43],
                     'num_dependentes': paciente_dados[44]
                 }
-                msg = Message('Vinculo de um novo paciente', sender='@gmail.com', recipients=['@gmail.com'])
+                msg = Message('Vinculo de um novo paciente', sender=os.getenv('MAIL_USERNAME'), recipients=['gerikpereiramartins@gmail.com'])
                 msg.html = render_template("email/vincular_paciente_terapeuta.html",dados=dados_formatados)
                 print("Enviando email...")
                 mail.send(msg)
