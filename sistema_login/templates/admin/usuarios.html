@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Dashboard Administrador</title>
+    <title>Dashboard Administrador - NAPESE</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/cadastro_terapeuta.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/formulario_napese.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
@@ -12,154 +13,202 @@
     <link rel="shortcut icon" type="imagex/png" href="{{ url_for('static', filename='images/logo_subfooter.png') }}">
 </head>
 <body>
+    <div class="bg-top"></div>
     <div class="bg-bottom"></div>
-    <div class="login-container">
-        <div class="login-box" style="max-width: 800px;">
-            <div class="login-header">
-                <h2>Listagem de Usuários</h2>
-            </div>
 
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }}" style="position: relative; padding-right: 2rem; margin-bottom: 1rem;">
-                            {{ message }}
-                            <button 
-                                style="position: absolute; right: 0.7rem; background: none; border: none; font-size: 1.2rem; cursor: pointer;" 
-                                onclick="fecharAlerta(this)">
-                                &times;
-                            </button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
+    <div class="admin-container">
+        <div class="admin-header">
+            <img src="{{ url_for('static', filename='images/logo_rodape.png') }}" alt="Logo NAPESE" class="logo">
+            <h1>Painel Administrativo</h1>
+        </div>
 
-            <!-- Botão para abrir o modal de criação de novo usuário -->
-            <button onclick="openCreateUserModal()" class="btn-nav btn-submit-terapeuta">Criar Novo Usuário</button>
+        <div class="admin-content">
+            <div class="admin-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-users"></i> Usuários Ativos</h2>
+                    <button onclick="openCreateUserModal()" class="btn-action">
+                        <i class="fas fa-plus"></i> Novo Usuário
+                    </button>
+                </div>
 
-            <input type="text" id="filtro-tabela" oninput="filtrarTabela()" placeholder="Filtrar..">
-            <table class="user-table" id="user-table">
-                <thead>
-                    <tr>
-                        <th >ID</th>
-                        <th>Email</th>
-                        <th>Tipo</th>
-                        <th>Data do Cadastro</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for user in usuarios['items'] %}
-                        <tr>
-                            <td>{{ user.id }}</td>
-                            <td>{{ user.email }}</td>
-                            <td>{{ user.tipo_usuario }}</td>
-                            <td>{{ user.data_cadastro }}</td>
-                            <td>
-                                <!-- Botão de editar com tooltip -->
-                                <button class="action-btn edit-btn" 
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="filtro-tabela" oninput="filtrarTabela()" placeholder="Buscar usuários...">
+                </div>
+
+                <div class="table-container">
+                    <table class="user-table" id="user-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Email</th>
+                                <th>Tipo</th>
+                                <th>Data do Cadastro</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in usuarios['items'] %}
+                            <tr>
+                                <td>{{ user.id }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>
+                                    <span class="badge badge-{{ user.tipo_usuario }}">
+                                        {{ user.tipo_usuario }}
+                                    </span>
+                                </td>
+                                <td>{{ user.data_cadastro }}</td>
+                                <td class="actions-cell">
+                                    <button class="action-btn edit-btn" 
                                         onclick="openEditUserModal('{{ user.id }}', '{{ user.email }}')" 
                                         title="Editar">
                                     <i class="fas fa-edit"></i>
-                                </button>
-                
-                                <!-- Botão de remover com tooltip -->
-                                <form action="{{ url_for('remover_usuario', user_id=user.id) }}" 
-                                      method="POST" 
-                                      style="display:inline;">
-                                    {{ form.csrf_token }}
-                                    <button type="submit" 
-                                            class="action-btn delete-btn" 
-                                            onclick="return confirm('Tem certeza que deseja remover este usuário?')" 
-                                            title="Remover">
-                                        <i class="fas fa-trash-alt"></i>
                                     </button>
-                                </form>
                 
-                                <!-- Botão de vincular pacientes, visível apenas para terapeutas -->
-                                {% if user.tipo_usuario == 'terapeuta' %}
-                                    <button class="action-btn link-btn" 
-                                            onclick="openVincularPacientesModal('{{ user.id }}')"
-                                            title="Vincular Pacientes">
-                                        <i class="fas fa-link"></i>
-                                    </button>
-                                {% endif %}
-
-                                {% if user.tipo_usuario == 'paciente' %}
-                                    <form action="{{ url_for('gerar_pdf', user_email=user.email) }}" 
-                                        method="GET" 
+                                    <!-- Botão de remover com tooltip -->
+                                    <form action="{{ url_for('remover_usuario', user_id=user.id) }}" 
+                                        method="POST" 
                                         style="display:inline;">
+                                        {{ form.csrf_token }}
                                         <button type="submit" 
-                                                class="action-btn pdf-btn" 
-                                                title="Gerar PDF">
-                                            <i class="fas fa-file-pdf"></i>
+                                                class="action-btn delete-btn" 
+                                                onclick="return confirm('Tem certeza que deseja remover este usuário?')" 
+                                                title="Remover">
+                                            <i class="fas fa-trash-alt"></i>
                                         </button>
                                     </form>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>                
-            </table>
+                    
+                                    <!-- Botão de vincular pacientes, visível apenas para terapeutas -->
+                                    {% if user.tipo_usuario == 'terapeuta' %}
+                                        <button class="action-btn link-btn" 
+                                                onclick="openVincularPacientesModal('{{ user.id }}')"
+                                                title="Vincular Pacientes">
+                                            <i class="fas fa-link"></i>
+                                        </button>
+                                    {% endif %}
 
-            <div class="pagination">
-                {% if usuarios.has_prev %}
-                    <a href="{{ url_for('admin_usuarios', page=usuarios.prev_num) }}">Anterior</a>
-                {% endif %}
-                <span>Página {{ usuarios.page }} de {{ usuarios.pages }}</span>
-                {% if usuarios.has_next %}
-                    <a href="{{ url_for('admin_usuarios', page=usuarios.next_num) }}">Próxima</a>
-                {% endif %}
+                                    {% if user.tipo_usuario == 'paciente' %}
+                                        <form action="{{ url_for('gerar_pdf', user_email=user.email) }}" 
+                                            method="GET" 
+                                            style="display:inline;">
+                                            <button type="submit" 
+                                                    class="action-btn pdf-btn" 
+                                                    title="Gerar PDF">
+                                                <i class="fas fa-file-pdf"></i>
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination">
+                    {% if usuarios.has_prev %}
+                        <a href="{{ url_for('admin_usuarios', page=usuarios.prev_num) }}" class="btn-page">
+                            <i class="fas fa-chevron-left"></i> Anterior
+                        </a>
+                    {% endif %}
+                    <span class="page-info">Página {{ usuarios.page }} de {{ usuarios.pages }}</span>
+                    {% if usuarios.has_next %}
+                        <a href="{{ url_for('admin_usuarios', page=usuarios.next_num) }}" class="btn-page">
+                            Próxima <i class="fas fa-chevron-right"></i>
+                        </a>
+                    {% endif %}
+                </div>
             </div>
 
-            <hr>
-            <!-- Pacientes pendentes     -->
-            <h3>Pacientes pendentes</h3>
-            <table class="user-table" id="patient-table">
-                <thead>
-                    <tr>
-                        <th >ID</th>
-                        <th>Email</th>
-                        <th>Tipo</th>
-                        <th>Data do Cadastro</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for user in pacientes_pendentes['items'] %}
-                        <tr>
-                            <td>{{ user.id }}</td>
-                            <td>{{ user.email }}</td>
-                            <td>{{ user.tipo_usuario }}</td>
-                            <td>{{ user.data_cadastro }}</td>
-                            <td>
-
-                                
-                                <button onclick="openAvaliarPacienteModal('{{ user.id }}', '{{ user.email }}')"  
-                                        class="action-btn pdf-btn" 
-                                        title="Avaliar Paciente">
-                                        <i class="fa-solid fa-folder-open"></i>
-                                </button>
-                                    
+            <div class="admin-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-clock"></i> Pacientes Pendentes</h2>
+                </div>
                 
-                                <!-- Botão de remover com tooltip -->
-                                <form action="{{ url_for('remover_usuario', user_id=user.id) }}"
-                                      method="POST" 
-                                      style="display:inline;">
-                                    {{ form.csrf_token }}
-                                    <button type="submit"
-                                            class="action-btn delete-btn" 
-                                            onclick="return confirm('Tem certeza que deseja remover este usuário?')" 
-                                            title="Remover">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>                
-            </table>
-            <button onclick="pacientes_reprovados_excel()"  class="action-btn delete-btn">Listar pacientes reprovados</button>
+                <div class="table-container">
+                    <table class="user-table" id="user-table">
+                            <thead>
+                                <tr>
+                                    <th >ID</th>
+                                    <th>Email</th>
+                                    <th>Tipo</th>
+                                    <th>Data do Cadastro</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in pacientes_pendentes['items'] %}
+                                    <tr>
+                                        <td>{{ user.id }}</td>
+                                        <td>{{ user.email }}</td>
+                                        <td>{{ user.tipo_usuario }}</td>
+                                        <td>{{ user.data_cadastro }}</td>
+                                        <td>
+            
+                                            
+                                            <button onclick="openAvaliarPacienteModal('{{ user.id }}', '{{ user.email }}')"  
+                                                    class="action-btn pdf-btn" 
+                                                    title="Avaliar Paciente">
+                                                    <i class="fa-solid fa-folder-open"></i>
+                                            </button>
+                                                
+                            
+                                            <!-- Botão de remover com tooltip -->
+                                            <form action="{{ url_for('remover_usuario', user_id=user.id) }}"
+                                                method="POST" 
+                                                style="display:inline;">
+                                                {{ form.csrf_token }}
+                                                <button type="submit"
+                                                        class="action-btn delete-btn" 
+                                                        onclick="return confirm('Tem certeza que deseja remover este usuário?')" 
+                                                        title="Remover">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                        </tbody>    
+                    </table>    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modais existentes com novo estilo -->
+
+    <!-- Modal de Vincular Pacientes -->
+    <div id="vincularPacientesModal" style="display:none;">
+        <div class="modal-content form-section">
+            <div class="modal-header">
+                <h3><i class="fas fa-link"></i> Vincular Pacientes</h3>
+                <span class="close" onclick="closeVincularPacientesModal()">&times;</span>
+            </div>
+            
+            <div class="modal-body">
+                <div class="pacientes-vinculados">
+                    <h4><i class="fas fa-users"></i> Pacientes Vinculados</h4>
+                    <div class="pacientes-list" id="pacientes-ul">
+                        <!-- Lista de pacientes vinculados será inserida aqui -->
+                    </div>
+                </div>
+                
+                <div class="vincular-novo">
+                    <h4><i class="fas fa-user-plus"></i> Adicionar Novo Paciente</h4>
+                    <form id="vincularPacientesForm" action="{{ url_for('vincular_paciente') }}" method="POST">
+                        {{ form.csrf_token }}
+                        <input type="hidden" id="terapeuta_id" name="terapeuta_id">
+                        <div class="select-wrapper">
+                            <select id="novo_paciente" name="novo_paciente" required>
+                                <option value="" disabled selected>Selecione um paciente</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn-vincular">
+                            <i class="fas fa-plus"></i> Vincular Paciente
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -230,38 +279,6 @@
                     <button type="submit" class="action-btn edit-btn">Criar Usuário</button>
                 </div>
             </form>
-        </div>
-    </div>
-
-    <!-- Modal de Vincular Pacientes -->
-    <div id="vincularPacientesModal" style="display:none;">
-        <div class="modal-content form-section">
-            <span class="close" onclick="closeVincularPacientesModal()">&times;</span>
-            <h3>Vincular Pacientes</h3>
-            <div id="pacientes-list">
-                <h4>Pacientes Vinculados</h4>
-                <ul id="pacientes-ul">
-                    <!-- Pacientes vinculados serão adicionados aqui -->
-                </ul>
-            </div>            
-            <div>
-                <form id="vincularPacientesForm" action="{{ url_for('vincular_paciente') }}" method="POST">
-                    {{ form.csrf_token }}
-                    <input type="hidden" id="terapeuta_id" name="terapeuta_id">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="novo_paciente">Adicionar Paciente:</label>
-                            <select id="novo_paciente" name="novo_paciente" class="form-control">
-                                <option value="" disabled selected>Selecione um paciente</option>
-                                <!-- As opções serão adicionadas dinamicamente -->
-                            </select>                            
-                        </div>
-                    </div>
-                    <div>
-                        <button type="submit" class="btn-nav btn-submit-terapeuta">Vincular</button>
-                    </div>
-                </form>
-            </div>
         </div>
     </div>
 
@@ -758,6 +775,7 @@
                 </div>
         </div>
     </div>
+    
 
     <form action="{{ url_for('remover_vinculo') }}" method="POST" style="display:none;" id="formRemoverVinculo">
         {{ form.csrf_token }}
@@ -766,8 +784,6 @@
         <button type="submit" id="btnRemoverVinculo">
         </button>
     </form>
-    
-
 
     <script>
         // Função para abrir o modal e preencher os campos
@@ -1038,34 +1054,37 @@
             document.getElementById('terapeuta_id').value = terapeutaId;
 
             // Fazer a requisição AJAX para buscar pacientes
+            loadPacientes(terapeutaId);
+        }
+
+        function loadPacientes(terapeutaId) {
+            const tbody = document.getElementById(`pacientes-ul`);
+            
             fetch(`/get_pacientes/${terapeutaId}`)
                 .then(response => response.json())
                 .then(pacientes => {
-                    const pacientesUl = document.getElementById('pacientes-ul');
-                    pacientesUl.innerHTML = ''; // Limpar a lista anterior
-
+                    tbody.innerHTML = '';
+                    
                     if (pacientes.length === 0) {
-                        pacientesUl.innerHTML = '<li>Nenhum paciente vinculado.</li>';
+                        tbody.innerHTML = '<div class="no-pacientes">Nenhum paciente vinculado</div>';
                     } else {
                         pacientes.forEach(paciente => {
-                        const pacienteItem = document.createElement('li');
-                        pacienteItem.textContent = paciente.email;
-
-                        const removeBtn = document.createElement('button');
-                        removeBtn.textContent = '✖';
-                        removeBtn.classList.add('action-btn-list');
-                        removeBtn.classList.add('delete-btn');
-                        removeBtn.title = 'Remover vínculo';
-                        removeBtn.onclick = () => removerVinculo(terapeutaId, paciente.id);
-
-                        pacienteItem.appendChild(removeBtn);
-                        pacientesUl.appendChild(pacienteItem);
+                            const div = document.createElement('div');
+                            div.className = 'paciente-item';
+                            div.innerHTML = `
+                                <div class="paciente-info">
+                                    <i class="fas fa-user"></i>
+                                    <span class="paciente-email">${paciente.email}</span>
+                                </div>
+                                <button class="btn-remover" onclick="removerVinculo(${terapeutaId}, ${paciente.id})" title="Remover vínculo">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            `;
+                            tbody.appendChild(div);
                         });
                     }
                 })
-                .catch(error => {
-                    console.error('Erro ao carregar pacientes:', error);
-                });
+                .catch(error => console.error('Erro ao carregar pacientes:', error));
         }
 
         function removerVinculo(terapeutaId, pacienteId) {
