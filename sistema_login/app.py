@@ -1236,7 +1236,7 @@ def vincular_paciente():
                     'renda_familiar': paciente_dados[43],
                     'num_dependentes': paciente_dados[44]
                 }
-                msg = Message('Vinculo de um novo paciente', sender=os.getenv('MAIL_USERNAME'), recipients=['gerikpereiramartins@gmail.com'])
+                msg = Message('Vinculo de um novo paciente', sender=os.getenv('MAIL_USERNAME'), recipients=['@gmail.com'])
                 msg.html = render_template("email/vincular_paciente_terapeuta.html",dados=dados_formatados)
                 print("Enviando email...")
                 mail.send(msg)
