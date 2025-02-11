@@ -20,6 +20,9 @@ from flask import Response, flash, redirect, url_for
 from flask_login import current_user, login_required
 import datetime
 from dotenv import load_dotenv
+from flask import send_from_directory
+from openpyxl import Workbook
+from openpyxl.styles import PatternFill, Font
 
 # Carregar variáveis de ambiente do arquivo .env
 load_dotenv()
@@ -735,6 +738,7 @@ def admin_usuarios():
     
     page = request.args.get('page', 1, type=int)
     page_pacientes_pendentes = request.args.get('page_pacientes_pendentes', 1, type=int)
+    page_terapeutas_pendentes = request.args.get('page_terapeutas_pendentes', 1, type=int)
     per_page = 5  # Número de usuários por página
     offset = (page - 1) * per_page
 
@@ -747,7 +751,7 @@ def admin_usuarios():
         total_usuarios = cur.fetchone()[0]
 
         # Recupera os usuários para a página atual
-        cur.execute("SELECT usuarios.id, usuarios.email, usuarios.tipo_usuario, usuarios.data_criacao FROM usuarios LEFT JOIN formulario_napese ON usuarios.email = formulario_napese.email AND usuarios.tipo_usuario = 'paciente' where (usuarios.tipo_usuario <> 'paciente' and usuarios.status = true) or (usuarios.tipo_usuario = 'paciente' and formulario_napese.aprovado = 'aprovado' and usuarios.status = true) order by id LIMIT %s OFFSET %s", (per_page, offset))
+        cur.execute("SELECT usuarios.id, usuarios.email, usuarios.tipo_usuario, usuarios.data_criacao FROM usuarios LEFT JOIN formulario_napese ON usuarios.email = formulario_napese.email LEFT JOIN terapeuta_napese ON usuarios.email = terapeuta_napese.email AND usuarios.tipo_usuario = 'terapeuta' where (usuarios.tipo_usuario = 'terapeuta' and terapeuta_napese.status = 'aprovado' and usuarios.status = true) or (usuarios.tipo_usuario = 'paciente' and formulario_napese.aprovado = 'aprovado' and usuarios.status = true) or (usuarios.tipo_usuario <> 'terapeuta' and usuarios.tipo_usuario <> 'paciente' and usuarios.status = true) order by id LIMIT %s OFFSET %s", (per_page, offset))
         usuarios = cur.fetchall()
 
         # Formata os dados
@@ -777,12 +781,12 @@ def admin_usuarios():
         total_pacientes_pendentes = cur.fetchone()[0]
 
         # Recupera os pacientes pendentes de aprovação para a página atual
-        cur.execute("SELECT usuarios.id, usuarios.email, usuarios.tipo_usuario, usuarios.data_criacao FROM usuarios LEFT JOIN formulario_napese ON usuarios.email = formulario_napese.email AND usuarios.tipo_usuario = 'paciente' where (usuarios.tipo_usuario = 'paciente' and formulario_napese.aprovado = 'pendente' and usuarios.status = true) order by id LIMIT %s OFFSET %s", (per_page, offset))
+        cur.execute("SELECT usuarios.id, usuarios.email, formulario_napese.nome_completo, usuarios.data_criacao FROM usuarios LEFT JOIN formulario_napese ON usuarios.email = formulario_napese.email AND usuarios.tipo_usuario = 'paciente' where (usuarios.tipo_usuario = 'paciente' and formulario_napese.aprovado = 'pendente' and usuarios.status = true) order by id LIMIT %s OFFSET %s", (per_page, offset))
         pacientes_pendentes = cur.fetchall()
 
         # Formata os dados
         pacientes_pendentes_formatados = [
-            {'id': usuario[0], 'email': usuario[1], 'tipo_usuario': usuario[2], 'data_cadastro': usuario[3].strftime("%d/%m/%Y %H:%M")}
+            {'id': usuario[0], 'email': usuario[1], 'nome_completo': usuario[2], 'data_cadastro': usuario[3].strftime("%d/%m/%Y %H:%M")}
             for usuario in pacientes_pendentes
         ]
 
@@ -801,6 +805,36 @@ def admin_usuarios():
             'next_num': page_pacientes_pendentes + 1,
         }
 
+        # -----------------
+        # Recupera a contagem total de terapeutas pendentes de aprovação
+        cur.execute("SELECT COUNT(*) FROM usuarios LEFT JOIN terapeuta_napese ON usuarios.email = terapeuta_napese.email AND usuarios.tipo_usuario = 'terapeuta' where (usuarios.tipo_usuario = 'terapeuta' and terapeuta_napese.status = 'pendente' and usuarios.status = true)")
+        total_terapeutas_pendentes = cur.fetchone()[0]
+
+        # Recupera os pacientes pendentes de aprovação para a página atual
+        cur.execute("SELECT usuarios.id, usuarios.email, terapeuta_napese.nome_completo, usuarios.data_criacao FROM usuarios LEFT JOIN terapeuta_napese ON usuarios.email = terapeuta_napese.email AND usuarios.tipo_usuario = 'terapeuta' where (usuarios.tipo_usuario = 'terapeuta' and terapeuta_napese.status = 'pendente' and usuarios.status = true) order by id LIMIT %s OFFSET %s", (per_page, offset))
+        terapeutas_pendentes = cur.fetchall()
+
+        # Formata os dados
+        terapeutas_pendentes_formatados = [
+            {'id': usuario[0], 'email': usuario[1], 'nome_completo': usuario[2], 'data_cadastro': usuario[3].strftime("%d/%m/%Y %H:%M")}
+            for usuario in terapeutas_pendentes
+        ]
+
+        # Configuração da paginação
+        has_prev_terapeutas = page > 1
+        has_next_terapeutas = offset + per_page < total_terapeutas_pendentes
+        total_pages_terapeutas_pendentes = ceil(total_terapeutas_pendentes / per_page)
+
+        paginacao_terapeutas = {
+            'items': terapeutas_pendentes_formatados,
+            'has_prev': has_prev_terapeutas,
+            'has_next': has_next_terapeutas,
+            'page': page_terapeutas_pendentes,
+            'pages': total_pages_terapeutas_pendentes,
+            'prev_num': page_terapeutas_pendentes - 1,
+            'next_num': page_terapeutas_pendentes + 1,
+        }
+
     except Exception as e:
         print(f"Erro ao buscar usuários: {e}")
         flash('Erro ao carregar usuários.', 'error')
@@ -815,7 +849,7 @@ def admin_usuarios():
         cur.close()
         conn.close()
 
-    return render_template('admin/usuarios.html', usuarios=paginacao, pacientes_pendentes=paginacao_pacientes, form=FlaskForm())
+    return render_template('admin/usuarios.html', usuarios=paginacao, pacientes_pendentes=paginacao_pacientes, terapeutas_pendentes=paginacao_terapeutas, form=FlaskForm())
 
 @app.route('/editar-usuario', methods=['POST'])
 @login_required
@@ -913,6 +947,54 @@ def criar_usuario():
         conn.close()
 
     return redirect(url_for('admin_usuarios'))
+
+@app.route('/avaliacao_terapeuta/<int:userId>')
+@login_required
+def avaliacao_terapeuta(userId):
+    if not current_user.is_authenticated or not current_user.is_admin():  # Verifica se o usuário está autenticado e é admin
+        return jsonify({'error': 'Acesso não autorizado'}), 403
+
+    conn = conectar_bd()
+    cur = conn.cursor()
+
+    try:
+        # Busca o formulario do terapeuta
+        cur.execute("""
+            SELECT form.id, form.nome_completo, form.cpf, form.telefone, 
+            form.celular, form.email, form.cidade, form.estado, 
+            form.endereco_consultorio, form.nivel_atual, form.ano_conclusao_avancado2, form.ano_conclusao_sep,
+            form.professores_formacao, form.formacao_academica, form.participa_grupo_estudo, form.numero_supervisoes_ultimo_ano, 
+            form.modalidade, form.faixa_valor_sessao, form.consultorio_acessivel, form.observacao_acessibilidade, 
+            form.interesse_producao_cientifica, form.associado_abt, form.carta_recomendacao_path, form.sugestoes, 
+            form.concordou_termos, form.data_cadastro, form.status
+            from terapeuta_napese as form inner join usuarios as usu on usu.email = form.email 
+            WHERE usu.id = %s and usu.status = true and form.status = 'pendente'
+        """, (userId,))
+
+        terapeutas = cur.fetchall()
+        # Formata os dados
+        terapeuta_formatados = [
+            {'id': terapeuta[0], 'nome_completo': terapeuta[1], 'cpf': terapeuta[2], 'telefone': terapeuta[3], 
+            'celular': terapeuta[4], 'email': terapeuta[5], 'cidade': terapeuta[6], 'estado': terapeuta[7],
+            'endereco_consultorio': terapeuta[8], 'nivel_atual': terapeuta[9], 'ano_conclusao_avancado2': terapeuta[10], 'ano_conclusao_sep': terapeuta[11],
+            'professores_formacao': terapeuta[12], 'formacao_academica': terapeuta[13], 'participa_grupo_estudo': terapeuta[14], 'numero_supervisoes_ultimo_ano': terapeuta[15],
+            'modalidade': terapeuta[16], 'faixa_valor_sessao': terapeuta[17], 'consultorio_acessivel': terapeuta[18], 'observacao_acessibilidade': terapeuta[19],
+            'interesse_producao_cientifica': terapeuta[20], 'associado_abt': terapeuta[21], 'carta_recomendacao_path': terapeuta[22], 'sugestoes': terapeuta[23],
+            'concordou_termos': terapeuta[24], 'data_cadastro': terapeuta[25], 'status': terapeuta[26]
+            }
+            for terapeuta in terapeutas
+        ]
+
+        # print(terapeuta_formatados)
+        return jsonify(terapeuta_formatados)
+    except Exception as e:
+        print(f"Erro ao buscar terapeuta pendente: {e}")
+        return jsonify({'error': 'Erro ao buscar terapeuta pendente'}), 500
+
+    finally:
+        cur.close()
+        conn.close()
+        
 
 @app.route('/avaliacao_paciente/<int:userId>')
 @login_required
@@ -1062,6 +1144,40 @@ def pacientes_disponiveis():
         cur.close()
         conn.close()
 
+@app.route('/definir_status_terapeuta/<int:terapeuta_napese_id>/<string:aprovado>', methods=['POST'])
+@login_required
+def definir_status_terapeuta(terapeuta_napese_id, aprovado):
+    if not current_user.is_authenticated or not current_user.is_admin():  # Verifica se o usuário está autenticado e é admin
+        flash('Acesso não autorizado!', 'error')
+        return redirect(url_for('admin_usuarios'))
+
+    conn = conectar_bd()
+    cur = conn.cursor()
+
+    try:
+        # Obter IDs dos pacientes já vinculados
+        cur.execute("""
+            UPDATE terapeuta_napese SET status = %s WHERE id = %s
+        """, (aprovado,terapeuta_napese_id,))
+        conn.commit()
+        if aprovado == 'aprovado':
+            flash('Terapeuta aprovado com sucesso!', 'success')
+            return redirect(url_for('admin_usuarios'))
+        else:
+            flash('Terapeuta reprovado!', 'success')
+            return redirect(url_for('admin_usuarios'))
+    except Exception as e:
+        print(f"Erro ao aprovar paciente: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': 'Erro ao aprovar paciente!'
+        })
+        # flash('Erro ao aprovar paciente!', 'error')
+        # return redirect(url_for('admin_usuarios'))
+    finally:
+        cur.close()
+        conn.close()
+
 @app.route('/definir_status_paciente/<int:formulario_napese_id>/<string:aprovado>', methods=['POST'])
 @login_required
 def definir_status_paciente(formulario_napese_id, aprovado):
@@ -1157,95 +1273,99 @@ def vincular_paciente():
                 VALUES (%s, %s, true)
             """, (terapeuta_id, paciente_id))
             conn.commit()
-            # Buscar dados do formulário do paciente
-            cur.execute("""
-                SELECT 
-                    nome_completo, cpf, telefones, data_nascimento, 
-                    cidade, estado, genero, profissao, 
-                    preferencia_atendimento, sintomas_relevantes,
-                    medicacoes, substancias_psicoativas,
-                    historico_acidentes, historico_cirurgias,
-                    dores, acompanhamento_psiquiatrico,
-                    acompanhamento_psicologico, tecnicas_corporais,
-                    motivo_procura, vivenciou_trauma,
-                    descricao_evento, tempo_decorrido,
-                    envolveu_violencia, impacto_lembracas,
-                    impacto_evitacao, impacto_crencas,
-                    impacto_apreensao, impacto_concentracao,
-                    impacto_chateado, impacto_evitar_gatilhos,
-                    impacto_perda_interesse, acidente_violencia,
-                    causas_naturais, nao_se_aplica, conheceu_site_trauma,
-                    conheceu_instagram, conheceu_indicacao, conheceu_treinamentos,
-                    conheceu_google, conheceu_rede_social, conheceu_psicologo,
-                    conheceu_outro, cep, renda_familiar, num_dependentes
-                FROM formulario_napese 
-                WHERE email = %s
-            """, (paciente_email,))
-            paciente_dados = cur.fetchone()
-
-            if not paciente_dados:
-                flash('Dados do formulário do paciente não encontrados!', 'error')
-                return redirect(url_for('admin_usuarios'))
-            
-            try:
-                dados_formatados = {
-                    'nome_completo': paciente_dados[0],
-                    'cpf': paciente_dados[1],
-                    'telefones': paciente_dados[2],
-                    'data_nascimento': paciente_dados[3],
-                    'cidade': paciente_dados[4],
-                    'estado': paciente_dados[5],
-                    'genero': paciente_dados[6],
-                    'profissao': paciente_dados[7],
-                    'preferencia_atendimento': paciente_dados[8],
-                    'sintomas_relevantes': paciente_dados[9],
-                    'medicacoes': paciente_dados[10],
-                    'substancias_psicoativas': paciente_dados[11],
-                    'historico_acidentes': paciente_dados[12],
-                    'historico_cirurgias': paciente_dados[13],
-                    'dores': paciente_dados[14],
-                    'acompanhamento_psiquiatrico': paciente_dados[15],
-                    'acompanhamento_psicologico': paciente_dados[16],
-                    'tecnicas_corporais': paciente_dados[17],
-                    'motivo_procura': paciente_dados[18],
-                    'vivenciou_trauma': paciente_dados[19],
-                    'descricao_evento': paciente_dados[20],
-                    'tempo_decorrido': paciente_dados[21],
-                    'nao_se_aplica': paciente_dados[22],
-                    'envolveu_violencia': paciente_dados[22],
-                    'impacto_lembracas': paciente_dados[23],
-                    'impacto_evitacao': paciente_dados[24],
-                    'impacto_crencas': paciente_dados[25],
-                    'impacto_apreensao': paciente_dados[26],
-                    'impacto_concentracao': paciente_dados[27],
-                    'impacto_chateado': paciente_dados[28],
-                    'impacto_evitar_gatilhos': paciente_dados[29],
-                    'impacto_perda_interesse': paciente_dados[30],
-                    'acidente_violencia': paciente_dados[31],
-                    'causas_naturais': paciente_dados[32],
-                    'nao_se_aplica': paciente_dados[33],
-                    'conheceu_site_trauma': paciente_dados[34],
-                    'conheceu_instagram': paciente_dados[35],
-                    'conheceu_indicacao': paciente_dados[36],
-                    'conheceu_treinamentos': paciente_dados[37],
-                    'conheceu_google': paciente_dados[38],
-                    'conheceu_rede_social': paciente_dados[39],
-                    'conheceu_psicologo': paciente_dados[40],
-                    'conheceu_outro': paciente_dados[41],
-                    'cep': paciente_dados[42],
-                    'renda_familiar': paciente_dados[43],
-                    'num_dependentes': paciente_dados[44]
-                }
-                msg = Message('Vinculo de um novo paciente', sender=os.getenv('MAIL_USERNAME'), recipients=['@gmail.com'])
-                msg.html = render_template("email/vincular_paciente_terapeuta.html",dados=dados_formatados)
-                print("Enviando email...")
-                mail.send(msg)
-            except Exception as e:
-                print(f"Erro ao enviar email: {e}")
-                flash('Erro ao enviar email!', 'error')
-                return redirect(url_for('admin_usuarios'))
-            
             flash('Paciente vinculado com sucesso!', 'success')
+        # Buscar dados do formulário do paciente
+        cur.execute("""
+            SELECT 
+                nome_completo, cpf, telefones, data_nascimento, 
+                cidade, estado, genero, profissao, 
+                preferencia_atendimento, sintomas_relevantes,
+                medicacoes, substancias_psicoativas,
+                historico_acidentes, historico_cirurgias,
+                dores, acompanhamento_psiquiatrico,
+                acompanhamento_psicologico, tecnicas_corporais,
+                motivo_procura, vivenciou_trauma,
+                descricao_evento, tempo_decorrido,
+                envolveu_violencia, impacto_lembracas,
+                impacto_evitacao, impacto_crencas,
+                impacto_apreensao, impacto_concentracao,
+                impacto_chateado, impacto_evitar_gatilhos,
+                impacto_perda_interesse, acidente_violencia,
+                causas_naturais, nao_se_aplica, conheceu_site_trauma,
+                conheceu_instagram, conheceu_indicacao, conheceu_treinamentos,
+                conheceu_google, conheceu_rede_social, conheceu_psicologo,
+                conheceu_outro, cep, renda_familiar, num_dependentes
+            FROM formulario_napese 
+            WHERE email = %s
+        """, (paciente_email,))
+        paciente_dados = cur.fetchone()
+        print("terapeuta_idterapeuta_id:------- "+terapeuta_id)
+        cur.execute("SELECT email FROM usuarios WHERE id = %s", (terapeuta_id,))
+        terapeuta_email = cur.fetchone()
+        if not terapeuta_email:
+            flash('Terapeuta não encontrado!', 'error')
+            return redirect(url_for('admin_usuarios'))
+        print("EMAIL:------- "+terapeuta_email[0])
+
+        if not paciente_dados:
+            flash('Dados do formulário do paciente não encontrados!', 'error')
+            return redirect(url_for('admin_usuarios'))
+        try:
+            dados_formatados = {
+                'nome_completo': paciente_dados[0],
+                'cpf': paciente_dados[1],
+                'telefones': paciente_dados[2],
+                'data_nascimento': paciente_dados[3],
+                'cidade': paciente_dados[4],
+                'estado': paciente_dados[5],
+                'genero': paciente_dados[6],
+                'profissao': paciente_dados[7],
+                'preferencia_atendimento': paciente_dados[8],
+                'sintomas_relevantes': paciente_dados[9],
+                'medicacoes': paciente_dados[10],
+                'substancias_psicoativas': paciente_dados[11],
+                'historico_acidentes': paciente_dados[12],
+                'historico_cirurgias': paciente_dados[13],
+                'dores': paciente_dados[14],
+                'acompanhamento_psiquiatrico': paciente_dados[15],
+                'acompanhamento_psicologico': paciente_dados[16],
+                'tecnicas_corporais': paciente_dados[17],
+                'motivo_procura': paciente_dados[18],
+                'vivenciou_trauma': paciente_dados[19],
+                'descricao_evento': paciente_dados[20],
+                'tempo_decorrido': paciente_dados[21],
+                'envolveu_violencia': paciente_dados[22],
+                'impacto_lembracas': paciente_dados[23],
+                'impacto_evitacao': paciente_dados[24],
+                'impacto_crencas': paciente_dados[25],
+                'impacto_apreensao': paciente_dados[26],
+                'impacto_concentracao': paciente_dados[27],
+                'impacto_chateado': paciente_dados[28],
+                'impacto_evitar_gatilhos': paciente_dados[29],
+                'impacto_perda_interesse': paciente_dados[30],
+                'acidente_violencia': paciente_dados[31],
+                'causas_naturais': paciente_dados[32],
+                'nao_se_aplica': paciente_dados[33],
+                'conheceu_site_trauma': paciente_dados[34],
+                'conheceu_instagram': paciente_dados[35],
+                'conheceu_indicacao': paciente_dados[36],
+                'conheceu_treinamentos': paciente_dados[37],
+                'conheceu_google': paciente_dados[38],
+                'conheceu_rede_social': paciente_dados[39],
+                'conheceu_psicologo': paciente_dados[40],
+                'conheceu_outro': paciente_dados[41],
+                'cep': paciente_dados[42],
+                'renda_familiar': paciente_dados[43],
+                'num_dependentes': paciente_dados[44]
+            }
+            msg = Message('Vinculo de um novo paciente', sender=os.getenv('MAIL_USERNAME'), recipients=[terapeuta_email[0]])
+            msg.html = render_template("email/vincular_paciente_terapeuta.html",dados=dados_formatados)
+            print("Enviando email...")
+            mail.send(msg)
+        except Exception as e:
+            print(f"Erro ao enviar email: {e}")
+            flash('Erro ao enviar email!', 'error')
+            return redirect(url_for('admin_usuarios'))
 
         return redirect(url_for('admin_usuarios'))
 
@@ -1580,7 +1700,7 @@ def formulario_terapeuta():
                 'numero_supervisoes_ultimo_ano': numero_supervisoes,
                 'modalidade': request.form['modalidade'],
                 # 'faixa_valor_sessao': request.form['faixa_valor_sessao'],
-                'consultorio_acessivel': request.form.get('consultorio_acessivel') != 'nao',
+                'consultorio_acessivel': request.form.get('consultorio_acessivel') == 'sim',
                 'observacao_acessibilidade': request.form.get('observacao_acessibilidade', ''),
                 # apagar após adicionar os campos no html
                 'faixa_valor_sessao': '-',
@@ -1638,9 +1758,110 @@ def log_request_info():
     print('Headers: %s', request.headers)
     print('Body: %s', request.get_data())
 
-@app.route('/gerar_excel_reprovados')
+@app.route('/gerar_excel_reprovados_terapeutas')
 @login_required
-def gerar_excel_reprovados():
+def gerar_excel_reprovados_terapeutas():
+    if not current_user.is_authenticated or not current_user.is_admin():
+        flash('Acesso não autorizado!', 'error')
+        return redirect(url_for('admin_usuarios'))
+
+    conn = conectar_bd()
+    cur = conn.cursor()
+
+    try:
+        # Consulta os registros reprovados
+        cur.execute("""
+            SELECT 
+                data_cadastro, nome_completo, cpf, telefone, 
+                celular, email, cidade, estado, 
+                endereco_consultorio, nivel_atual, ano_conclusao_avancado2, 
+                ano_conclusao_sep, professores_formacao, formacao_academica, 
+                participa_grupo_estudo, numero_supervisoes_ultimo_ano, 
+                modalidade, faixa_valor_sessao, consultorio_acessivel, 
+                observacao_acessibilidade, interesse_producao_cientifica, 
+                associado_abt, sugestoes, concordou_termos, status
+            FROM terapeuta_napese 
+            WHERE status = 'reprovado'
+            ORDER BY data_cadastro DESC
+        """)
+        
+        registros = cur.fetchall()
+        
+        if not registros:
+            flash('Não há registros reprovados para exportar!', 'info')
+            return redirect(url_for('admin_usuarios'))
+
+        # Criar workbook e definir cabeçalhos
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Terapeutas Reprovados"
+
+        headers = [
+            "Data Cadastro", "Nome Completo", "CPF", "Telefone", 
+            "Celular", "Email", "Cidade", "Estado", 
+            "Endereço Consultório", "Nível Atual", "Ano Conclusão Avançado 2",
+            "Ano Conclusão SEP", "Professores Formação", "Formação Acadêmica",
+            "Participa Grupo Estudo", "Número Supervisões", 
+            "Modalidade", "Faixa Valor Sessão", "Consultório Acessível",
+            "Observação Acessibilidade", "Interesse Produção Científica",
+            "Associado ABT", "Sugestões", "Concordou Termos", "Status"
+        ]
+
+        # Estilizar cabeçalhos
+        header_fill = PatternFill(start_color="96d232", end_color="96d232", fill_type="solid")
+        header_font = Font(bold=True, color="FFFFFF")
+
+        for col, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col, value=header)
+            cell.fill = header_fill
+            cell.font = header_font
+
+        # Adicionar dados
+        for row, registro in enumerate(registros, 2):
+            for col, valor in enumerate(registro, 1):
+                if isinstance(valor, (datetime.date, datetime.datetime)):
+                    valor = valor.strftime("%d/%m/%Y")
+                elif isinstance(valor, bool):
+                    valor = "Sim" if valor else "Não"
+                ws.cell(row=row, column=col, value=valor)
+
+        # Ajustar largura das colunas
+        for col in ws.columns:
+            max_length = 0
+            column = col[0].column_letter
+            for cell in col:
+                try:
+                    max_length = max(max_length, len(str(cell.value)))
+                except:
+                    pass
+            ws.column_dimensions[column].width = max_length + 2
+
+        # Salvar em memória e retornar
+        excel_file = BytesIO()
+        wb.save(excel_file)
+        excel_file.seek(0)
+
+        return Response(
+            excel_file,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            headers={
+                "Content-Disposition": f"attachment;filename=terapeutas_reprovados_{datetime.datetime.now().strftime('%Y%m%d')}.xlsx",
+                "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            }
+        )
+
+    except Exception as e:
+        print(f"Erro ao gerar Excel: {e}")
+        flash('Erro ao gerar arquivo Excel!', 'error')
+        return redirect(url_for('admin_usuarios'))
+
+    finally:
+        cur.close()
+        conn.close()
+
+@app.route('/gerar_excel_reprovados_pacientes')
+@login_required
+def gerar_excel_reprovados_pacientes():
     if not current_user.is_authenticated or not current_user.is_admin():
         flash('Acesso não autorizado!', 'error')
         return redirect(url_for('admin_usuarios'))
@@ -1731,8 +1952,9 @@ def gerar_excel_reprovados():
 
         # Nome do arquivo com data atual
         hoje = datetime.datetime.now().strftime("%Y%m%d")
-        filename = f"registros_reprovados_{hoje}.xlsx"
+        filename = f"pacientes_reprovados_{hoje}.xlsx"
 
+        # Adicionar headers corretos na resposta
         return Response(
             excel_file,
             mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -1754,6 +1976,11 @@ def gerar_excel_reprovados():
 @app.route('/termos-condicoes')
 def termos_condicoes():
     return render_template('termos_condicoes.html')
+
+@app.route('/uploads/cartas_recomendacao/<path:filename>')
+@login_required  # Protege o acesso aos arquivos
+def cartas_recomendacao(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 # Adicione no final do arquivo
 if __name__ == '__main__':

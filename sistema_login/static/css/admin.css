@@ -1,6 +1,9 @@
 :root {
     --primary-color: #96d232;
     --secondary-color: #587c1e;
+    --warn-color: #998200;
+    --warn-color-hover: #5c4800;
+    --danger-color: #dc3545;
     --background-color: #f5f5f5;
     --text-color: #333;
     --border-radius: 8px;
@@ -78,6 +81,23 @@ body {
 
 .btn-action:hover {
     background: var(--secondary-color);
+}
+
+.btn-warn {
+    background: var(--warn-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.3s;
+}
+
+.btn-warn:hover {
+    background: var(--warn-color-hover);
 }
 
 .search-box {

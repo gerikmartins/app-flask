@@ -123,6 +123,9 @@
             <div class="admin-section">
                 <div class="section-header">
                     <h2><i class="fas fa-clock"></i> Pacientes Pendentes</h2>
+                    <button onclick="pacientes_reprovados_excel()" class="btn-warn">
+                        <i class="fas fa-plus"></i> Listar pacientes reprovados
+                    </button>
                 </div>
                 
                 <div class="table-container">
@@ -130,8 +133,8 @@
                             <thead>
                                 <tr>
                                     <th >ID</th>
+                                    <th>Nome Completo</th>
                                     <th>Email</th>
-                                    <th>Tipo</th>
                                     <th>Data do Cadastro</th>
                                     <th>Ações</th>
                                 </tr>
@@ -140,8 +143,8 @@
                                 {% for user in pacientes_pendentes['items'] %}
                                     <tr>
                                         <td>{{ user.id }}</td>
+                                        <td>{{ user.nome_completo }}</td>
                                         <td>{{ user.email }}</td>
-                                        <td>{{ user.tipo_usuario }}</td>
                                         <td>{{ user.data_cadastro }}</td>
                                         <td>
             
@@ -149,6 +152,62 @@
                                             <button onclick="openAvaliarPacienteModal('{{ user.id }}', '{{ user.email }}')"  
                                                     class="action-btn pdf-btn" 
                                                     title="Avaliar Paciente">
+                                                    <i class="fa-solid fa-folder-open"></i>
+                                            </button>
+                                                
+                            
+                                            <!-- Botão de remover com tooltip -->
+                                            <form action="{{ url_for('remover_usuario', user_id=user.id) }}"
+                                                method="POST" 
+                                                style="display:inline;">
+                                                {{ form.csrf_token }}
+                                                <button type="submit"
+                                                        class="action-btn delete-btn" 
+                                                        onclick="return confirm('Tem certeza que deseja remover este usuário?')" 
+                                                        title="Remover">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                        </tbody>    
+                    </table>    
+                </div>
+            </div>
+
+            <div class="admin-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-user-plus"></i> Terapeutas Pendentes</h2>
+                    <button onclick="terapeutas_reprovados_excel()" class="btn-warn">
+                        <i class="fas fa-plus"></i> Listar terapeutas reprovados
+                    </button>
+                </div>
+                
+                <div class="table-container">
+                    <table class="user-table" id="user-table">
+                            <thead>
+                                <tr>
+                                    <th >ID</th>
+                                    <th>Nome Completo</th>
+                                    <th>Email</th>
+                                    <th>Data do Cadastro</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in terapeutas_pendentes['items'] %}
+                                    <tr>
+                                        <td>{{ user.id }}</td>
+                                        <td>{{ user.nome_completo }}</td>
+                                        <td>{{ user.email }}</td>
+                                        <td>{{ user.data_cadastro }}</td>
+                                        <td>
+            
+                                            
+                                            <button onclick="openAvaliarTerapeutaModal('{{ user.id }}', '{{ user.email }}')"  
+                                                    class="action-btn pdf-btn" 
+                                                    title="Avaliar Terapeuta">
                                                     <i class="fa-solid fa-folder-open"></i>
                                             </button>
                                                 
@@ -282,13 +341,253 @@
         </div>
     </div>
 
+    <!-- Modal de Avaliar Terapeuta -->
+    <div id="avaliarTerapeutaModal" style="display:none;">
+        <div class="modal-content-lg form-section">
+            <span class="close" onclick="closeAvaliarTerapeutaModal()">&times;</span>
+            
+
+            <div class="form-section">
+                <h3>Informações Pessoais</h3>
+                <input type="hidden" id="avaliar_terapeuta_id" name="avaliar_terapeuta_id">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nome Completo</label>
+                        <input type="text" id="terapeuta_nome_completo" name="terapeuta_nome_completo" disabled>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cidade">Cidade</label>
+                        <input type="text" id="terapeuta_cidade" name="terapeuta_cidade" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="estado">Estado</label>
+                        <select id="terapeuta_estado" name="terapeuta_estado" disabled>
+                            <option value="">Selecione o Estado</option>
+                            <option value="AC">Acre</option>
+                            <option value="AL">Alagoas</option>
+                            <option value="AP">Amapá</option>
+                            <option value="AM">Amazonas</option>
+                            <option value="BA">Bahia</option>
+                            <option value="CE">Ceará</option>
+                            <option value="DF">Distrito Federal</option>
+                            <option value="ES">Espírito Santo</option>
+                            <option value="GO">Goiás</option>
+                            <option value="MA">Maranhão</option>
+                            <option value="MT">Mato Grosso</option>
+                            <option value="MS">Mato Grosso do Sul</option>
+                            <option value="MG">Minas Gerais</option>
+                            <option value="PA">Pará</option>
+                            <option value="PB">Paraíba</option>
+                            <option value="PR">Paraná</option>
+                            <option value="PE">Pernambuco</option>
+                            <option value="PI">Piauí</option>
+                            <option value="RJ">Rio de Janeiro</option>
+                            <option value="RN">Rio Grande do Norte</option>
+                            <option value="RS">Rio Grande do Sul</option>
+                            <option value="RO">Rondônia</option>
+                            <option value="RR">Roraima</option>
+                            <option value="SC">Santa Catarina</option>
+                            <option value="SP">São Paulo</option>
+                            <option value="SE">Sergipe</option>
+                            <option value="TO">Tocantins</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="telefone">Telefone</label>
+                        <input type="tel" id="terapeuta_telefone" name="terapeuta_telefone" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="celular">Celular (WhatsApp)</label>
+                        <input type="tel" id="terapeuta_celular" name="terapeuta_celular" disabled>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="terapeuta_email" name="terapeuta_email" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="cpf">CPF</label>
+                        <input type="text" id="terapeuta_cpf" name="terapeuta_cpf" disabled>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Endereço do Consultório</label>
+                        <input type="text" id="terapeuta_endereco_consultorio" name="terapeuta_endereco_consultorio" disabled>
+                        <div class="checkbox-group" style="margin-top: 8px; display: flex; align-items: center; gap: 5px;">
+                            <input type="checkbox" id="terapeuta_online" name="terapeuta_online" style="margin: 0;" onchange="toggleConsultorioAcessivel()" disabled>
+                            <label style="margin: 0;">Somente atendimento online</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row" id="consultorio-acessivel-row">
+                    <div class="form-group">
+                        <label>Seu consultório tem acesso facilitado para pessoas com mobilidade reduzida?</label>
+                        <select id="terapeuta_consultorio_acessivel" name="terapeuta_consultorio_acessivel" disabled onchange="toggleOutroAcesso()">
+                            <option value="true">Sim</option>
+                            <option value="false">Não</option>
+                            <option value="outro">Outro</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="consultorio-acessivel-outro-group" style="display: none;">
+                        <label >Descreva o acesso facilitado para pessoas com mobilidade reduzida</label>
+                        <input type="text" id="terapeuta_observacao_acessibilidade" name="terapeuta_observacao_acessibilidade" disabled>
+                    </div>
+                </div>
+                <h3>Formação e Certificações</h3>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nível Atual</label>
+                        <select id="terapeuta_nivel_atual" name="terapeuta_nivel_atual" disabled onchange="toggleCartaRecomendacao()">
+                            <option value="">Selecione o Nível</option>
+                            <option value="Avançado Completo">Avançado Completo</option>
+                            <option value="Certificado SEP">Certificado SEP</option>
+                            <option value="Supervisor">Supervisor</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row" id="carta-recomendacao-row" style="display: none;">
+                    <div class="form-group">
+                        <label>Carta de Recomendação (PDF)</label>
+                        <iframe 
+                            src="{{ url_for('cartas_recomendacao', filename='') }}"
+                            width="100%" 
+                            height="500px" 
+                            style="border: 1px solid #ddd; border-radius: 4px;"
+                            id="terapeuta_carta_recomendacao">
+                        </iframe>
+                        <label class="observacao">Se você concluiu o Avançado 2 mas ainda não obteve o SEP, anexar uma carta de recomendação de um dos professores salva em pdf.</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Ano de Conclusão do Avançado 2:</label>
+                    <input type="number" id="terapeuta_ano_conclusao_avancado2" name="terapeuta_ano_conclusao_avancado2" disabled>
+                </div>
+                <h3>Informações Adicionais</h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Ano de conclusão do SEP:</label>
+                            <input type="number" id="terapeuta_ano_conclusao_sep" name="terapeuta_ano_conclusao_sep" disabled>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Quem foram seus professores na formação em SE?</label>
+                            <input type="text" id="terapeuta_professores_formacao" name="terapeuta_professores_formacao" disabled>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Você participa atualmente de grupos de estudo em SE?</label>
+                            <select id="terapeuta_participa_grupo_estudo" name="terapeuta_participa_grupo_estudo" disabled>
+                                <option value="true">Sim</option>
+                                <option value="false">Não</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Você participa de sessões de supervisão de casos? </label>
+                            <select id="terapeuta_supervisao_casos" name="terapeuta_supervisao_casos" disabled onchange="toggleNumeroSupervisoes()">
+                                <option value="sim">Sim</option>
+                                <option value="nao">Não</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="numero-supervisoes-group" style="display: none;">
+                            <label>De quantas supervisões você participou no último ano? </label>
+                            <input type="number" id="terapeuta_numero_supervisoes_ultimo_ano" name="terapeuta_numero_supervisoes_ultimo_ano" disabled>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Qual a sua formação acadêmica?</label>
+                            <input type="text" id="terapeuta_formacao_academica" name="terapeuta_formacao_academica" disabled>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Gostaria de participar da produção científica da ABT?</label>
+                            <select id="terapeuta_interesse_producao_cientifica" name="terapeuta_interesse_producao_cientifica" disabled>
+                                <option value="true">Sim</option>
+                                <option value="false">Não</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Modalidade do Atendimento:</label>
+                            <select id="terapeuta_modalidade" name="terapeuta_modalidade" disabled>
+                                <option value="presencial">Presencial</option>
+                                <option value="online">Online</option>
+                                <option value="presencial_online">Online e Presencial</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Tem alguma sugestão para o NAPESE?</label>
+                            <input type="text" id="terapeuta_sugestoes" name="terapeuta_sugestoes" disabled>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>É associado da ABT?</label>
+                            <select id="terapeuta_associado_abt" name="terapeuta_associado_abt" disabled>
+                                <option value="true">Sim</option>
+                                <option value="false">Não</option>
+                            </select>
+                        </div>
+                    </div>
+            </div>
+        
+            <hr>
+            <div class="" style="display: block;">
+                
+                <div class="form-row">
+                
+                    <div class="form-col">
+                        <div class="form-group">
+                            <!--<h3>Avaliação do Terapeuta</h3> -->
+                            <div>
+                                <button onclick="aprovarTerapeuta()" class="action-btn edit-btn">Aprovar</button>
+                                <button onclick="negarTerapeuta()"  class="action-btn delete-btn">Negar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal de Avaliar Pacientes -->
     <div id="avaliarPacientesModal" style="display:none;">
         <div class="modal-content-lg form-section">
             <span class="close" onclick="closeAvaliarPacientesModal()">&times;</span>
             <div class=""> 
                 <h3>Dados Pessoais</h3>
-                <input type="hidden" id="avaliar_paciente_id" name="avaliar_paciente_id">
+                <input type="text" hidden id="avaliar_paciente_id" name="avaliar_paciente_id">
                 <div class="form-row">
                     <div class="form-col">
                         <div class="form-group">
@@ -799,7 +1098,148 @@
         }
 
         function pacientes_reprovados_excel(){
-            window.location.href = '/gerar_excel_reprovados';
+            fetch('/gerar_excel_reprovados_pacientes')
+                .then(response => {
+                    if (response.ok) {
+                        return response.blob();
+                    }
+                    throw new Error('Erro ao gerar Excel');
+                })
+                .then(blob => {
+                    // Criar URL do blob
+                    const url = window.URL.createObjectURL(blob);
+                    // Criar link temporário
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'pacientes_reprovados.xlsx'; // Nome do arquivo
+                    // Adicionar à página e clicar
+                    document.body.appendChild(a);
+                    a.click();
+                    // Limpar
+                    window.URL.revokeObjectURL(url);
+                    a.remove();
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Erro ao gerar arquivo Excel');
+                });
+        }
+
+        function terapeutas_reprovados_excel(){
+            fetch('/gerar_excel_reprovados_terapeutas', {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'same-origin'  // Importante para enviar cookies de autenticação
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.blob();
+                }
+                throw new Error('Erro ao gerar Excel');
+            })
+            .then(blob => {
+                // Criar URL do blob
+                const url = window.URL.createObjectURL(blob);
+                // Criar link temporário
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'terapeutas_reprovados.xlsx'; // Nome do arquivo
+                // Adicionar à página e clicar
+                document.body.appendChild(a);
+                a.click();
+                // Limpar
+                window.URL.revokeObjectURL(url);
+                a.remove();
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao gerar arquivo Excel');
+            });
+        }
+
+        function openAvaliarTerapeutaModal(userId, email) {
+            document.getElementById('avaliarTerapeutaModal').style.display = "flex";
+            // document.getElementById('email').value = email;  // Preenche o email no formulário
+            // document.getElementById('user_id').value = userId;  // Preenche o ID do usuário
+
+            const selectPaciente = document.getElementById('novo_paciente');
+
+            // Limpar as opções existentes
+            selectPaciente.innerHTML = '<option value="" disabled selected>Selecione um paciente</option>';
+
+            fetch(`/avaliacao_terapeuta/${userId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        console.log(data[0].id + " ----------------------");
+                        document.getElementById('avaliar_terapeuta_id').value = data[0].id;
+                        document.getElementById('terapeuta_nome_completo').value = data[0].nome_completo;
+                        document.getElementById('terapeuta_cidade').value = data[0].cidade;
+                        document.getElementById('terapeuta_estado').value = data[0].estado;
+                        document.getElementById('terapeuta_email').value = data[0].email;
+                        document.getElementById('terapeuta_telefone').value = data[0].telefone;
+                        document.getElementById('terapeuta_celular').value = data[0].celular;
+                        document.getElementById('terapeuta_cpf').value = data[0].cpf;
+                        document.getElementById('terapeuta_online').value = data[0].online;
+                        document.getElementById('terapeuta_endereco_consultorio').value = data[0].endereco_consultorio;
+                        document.getElementById('terapeuta_consultorio_acessivel').value = data[0].consultorio_acessivel;
+                        //fazer observaçao surgir caso consultorio_acessivel!= 'sim'
+                        document.getElementById('terapeuta_observacao_acessibilidade').value = data[0].observacao_acessibilidade;
+                        document.getElementById('terapeuta_nivel_atual').value = data[0].nivel_atual;
+                        function toggleCartaRecomendacao() {
+                            const nivelSelect = document.getElementById('terapeuta_nivel_atual');
+                            const cartaRow = document.getElementById('carta-recomendacao-row');
+                            const cartaInput = document.getElementById('terapeuta_carta_recomendacao');
+                            
+                            if (nivelSelect.value === 'Avançado Completo') {
+                                cartaRow.style.display = 'flex';
+                                cartaInput.required = true;
+                                if (data[0].carta_recomendacao_path) {
+                                    const baseUrl = "{{ url_for('cartas_recomendacao', filename='') }}";
+                                    cartaInput.src = baseUrl + data[0].carta_recomendacao_path;
+                                }
+                            } else {
+                                cartaRow.style.display = 'none';
+                                cartaInput.required = false;
+                                cartaInput.src = '';
+                            }
+                        }
+
+                        // Executar a verificação inicial do campo carta de recomendação
+                        toggleCartaRecomendacao();
+                        document.getElementById('terapeuta_ano_conclusao_avancado2').value = data[0].ano_conclusao_avancado2;
+                        document.getElementById('terapeuta_ano_conclusao_sep').value = data[0].ano_conclusao_sep;
+                        document.getElementById('terapeuta_professores_formacao').value = data[0].professores_formacao;
+                        document.getElementById('terapeuta_participa_grupo_estudo').value = data[0].participa_grupo_estudo;
+                        if(data[0].numero_supervisoes_ultimo_ano > 0){
+                            document.getElementById('terapeuta_supervisao_casos').value = "sim";
+                            document.getElementById('terapeuta_numero_supervisoes_ultimo_ano').value = data[0].numero_supervisoes_ultimo_ano;
+                        } else {
+                            document.getElementById('terapeuta_supervisao_casos').value = "nao";
+                            document.getElementById('terapeuta_numero_supervisoes_ultimo_ano').value = 0;
+                        }
+                        document.getElementById('terapeuta_formacao_academica').value = data[0].formacao_academica;
+                        document.getElementById('terapeuta_interesse_producao_cientifica').value = data[0].interesse_producao_cientifica;
+                        document.getElementById('terapeuta_modalidade').value = data[0].modalidade;
+                        document.getElementById('terapeuta_sugestoes').value = data[0].sugestoes;
+                        document.getElementById('terapeuta_associado_abt').value = data[0].associado_abt;
+                        //add a pdf visializator
+                        // document.getElementById('terapeuta_carta_recomendacao_path').value = data[0].carta_recomendacao_path;
+                        
+                        const dt = new Date(data[0].data_nascimento );
+                        dt.setDate(dt.getDate() + 1);
+                        const dia = dt.getDate().toString().padStart(2, '0');
+                    } 
+                })
+        }
+
+        function closeAvaliarTerapeutaModal() {
+            document.getElementById('avaliarTerapeutaModal').style.display = "none";
         }
 
         function openAvaliarPacienteModal(userId, email) {
@@ -956,6 +1396,68 @@
 
         function closeCreateUserModal() {
             document.getElementById('createUserModal').style.display = "none";
+        }
+
+        function aprovarTerapeuta(){
+            const avaliar_terapeuta_id = document.getElementById('avaliar_terapeuta_id').value;
+            fetch(`/definir_status_terapeuta/${avaliar_terapeuta_id}/aprovado`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Terapeuta aprovado com sucesso!');
+                    window.location.reload();
+                } else {
+                    throw new Error('Erro ao processar a requisição');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+                alertDiv.innerHTML = `
+                    Erro ao processar a requisição
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+                document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.container').firstChild);
+            });
+            
+            closeAvaliarTerapeutaModal();
+        }
+
+        function negarTerapeuta(){
+            const avaliar_terapeuta_id = document.getElementById('avaliar_terapeuta_id').value;
+            fetch(`/definir_status_terapeuta/${avaliar_terapeuta_id}/reprovado`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Terapeuta reprovado com sucesso!');
+                    window.location.reload();
+                } else {
+                    throw new Error('Erro ao processar a requisição');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+                alertDiv.innerHTML = `
+                    Erro ao processar a requisição
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+                document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.container').firstChild);
+            });
+            
+            closeAvaliarTerapeutaModal();
         }
 
         function aprovarPaciente(){

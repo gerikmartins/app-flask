@@ -310,7 +310,7 @@ body {
 }
 
 /* Estilo para o modal */
-#editModal, #createUserModal, #vincularPacientesModal, #avaliarPacientesModal {
+#editModal, #createUserModal, #vincularPacientesModal, #avaliarPacientesModal, #avaliarTerapeutaModal {
     display: block;
     position: fixed;
     top: 0;

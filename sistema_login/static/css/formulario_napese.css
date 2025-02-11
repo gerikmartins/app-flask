@@ -509,7 +509,7 @@ li{
 }
 
 #filtro-tabela {
-    background-image: url('/css/searchicon.png');
+    /* background-image: url('/css/searchicon.png'); */
     background-position: 10px 10px;
     background-repeat: no-repeat;
     width: 100%;
@@ -537,6 +537,16 @@ li{
 
 /* Modal grande específico para avaliação de pacientes */
 #avaliarPacientesModal .modal-content-lg {
+    background-color: var(--gray-50);
+    border-radius: 8px;
+    margin: 20px auto;
+    padding: 20px;
+    width: 100%;
+    max-width: 800px;
+}
+
+/* Modal grande específico para avaliação de terapeutas */
+#avaliarTerapeutaModal .modal-content-lg {
     background-color: var(--gray-50);
     border-radius: 8px;
     margin: 20px auto;
@@ -587,6 +597,12 @@ li{
 }
 
 #avaliarPacientesModal .checkbox-item label {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+#avaliarTerapeutaModal .checkbox-item label {
     margin: 0;
     font-size: 14px;
     color: var(--text-secondary);
