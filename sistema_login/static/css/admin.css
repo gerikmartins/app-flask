@@ -355,3 +355,22 @@ body {
     color: #666;
     font-style: italic;
 } 
+
+.logout-button{
+    text-decoration: none;
+    display: flex;
+    flex: 0 1 auto;
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--controlStack-medium-gap-auto, 8px);
+    max-height: calc(var(--base-size-32, 32px));
+}
+
+.logout-button a{
+    text-decoration: none;
+    background-color: #dc3545;
+}
+.logout-button a:hover{
+    text-decoration: none;
+    background-color: #9b1825;
+}
