@@ -74,9 +74,9 @@ def conectar_bd():
         conn = psycopg2.connect(
             dbname="flask",
             user="postgres",
-            password="Postgres2022!",  # Coloque sua senha aqui se houver
+            password="postgres",  # Coloque sua senha aqui se houver
             host="localhost",
-            port="5433"
+            port="5432"
         )
         cur = conn.cursor()
         
