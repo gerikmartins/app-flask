@@ -18,6 +18,9 @@
 
     <div class="admin-container">
         <div class="admin-header">
+            <div class="logout-button">
+                <a class="btn-action" href="{{ url_for('selecao_perfil') }}"><i class="fas fa-arrow-right-from-bracket"></i> Sair</a>
+            </div>
             <img src="{{ url_for('static', filename='images/logo_rodape.png') }}" alt="Logo NAPESE" class="logo">
             <h1>Painel Administrativo</h1>
         </div>
@@ -124,7 +127,7 @@
                 <div class="section-header">
                     <h2><i class="fas fa-clock"></i> Pacientes Pendentes</h2>
                     <button onclick="pacientes_reprovados_excel()" class="btn-warn">
-                        <i class="fas fa-plus"></i> Listar pacientes reprovados
+                        <i class="fas fa-download"></i> Listar pacientes reprovados
                     </button>
                 </div>
                 
@@ -180,7 +183,7 @@
                 <div class="section-header">
                     <h2><i class="fas fa-user-plus"></i> Terapeutas Pendentes</h2>
                     <button onclick="terapeutas_reprovados_excel()" class="btn-warn">
-                        <i class="fas fa-plus"></i> Listar terapeutas reprovados
+                        <i class="fas fa-download"></i> Listar terapeutas reprovados
                     </button>
                 </div>
                 
@@ -1056,6 +1059,21 @@
                         <span class="scale-point">Extremamente</span>
                     </div>
                 </div>
+
+                <div class="likert-item">
+                    <div class="likert-header">
+                        <label type="text" id="impacto_soma" name="impacto_soma" class="likert-label"> </label>
+                        <!-- <span class="likert-value">Neutro</span> -->
+                    </div>
+                    <!-- <input type="range" class="likert-range" id="impacto_concentracao" name="impacto_concentracao" min="0" max="4" value="2" disabled>
+                    <div class="likert-scale">
+                        <span class="scale-point">De modo nenhum</span>
+                        <span class="scale-point">Um pouco</span>
+                        <span class="scale-point">Moderadamente</span>
+                        <span class="scale-point">Muito</span>
+                        <span class="scale-point">Extremamente</span>
+                    </div> -->
+                </div>
             </div>
             <hr>
             <div class="" style="display: block;">
@@ -1310,6 +1328,7 @@
                         document.getElementById('acidente_violencia').checked = data[0].acidente_violencia;
                         document.getElementById('causas_naturais').checked = data[0].causas_naturais;
                         document.getElementById('nao_se_aplica').checked = data[0].nao_se_aplica;
+                        document.getElementById('impacto_soma').innerHTML  =  "Resultado da soma: "+(data[0].impacto_perda_interesse + data[0].impacto_apreensao + data[0].impacto_evitar_gatilhos+ data[0].impacto_chateado+ data[0].impacto_concentracao+ data[0].impacto_crencas+ data[0].impacto_lembracas + data[0].impacto_evitacao);
 
                         toggleTraumaFields(data[0].vivenciou_trauma);
 
