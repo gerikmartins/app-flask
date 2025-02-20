@@ -156,6 +156,14 @@
                         </div>
                     </div>
 
+                    <div class="form-row" id="comprovante-sessoes-row" style="display: none;">
+                        <div class="form-group">
+                            <label for="comprovante_sessoes">Comprovante de participação em sessões pessoais</label>
+                            <input type="file" id="comprovante_sessoes" name="comprovante_sessoes" accept=".pdf">
+                            <!-- <label class="observacao">Se você participou de sessões de supervisão de casos, anexar o comprovante.</label> -->
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label for="ano_conclusao_avancado2">Ano de Conclusão do Avançado 2:</label>
                         <input type="number" id="ano_conclusao_avancado2" name="ano_conclusao_avancado2" required>
@@ -351,14 +359,19 @@
         function toggleCartaRecomendacao() {
             const nivelSelect = document.getElementById('nivel_atual');
             const cartaRow = document.getElementById('carta-recomendacao-row');
+            const comprovanteRow = document.getElementById('comprovante-sessoes-row');
             const cartaInput = document.getElementById('carta_recomendacao');
+            const comprovanteInput = document.getElementById('comprovante_sessoes');
             
             if (nivelSelect.value === 'Avançado Completo') {
                 cartaRow.style.display = 'flex';
+                comprovanteRow.style.display = 'flex';
                 cartaInput.required = True;
             } else {
                 cartaRow.style.display = 'none';
+                comprovanteRow.style.display = 'none';
                 cartaInput.required = False;
+                comprovanteInput.value = '';
                 cartaInput.value = ''; // Limpa o arquivo selecionado
             }
         }

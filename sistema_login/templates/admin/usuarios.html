@@ -475,6 +475,19 @@
                     </div>
                 </div>
 
+                <div class="form-row" id="comprovante-sessoes-row" style="display: none;">
+                    <div class="form-group">
+                        <label>Comprovante de participação em sessões pessoais</label>
+                        <iframe 
+                            src="{{ url_for('comprovantes_sessoes', filename='') }}"
+                            width="100%" 
+                            height="500px" 
+                            style="border: 1px solid #ddd; border-radius: 4px;"
+                            id="terapeuta_comprovante_sessoes">
+                        </iframe>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label>Ano de Conclusão do Avançado 2:</label>
                     <input type="number" id="terapeuta_ano_conclusao_avancado2" name="terapeuta_ano_conclusao_avancado2" disabled>
@@ -1212,19 +1225,28 @@
                         function toggleCartaRecomendacao() {
                             const nivelSelect = document.getElementById('terapeuta_nivel_atual');
                             const cartaRow = document.getElementById('carta-recomendacao-row');
+                            const comprovanteRow = document.getElementById('comprovante-sessoes-row');
                             const cartaInput = document.getElementById('terapeuta_carta_recomendacao');
+                            const comprovanteInput = document.getElementById('terapeuta_comprovante_sessoes');
                             
                             if (nivelSelect.value === 'Avançado Completo') {
                                 cartaRow.style.display = 'flex';
+                                comprovanteRow.style.display = 'flex';
                                 cartaInput.required = true;
                                 if (data[0].carta_recomendacao_path) {
                                     const baseUrl = "{{ url_for('cartas_recomendacao', filename='') }}";
                                     cartaInput.src = baseUrl + data[0].carta_recomendacao_path;
                                 }
+                                if (data[0].comprovante_sessoes_path) {
+                                    const baseUrl = "{{ url_for('comprovantes_sessoes', filename='') }}";
+                                    comprovanteInput.src = baseUrl + data[0].comprovante_sessoes_path;
+                                }
                             } else {
                                 cartaRow.style.display = 'none';
+                                comprovanteRow.style.display = 'none';
                                 cartaInput.required = false;
                                 cartaInput.src = '';
+                                comprovanteInput.src = '';
                             }
                         }
 
