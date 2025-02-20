@@ -41,6 +41,7 @@ mail = Mail(app)
 
 app.config['SECRET_KEY'] = '1235'  # Mude para uma chave segura
 app.config['UPLOAD_FOLDER'] = 'uploads/cartas_recomendacao'
+app.config['UPLOAD_FOLDER_COMPROVANTE'] = 'uploads/comprovantes_sessoes'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Limite de 16MB para upload
 csrf = CSRFProtect(app)
 login_manager = LoginManager()
@@ -632,6 +633,7 @@ def init_db():
                 interesse_producao_cientifica BOOLEAN NOT NULL,
                 associado_abt BOOLEAN NOT NULL,
                 carta_recomendacao_path TEXT,
+                comprovante_sessoes_path TEXT,
                 sugestoes TEXT,
                 concordou_termos BOOLEAN NOT NULL,
                 data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -966,7 +968,7 @@ def avaliacao_terapeuta(userId):
             form.professores_formacao, form.formacao_academica, form.participa_grupo_estudo, form.numero_supervisoes_ultimo_ano, 
             form.modalidade, form.faixa_valor_sessao, form.consultorio_acessivel, form.observacao_acessibilidade, 
             form.interesse_producao_cientifica, form.associado_abt, form.carta_recomendacao_path, form.sugestoes, 
-            form.concordou_termos, form.data_cadastro, form.status
+            form.concordou_termos, form.data_cadastro, form.status, form.comprovante_sessoes_path
             from terapeuta_napese as form inner join usuarios as usu on usu.email = form.email 
             WHERE usu.id = %s and usu.status = true and form.status = 'pendente'
         """, (userId,))
@@ -980,7 +982,7 @@ def avaliacao_terapeuta(userId):
             'professores_formacao': terapeuta[12], 'formacao_academica': terapeuta[13], 'participa_grupo_estudo': terapeuta[14], 'numero_supervisoes_ultimo_ano': terapeuta[15],
             'modalidade': terapeuta[16], 'faixa_valor_sessao': terapeuta[17], 'consultorio_acessivel': terapeuta[18], 'observacao_acessibilidade': terapeuta[19],
             'interesse_producao_cientifica': terapeuta[20], 'associado_abt': terapeuta[21], 'carta_recomendacao_path': terapeuta[22], 'sugestoes': terapeuta[23],
-            'concordou_termos': terapeuta[24], 'data_cadastro': terapeuta[25], 'status': terapeuta[26]
+            'concordou_termos': terapeuta[24], 'data_cadastro': terapeuta[25], 'status': terapeuta[26], 'comprovante_sessoes_path': terapeuta[27]
             }
             for terapeuta in terapeutas
         ]
@@ -1616,6 +1618,7 @@ def criar_usuarios_teste():
 
 # Configurações para upload de arquivos
 UPLOAD_FOLDER = 'uploads/cartas_recomendacao'
+UPLOAD_FOLDER_COMPROVANTE = 'uploads/comprovantes_sessoes'
 ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx'}
 
 def allowed_file(filename):
@@ -1661,6 +1664,15 @@ def formulario_terapeuta():
                         os.makedirs(UPLOAD_FOLDER)
                     arquivo.save(os.path.join(UPLOAD_FOLDER, filename))
                     carta_path = filename
+            comprovante_path = None
+            if 'comprovante_sessoes' in request.files:
+                arquivo_comprovante = request.files['comprovante_sessoes']
+                if arquivo_comprovante and arquivo_comprovante.filename and allowed_file(arquivo_comprovante.filename):
+                    comprovante_filename = secure_filename(f"{current_user.email}_compr_{arquivo_comprovante.filename}")
+                    if not os.path.exists(UPLOAD_FOLDER_COMPROVANTE):
+                        os.makedirs(UPLOAD_FOLDER_COMPROVANTE)
+                    arquivo_comprovante.save(os.path.join(UPLOAD_FOLDER_COMPROVANTE,comprovante_filename))
+                    comprovante_path = comprovante_filename
             endereco_consultorio = ''
             if 'endereco_consultorio' in request.form:
                 endereco_consultorio = request.form['endereco_consultorio']
@@ -1695,6 +1707,7 @@ def formulario_terapeuta():
                 'interesse_producao_cientifica': request.form.get('interesse_producao_cientifica') == 'sim',
                 'associado_abt': request.form.get('associado_abt') == 'sim',
                 'carta_recomendacao_path': carta_path,
+                'comprovante_sessoes_path': comprovante_path,
                 'sugestoes': request.form.get('sugestoes', ''),
 
                 'numero_supervisoes_ultimo_ano': numero_supervisoes,
@@ -1981,6 +1994,11 @@ def termos_condicoes():
 @login_required  # Protege o acesso aos arquivos
 def cartas_recomendacao(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+@app.route('/uploads/comprovantes_sessoes/<path:filename>')
+@login_required  # Protege o acesso aos arquivos
+def comprovantes_sessoes(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER_COMPROVANTE'], filename)
 
 # Adicione no final do arquivo
 if __name__ == '__main__':
