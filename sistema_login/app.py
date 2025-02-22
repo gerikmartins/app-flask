@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_mail import Mail, Message
 from werkzeug.security import check_password_hash, generate_password_hash
-import psycopg2
+import pymysql
 from flask_wtf import CSRFProtect, FlaskForm, CSRFProtect
 from utils.auth import admin_required, terapeuta_required
 from werkzeug.utils import secure_filename
@@ -72,17 +72,18 @@ class User(UserMixin):
 
 def conectar_bd():
     try:
-        conn = psycopg2.connect(
-            dbname="flask",
-            user="postgres",
-            password="postgres",  # Coloque sua senha aqui se houver
+        conn = pymysql.connect(
+            database="flask",
+            user="root",
+            password="mysql",  # Coloque sua senha aqui se houver
             host="localhost",
-            port="5432"
+            port=3306
         )
+
         cur = conn.cursor()
         
         # Debug: Mostrar banco atual
-        cur.execute("SELECT current_database()")
+        cur.execute("SELECT DATABASE()")
         current_db = cur.fetchone()[0]
         print(f"\nBanco atual: {current_db}")
         
@@ -93,7 +94,7 @@ def conectar_bd():
             WHERE table_schema NOT IN ('pg_catalog', 'information_schema')
         """)
         tables = cur.fetchall()
-        print("Tabelas disponíveis:", tables)
+        # print("Tabelas disponíveis:", tables)
         
         cur.close()
         return conn
@@ -476,35 +477,35 @@ def init_db():
     cur = conn.cursor()
     try:
         # 1. Primeiro, criar os tipos ENUM
-        cur.execute("""
-            DO $$ 
-            BEGIN
-                -- Criar tipo_atendimento
-                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'tipo_atendimento') THEN
-                    CREATE TYPE tipo_atendimento AS ENUM ('PRESENCIAL', 'ONLINE');
-                END IF;
+        # cur.execute("""
+        #     DO $$ 
+        #     BEGIN
+        #         -- Criar tipo_atendimento
+        #         IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'tipo_atendimento') THEN
+        #             CREATE TYPE tipo_atendimento AS ENUM ('PRESENCIAL', 'ONLINE');
+        #         END IF;
 
-                -- Criar faixa_renda
-                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'faixa_renda') THEN
-                    CREATE TYPE faixa_renda AS ENUM ('SEM_RENDA','ATE_1_SALARIO', '1_A_3_SALARIOS', '3_A_6_SALARIOS', '6_A_9_SALARIOS', '9_A_12_SALARIOS', '12_A_15_SALARIOS', 'ACIMA_15_SALARIOS');
-                END IF;
+        #         -- Criar faixa_renda
+        #         IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'faixa_renda') THEN
+        #             CREATE TYPE faixa_renda AS ENUM ('SEM_RENDA','ATE_1_SALARIO', '1_A_3_SALARIOS', '3_A_6_SALARIOS', '6_A_9_SALARIOS', '9_A_12_SALARIOS', '12_A_15_SALARIOS', 'ACIMA_15_SALARIOS');
+        #         END IF;
 
-                -- Criar faixa_dependentes
-                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'faixa_dependentes') THEN
-                    CREATE TYPE faixa_dependentes AS ENUM ('NENHUM', '1_A_2', '3_A_5', 'MAIS_DE_5');
-                END IF;
+        #         -- Criar faixa_dependentes
+        #         IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'faixa_dependentes') THEN
+        #             CREATE TYPE faixa_dependentes AS ENUM ('NENHUM', '1_A_2', '3_A_5', 'MAIS_DE_5');
+        #         END IF;
 
-                -- Criar resposta_sim_nao
-                IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'resposta_sim_nao') THEN
-                    CREATE TYPE resposta_sim_nao AS ENUM ('SIM', 'NAO', 'NAO_SEI');
-                END IF;
-            END $$;
-        """)
+        #         -- Criar resposta_sim_nao
+        #         IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'resposta_sim_nao') THEN
+        #             CREATE TYPE resposta_sim_nao AS ENUM ('SIM', 'NAO', 'NAO_SEI');
+        #         END IF;
+        #     END $$;
+        # """)
         
         # 2. Criar tabela usuarios
         cur.execute("""
             CREATE TABLE IF NOT EXISTS usuarios (
-                id SERIAL PRIMARY KEY,
+                id INT PRIMARY KEY AUTO_INCREMENT,
                 email VARCHAR(255) UNIQUE NOT NULL,
                 senha VARCHAR(255) NOT NULL,
                 data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -518,28 +519,20 @@ def init_db():
         # 2. Criar tabela terapeutas_pacientes
         cur.execute("""
             CREATE TABLE IF NOT EXISTS terapeutas_pacientes (
-                id SERIAL PRIMARY KEY,
+                id INT PRIMARY KEY AUTO_INCREMENT,
                 terapeuta_id INTEGER NOT NULL,
                 paciente_id INTEGER NOT NULL,
                 data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                status BOOLEAN DEFAULT TRUE
+                status BOOLEAN DEFAULT TRUE,
+                CONSTRAINT fk_terapeutas_pacientes_usuarios_terapeuta FOREIGN KEY (terapeuta_id) REFERENCES usuarios(id),
+                CONSTRAINT fk_terapeutas_pacientes_usuarios_paciente FOREIGN KEY (paciente_id) REFERENCES usuarios(id)
             );
-                    
-            alter table terapeutas_pacientes 
-            add constraint fk_terapeura_id
-            foreign key (terapeuta_id) 
-            REFERENCES usuarios (id);
-                    
-            alter table terapeutas_pacientes 
-            add constraint fk_paciente_id
-            foreign key (paciente_id) 
-            REFERENCES usuarios (id);
         """)
 
         # 3. Criar tabela formulario_napese
         cur.execute("""
             CREATE TABLE IF NOT EXISTS formulario_napese (
-                id SERIAL PRIMARY KEY,
+                id INT PRIMARY KEY AUTO_INCREMENT,
                 data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 aprovado VARCHAR(255) NOT NULL,
                 email VARCHAR(255) NOT NULL,
@@ -549,9 +542,9 @@ def init_db():
                 telefones VARCHAR(100) NOT NULL,
                 cidade VARCHAR(100) NOT NULL,
                 estado VARCHAR(2) NOT NULL,
-                preferencia_atendimento tipo_atendimento NOT NULL,
-                renda_familiar faixa_renda NOT NULL,
-                num_dependentes faixa_dependentes NOT NULL,
+                preferencia_atendimento ENUM('PRESENCIAL', 'ONLINE') NOT NULL,
+                renda_familiar ENUM('SEM_RENDA','ATE_1_SALARIO', '1_A_3_SALARIOS', '3_A_6_SALARIOS', '6_A_9_SALARIOS', '9_A_12_SALARIOS', '12_A_15_SALARIOS', 'ACIMA_15_SALARIOS') NOT NULL,
+                num_dependentes ENUM('NENHUM', '1_A_2', '3_A_5', 'MAIS_DE_5') NOT NULL,
                 data_nascimento DATE NOT NULL,
                 genero VARCHAR(50) NOT NULL,
                 profissao VARCHAR(100) NOT NULL,
@@ -569,8 +562,8 @@ def init_db():
                 historico_acidentes TEXT,
                 historico_cirurgias TEXT,
                 dores TEXT,
-                acompanhamento_psiquiatrico resposta_sim_nao NOT NULL,
-                acompanhamento_psicologico resposta_sim_nao NOT NULL,
+                acompanhamento_psiquiatrico ENUM('SIM', 'NAO', 'NAO_SEI') NOT NULL,
+                acompanhamento_psicologico ENUM('SIM', 'NAO', 'NAO_SEI') NOT NULL,
                 tecnicas_corporais TEXT,
                 conhece_se BOOLEAN NOT NULL,
                 motivo_procura TEXT NOT NULL,
@@ -595,22 +588,37 @@ def init_db():
                 impacto_perda_interesse INTEGER CHECK (impacto_perda_interesse BETWEEN 0 AND 4),
                 impacto_apreensao INTEGER CHECK (impacto_apreensao BETWEEN 0 AND 4),
                 impacto_concentracao INTEGER CHECK (impacto_concentracao BETWEEN 0 AND 4),
-                CONSTRAINT email_valido CHECK (email ~ '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$'),
+                CONSTRAINT email_valido CHECK (email REGEXP '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$'),
                 CONSTRAINT fk_email FOREIGN KEY (email) REFERENCES usuarios(email)
             )
         """)
 
         # 4. Criar índices
-        cur.execute("""
-            CREATE INDEX IF NOT EXISTS idx_formulario_email ON formulario_napese(email);
-            CREATE INDEX IF NOT EXISTS idx_formulario_cpf ON formulario_napese(cpf);
-            CREATE INDEX IF NOT EXISTS idx_formulario_data_cadastro ON formulario_napese(data_cadastro);
-        """)
+        try:
+            cur.execute("""
+                CREATE INDEX idx_formulario_email ON formulario_napese(email);
+            """)
+        except:
+            print('indice idx_formulario_email ja existe')
+
+        try:
+            cur.execute("""
+                CREATE INDEX idx_formulario_cpf ON formulario_napese(cpf);
+            """)
+        except:
+            print('indice idx_formulario_cpf ja existe')
+
+        try:
+            cur.execute("""
+                CREATE INDEX idx_formulario_data_cadastro ON formulario_napese(data_cadastro);
+            """)
+        except:
+            print('indice idx_formulario_data_cadastro ja existe')
 
         # Criar tabela terapeuta_napese
         cur.execute("""
             CREATE TABLE IF NOT EXISTS terapeuta_napese (
-                id SERIAL PRIMARY KEY,
+                id INT PRIMARY KEY AUTO_INCREMENT,
                 nome_completo VARCHAR(255) NOT NULL,
                 endereco_consultorio TEXT NULL,
                 cidade VARCHAR(100) NOT NULL,
@@ -1589,21 +1597,21 @@ def criar_usuarios_teste():
         cur.execute("""
             INSERT INTO usuarios (email, senha, tipo_usuario, status)
             VALUES (%s, %s, 'admin', true)
-            ON CONFLICT (email) DO NOTHING
+            ON DUPLICATE KEY UPDATE tipo_usuario = 'admin'
         """, ('admin@teste.com', generate_password_hash('admin123')))
 
         # Criar terapeuta
         cur.execute("""
             INSERT INTO usuarios (email, senha, tipo_usuario, status)
             VALUES (%s, %s, 'terapeuta', true)
-            ON CONFLICT (email) DO NOTHING
+            ON DUPLICATE KEY UPDATE tipo_usuario = 'terapeuta'
         """, ('terapeuta@teste.com', generate_password_hash('terapeuta123')))
 
         # Criar paciente
         cur.execute("""
             INSERT INTO usuarios (email, senha, tipo_usuario, status)
             VALUES (%s, %s, 'paciente', true)
-            ON CONFLICT (email) DO NOTHING
+            ON DUPLICATE KEY UPDATE tipo_usuario = 'paciente'
         """, ('paciente@teste.com', generate_password_hash('paciente123')))
 
         conn.commit()
