@@ -304,8 +304,7 @@ def cadastro():
             # Insere o usuário
             cur.execute("""
                 INSERT INTO usuarios (email, senha, tipo_usuario, data_criacao, status)
-                VALUES (%s, %s, 'paciente', CURRENT_TIMESTAMP, true)
-                RETURNING id, email;
+                VALUES (%s, %s, 'paciente', CURRENT_TIMESTAMP, true);
             """, (email, senha_hash))
             
             conn.commit()
@@ -720,11 +719,6 @@ def cadastro_usuario_terapeuta():
                 if 'conn' in locals():
                     conn.rollback()
                 flash('Erro ao realizar cadastro. Por favor, tente novamente.', 'error')
-            finally:
-                if 'cur' in locals():
-                    cur.close()
-                if 'conn' in locals():
-                    conn.close()
     
     return render_template('cadastro_terapeuta.html', form=form)
 
@@ -1737,7 +1731,6 @@ def formulario_terapeuta():
             query = f"""
                 INSERT INTO terapeuta_napese ({campos})
                 VALUES ({placeholders})
-                RETURNING id
             """
             print("Query SQL:", query) # Debug log
 

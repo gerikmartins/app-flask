@@ -162,6 +162,10 @@ body {
     margin-top: 0.25rem;
 }
 
+.error-border {
+    border: 2px solid red !important;
+}
+
 .form-group.error input {
     border-color: #e74c3c;
 }
