@@ -108,7 +108,11 @@ h3 {
 .form-group {
     margin-bottom: 20px;
 }
-
+.intro-text{
+    text-align: justify; /* Justifica o texto */
+    /*hyphens: auto;  Hifenização automática */
+    padding-bottom: 10px;
+}
 .form-group label {
     display: block;
     margin-bottom: 8px;
