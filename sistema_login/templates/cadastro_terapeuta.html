@@ -34,7 +34,7 @@
                 {% endif %}
             {% endwith %}
 
-            <form method="POST" action="{{ url_for('cadastro_usuario_terapeuta') }}" class="registration-form">
+            <form id="cadastroForm" method="POST" class="registration-form">
                 {{ form.csrf_token }}
 
                 <div class="form-section">
@@ -50,11 +50,13 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="senha">Senha</label>
-                            <input type="password" id="senha" name="senha" required>
+                            <input type="password" id="senha" name="senha" required minlength="8">
+                            <span id="passwordError" class="error-message"></span>
                         </div>
                         <div class="form-group">
                             <label for="confirma_senha">Confirmar Senha</label>
                             <input type="password" id="confirma_senha" name="confirma_senha" required>
+                            <span id="confirmPasswordError" class="error-message"></span>
                         </div>
                     </div>
                 </div>
@@ -98,6 +100,42 @@
                 this.setCustomValidity('');
             }
         });
+
+        document.getElementById('cadastroForm').onsubmit = function(event) {
+            const password = document.getElementById('senha');
+            const confirmPassword = document.getElementById('confirma_senha');
+            const passwordError = document.getElementById('passwordError');
+            const confirmPasswordError = document.getElementById('confirmPasswordError');
+
+            password.classList.remove('error-border');
+            confirmPassword.classList.remove('error-border');
+
+            // Expressão regular para validar a senha
+            const regex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+
+            // Validação da senha
+            if (!regex.test(password.value)) {
+                passwordError.textContent = "A senha deve ter no mínimo 8 caracteres, incluindo letras e números.";
+                password.classList.add('error-border');
+                event.preventDefault();
+                return false; // Impede o envio do formulário
+            } else {
+                passwordError.textContent = ""; // Limpa a mensagem de erro
+            }
+
+            // Validação de confirmação de senha
+            if (password.value !== confirmPassword.value) {
+                confirmPasswordError.textContent = "As senhas não coincidem.";
+                confirmPassword.classList.add('error-border');
+
+                event.preventDefault();
+                return false; // Impede o envio do formulário
+            } else {
+                confirmPasswordError.textContent = ""; // Limpa a mensagem de erro
+            }
+            this.action = "{{ url_for('cadastro_usuario_terapeuta') }}";
+            return true; // Permite o envio do formulário
+        }
     </script>
 </body>
 </html>

@@ -157,8 +157,8 @@ def login():
                     return redirect(url_for('formulario_napese'))
                 else:
                     # Se já tem formulário, redireciona para o dashboard
-                    flash('Login realizado com sucesso!', 'success')
-                    return redirect(url_for('dashboard'))
+                    # return redirect(url_for('dashboard'))
+                    return render_template('paciente/dashboard.html')
             
             flash('Email ou senha incorretos!', 'error')
             
@@ -209,7 +209,6 @@ def login_terapeuta():
                     return redirect(url_for('formulario_terapeuta'))
                 else:
                     # Se já tem formulário, redireciona para o dashboard
-                    flash('Login realizado com sucesso!', 'success')
                     return redirect(url_for('dashboard_terapeuta'))
             
             flash('Email ou senha incorretos!', 'error')
@@ -247,7 +246,7 @@ def login_admin():
                 user_obj = User(user[0], user[1], user[3])
                 login_user(user_obj)
                 
-                flash('Login realizado com sucesso!', 'success')
+                # flash('Login realizado com sucesso!', 'success')
                 return redirect(url_for('admin_usuarios'))
             
             flash('Email ou senha incorretos!', 'error')
@@ -263,15 +262,11 @@ def login_admin():
     return render_template('login_admin.html', form=form)
 
 @app.route('/logout')
-@login_required
 def logout():
     try:
         logout_user()  # Desloga o usuário
-        flash('Você foi desconectado com sucesso.', 'success')
     except Exception as e:
         print(f"Erro ao realizar logout: {e}")
-        flash('Ocorreu um erro ao tentar desconectar.', 'error')
-    
     return redirect(url_for('selecao_perfil'))  # Redireciona para a página de login
 
 @app.route('/cadastro', methods=['GET', 'POST'])
@@ -304,8 +299,7 @@ def cadastro():
             # Insere o usuário
             cur.execute("""
                 INSERT INTO usuarios (email, senha, tipo_usuario, data_criacao, status)
-                VALUES (%s, %s, 'paciente', CURRENT_TIMESTAMP, true)
-                RETURNING id, email;
+                VALUES (%s, %s, 'paciente', CURRENT_TIMESTAMP, true);
             """, (email, senha_hash))
             
             conn.commit()
@@ -392,58 +386,58 @@ def formulario_napese():
 
                 # Adicionando campos condicionais
                 if 'acidente_violencia' in request.form and request.form['acidente_violencia'].strip():
-                    dados['acidente_violencia'] = request.form['acidente_violencia']
+                    dados['acidente_violencia'] = request.form['acidente_violencia'] == "on"
 
                 if 'causas_naturais' in request.form and request.form['causas_naturais'].strip():
-                    dados['causas_naturais'] = request.form['causas_naturais']
+                    dados['causas_naturais'] = request.form['causas_naturais'] == "on"
 
                 if 'nao_se_aplica' in request.form and request.form['nao_se_aplica'].strip():
-                    dados['nao_se_aplica'] = request.form['nao_se_aplica']
+                    dados['nao_se_aplica'] = request.form['nao_se_aplica'] == "on"
 
                 if 'conheceu_site_trauma' in request.form and request.form['conheceu_site_trauma'].strip():
-                    dados['conheceu_site_trauma'] = request.form['conheceu_site_trauma']
+                    dados['conheceu_site_trauma'] = request.form['conheceu_site_trauma'] == "on"
 
                 if 'conheceu_instagram' in request.form and request.form['conheceu_instagram'].strip():
-                    dados['conheceu_instagram'] = request.form['conheceu_instagram']
+                    dados['conheceu_instagram'] = request.form['conheceu_instagram'] == "on"
 
                 if 'conheceu_indicacao' in request.form and request.form['conheceu_indicacao'].strip():
-                    dados['conheceu_indicacao'] = request.form['conheceu_indicacao']
+                    dados['conheceu_indicacao'] = request.form['conheceu_indicacao'] == "on"
 
                 if 'conheceu_treinamentos' in request.form and request.form['conheceu_treinamentos'].strip():
-                    dados['conheceu_treinamentos'] = request.form['conheceu_treinamentos']
+                    dados['conheceu_treinamentos'] = request.form['conheceu_treinamentos'] == "on"
 
                 if 'conheceu_google' in request.form and request.form['conheceu_google'].strip():
-                    dados['conheceu_google'] = request.form['conheceu_google']
+                    dados['conheceu_google'] = request.form['conheceu_google'] == "on"
 
                 if 'conheceu_rede_social' in request.form and request.form['conheceu_rede_social'].strip():
-                    dados['conheceu_rede_social'] = request.form['conheceu_rede_social']
+                    dados['conheceu_rede_social'] = request.form['conheceu_rede_social'] == "on"
 
                 if 'conheceu_psicologo' in request.form and request.form['conheceu_psicologo'].strip():
-                    dados['conheceu_psicologo'] = request.form['conheceu_psicologo']
+                    dados['conheceu_psicologo'] = request.form['conheceu_psicologo'] == "on"
 
                 if 'conheceu_outro' in request.form and request.form['conheceu_outro'].strip():
                     dados['conheceu_outro'] = request.form['conheceu_outro']
 
                 if 'vivencia_direta' in request.form and request.form['vivencia_direta'].strip():
-                    dados['vivencia_direta'] = request.form['vivencia_direta']
+                    dados['vivencia_direta'] = request.form['vivencia_direta'] == "on"
 
                 if 'vivencia_testemunha' in request.form and request.form['vivencia_testemunha'].strip():
-                    dados['vivencia_testemunha'] = request.form['vivencia_testemunha']
+                    dados['vivencia_testemunha'] = request.form['vivencia_testemunha'] == "on"
 
                 if 'vivencia_familiar_amigo' in request.form and request.form['vivencia_familiar_amigo'].strip():
-                    dados['vivencia_familiar_amigo'] = request.form['vivencia_familiar_amigo']
+                    dados['vivencia_familiar_amigo'] = request.form['vivencia_familiar_amigo'] == "on"
 
                 if 'vivencia_trabalho' in request.form and request.form['vivencia_trabalho'].strip():
-                    dados['vivencia_trabalho'] = request.form['vivencia_trabalho']
+                    dados['vivencia_trabalho'] = request.form['vivencia_trabalho'] == "on"
 
                 if 'vivencia_nenhuma' in request.form and request.form['vivencia_nenhuma'].strip():
-                    dados['vivencia_nenhuma'] = request.form['vivencia_nenhuma']
+                    dados['vivencia_nenhuma'] = request.form['vivencia_nenhuma'] == "on"
 
                 if 'vivencia_outro' in request.form and request.form['vivencia_outro'].strip():
                     dados['vivencia_outro'] = request.form['vivencia_outro']
                 
                 # Debug: mostrar dados recebidos
-                print("Dados recebidos:", dados)
+                # print("Dados recebidos:", dados)
                 
                 # Monta a query de inserção dinamicamente
                 campos = ', '.join(dados.keys())
@@ -456,8 +450,9 @@ def formulario_napese():
                 cur.execute(query, list(dados.values()))
                 conn.commit()
                 
-                flash('Cadastro realizado com sucesso! Agora você será redirecionado para o dashboard.', 'success')
-                return redirect(url_for('dashboard'))
+                # flash('Cadastro realizado com sucesso! Agora você será redirecionado para o dashboard.', 'success')
+                # TALVEZ - criar um def dashboardPaciente para checagens
+                return render_template('paciente/dashboard.html')
                 
             except Exception as e:
                 conn.rollback()
@@ -669,10 +664,12 @@ class TerapeutaForm(FlaskForm):
 @app.route('/dashboard-terapeuta')
 @login_required
 def dashboard_terapeuta():
-    if not current_user.is_admin:
-        flash('Acesso não autorizado!', 'error')
-        return redirect(url_for('login'))
-    return "Bem-vindo ao Dashboard do Terapeuta!"
+    return render_template('terapeuta/dashboard.html')
+
+@app.route('/dashboard-paciente')
+@login_required
+def dashboard_paciente():
+    return render_template('paciente/dashboard.html')
 
 # Atualizar a rota existente ou criar se não existir
 @app.route('/cadastro-paciente')
@@ -720,11 +717,6 @@ def cadastro_usuario_terapeuta():
                 if 'conn' in locals():
                     conn.rollback()
                 flash('Erro ao realizar cadastro. Por favor, tente novamente.', 'error')
-            finally:
-                if 'cur' in locals():
-                    cur.close()
-                if 'conn' in locals():
-                    conn.close()
     
     return render_template('cadastro_terapeuta.html', form=form)
 
@@ -1641,15 +1633,15 @@ def formulario_terapeuta():
     # Adicione este print para debug
     print("Method:", request.method)
     if request.method == 'POST':
-        print("Form data:", request.form)  # Debug dos dados do formulário
-        print("Files:", request.files)     # Debug dos arquivos
+        # print("Form data:", request.form)  # Debug dos dados do formulário
+        # print("Files:", request.files)     # Debug dos arquivos
         
         try:
             # Verifica se já existe um formulário preenchido
             conn = conectar_bd()
             cur = conn.cursor()
             
-            print(f"Verificando formulário existente para email: {current_user.email}") # Debug log
+            # print(f"Verificando formulário existente para email: {current_user.email}") # Debug log
             cur.execute("""
                 SELECT id 
                 FROM terapeuta_napese 
@@ -1658,7 +1650,7 @@ def formulario_terapeuta():
 
             
             if cur.fetchone():
-                print("Formulário já preenchido.") # Debug log
+                # print("Formulário já preenchido.") # Debug log
                 flash('Você já preencheu o formulário anteriormente.', 'info')
                 return redirect(url_for('dashboard_terapeuta'))
             
@@ -1684,11 +1676,11 @@ def formulario_terapeuta():
             endereco_consultorio = ''
             if 'endereco_consultorio' in request.form:
                 endereco_consultorio = request.form['endereco_consultorio']
-            consultorio_acessivel = False
+            consultorio_acessivel = 0
             if 'consultorio_acessivel' in request.form:
-                if request.form['consultorio_acessivel'] != 'nao':
-                    consultorio_acessivel = True
-            print("Carta path:", carta_path) # Debug log
+                if request.form['consultorio_acessivel'] != '0':
+                    consultorio_acessivel = 1
+            # print("Carta path:", carta_path) # Debug log
             # Coletar dados do formulário
             try:
                 numero_supervisoes = request.form.get('numero_supervisoes_ultimo_ano', '0')
@@ -1711,9 +1703,9 @@ def formulario_terapeuta():
                 'ano_conclusao_sep': int(request.form.get('ano_conclusao_sep',0)),
                 'professores_formacao': request.form['professores_formacao'],
                 'formacao_academica': request.form['formacao_academica'],
-                'participa_grupo_estudo': request.form.get('participa_grupo_estudo') == 'sim',
-                'interesse_producao_cientifica': request.form.get('interesse_producao_cientifica') == 'sim',
-                'associado_abt': request.form.get('associado_abt') == 'sim',
+                'participa_grupo_estudo': request.form.get('participa_grupo_estudo') == '1',
+                'interesse_producao_cientifica': request.form.get('interesse_producao_cientifica') == '1',
+                'associado_abt': request.form.get('associado_abt') == '1',
                 'carta_recomendacao_path': carta_path,
                 'comprovante_sessoes_path': comprovante_path,
                 'sugestoes': request.form.get('sugestoes', ''),
@@ -1721,32 +1713,31 @@ def formulario_terapeuta():
                 'numero_supervisoes_ultimo_ano': numero_supervisoes,
                 'modalidade': request.form['modalidade'],
                 # 'faixa_valor_sessao': request.form['faixa_valor_sessao'],
-                'consultorio_acessivel': request.form.get('consultorio_acessivel') == 'sim',
+                'consultorio_acessivel': request.form.get('consultorio_acessivel') == '1',
                 'observacao_acessibilidade': request.form.get('observacao_acessibilidade', ''),
                 # apagar após adicionar os campos no html
                 'faixa_valor_sessao': '-',
-                'concordou_termos': True
+                'concordou_termos': 1
             }
 
-            print("Dados coletados:", dados) # Debug log
+            # print("Dados coletados:", dados) # Debug log
 
             # Construir query de inserção
             campos = ', '.join(dados.keys())
-            placeholders = ', '.join([get_pg_placeholder(value) for value in dados.values()])
-            
+            # placeholders = ', '.join([get_pg_placeholder(value) for value in dados.values()])
+            placeholders = ', '.join(['%s'] * len(dados))
             query = f"""
                 INSERT INTO terapeuta_napese ({campos})
                 VALUES ({placeholders})
-                RETURNING id
             """
-            print("Query SQL:", query) # Debug log
+            # print("Query SQL:", query) # Debug log
 
             cur.execute(query, list(dados.values()))
             
             conn.commit()
-            print("Dados inseridos com sucesso!") # Debug log
+            # print("Dados inseridos com sucesso!") # Debug log
             
-            flash('Formulário enviado com sucesso! Aguarde a aprovação do administrador.', 'success')
+            # flash('Formulário enviado com sucesso! Aguarde a aprovação do administrador.', 'success')
             return redirect(url_for('dashboard_terapeuta'))
                 
         except Exception as e:
@@ -1764,15 +1755,19 @@ def formulario_terapeuta():
 
 def get_pg_placeholder(value):
     if isinstance(value, bool):
-        return '%s::boolean'
+        return 'CAST(%s AS TINYINT)'
     elif isinstance(value, int):
-        return '%s::integer'
+        return 'CAST(%s AS INTEGER)'
+        # return '%s::integer'
     elif isinstance(value, float):
-        return '%s::float'
+        return 'CAST(%s AS FLOAT)'
+        # return '%s::float'
     elif value is None:
-        return '%s::text'
+        return 'CAST(%s AS TEXT)'
+        # return '%s::text'
     else:
-        return '%s::text'
+        return 'CAST(%s AS TEXT)'
+        # return '%s::text'
 
 @app.before_request
 def log_request_info():
