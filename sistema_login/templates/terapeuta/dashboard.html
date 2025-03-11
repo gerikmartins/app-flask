@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Dashboard Administrador - NAPESE</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cadastro_terapeuta.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/formulario_napese.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="shortcut icon" type="imagex/png" href="{{ url_for('static', filename='images/logo_subfooter.png') }}">
+</head>
+<body>
+    <div class="bg-top"></div>
+    <div class="bg-bottom"></div>
+
+    <div class="admin-container">
+        <div class="admin-header">
+            <div class="logout-button">
+                <a class="btn-action" href="{{ url_for('logout') }}"><i class="fas fa-arrow-right-from-bracket"></i> Sair</a>
+            </div>
+            <img src="{{ url_for('static', filename='images/logo_rodape.png') }}" alt="Logo NAPESE" class="logo">
+            <!-- <h1>Painel Administrativo</h1> -->
+        </div>
+
+        <div class="admin-content">
+
+        </div>
+    </div>
+    <div class="modal-bg">
+        <div id="alert" class="alert">
+            <h2 style="color: aliceblue;">Sua inscrição foi enviada!</h2>
+            <p>Você será contactado nas próximas semanas por um colaborador do NAPESE para marcar data e horário para uma entrevista.</p>
+            <button class="close">x</button>
+        </div>
+    </div>
+
+    <script>
+        window.onload = function() {
+            // Exibe o alerta
+            const alert = document.querySelector('.modal-bg');
+            const modalContent = document.getElementById('alert');
+            
+            alert.style.display = 'block';
+            modalContent.style.display = 'block';
+
+            // Opcional: Oculta o alerta após alguns segundos
+            // setTimeout(function() {
+            //     alert.classList.add('fade-out');
+            //     setTimeout(function() {
+            //             alert.style.display = 'none';
+            //             alert.classList.remove('fade-out'); // Remove a classe fade-out para reutilização
+            //         }, 500); // Tempo da transição (0.5s)
+            // }, 3000); // 3000 milissegundos = 3 segundos
+        };
+
+        document.querySelector('.close').addEventListener('click', function() {
+            const modal = document.querySelector('.modal-bg');
+            const modalContent = document.getElementById('alert');
+
+            // Aplica o efeito de fade-out
+            modal.classList.add('fade-out');
+            modalContent.classList.add('fade-out');
+
+            // Aguarda o término da transição e oculta o modal
+            setTimeout(function() {
+                modal.style.display = 'none';
+                modal.classList.remove('fade-out');
+                modalContent.classList.remove('fade-out');
+            }, 500); // Tempo da transição (0.5s)
+        })
+    </script>
+    <style>
+        /* Estilo do alerta */
+        .modal-bg {
+            display: none; /* Oculta o modal inicialmente */
+            position: fixed; /* Fixa o modal na tela */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* Fundo escurecido */
+            z-index: 1000; /* Garante que o modal fique acima de outros elementos */
+            opacity: 1; /* Inicialmente visível */
+            transition: opacity 0.5s ease; /* Transição suave de opacidade */
+        }
+        .alert {
+            display: none; /* Oculta o alerta inicialmente */
+            position: fixed; /* Fixa o alerta na tela */
+            top: 50%; /* Posiciona no centro vertical */
+            left: 50%; /* Posiciona no centro horizontal */
+            transform: translate(-50%, -50%); /* Centraliza exatamente no meio */
+            background-color: #32ac37; /* Cor de fundo verde */
+            color: white; /* Cor do texto */
+            padding: 20px; /* Espaçamento interno */
+            border-radius: 10px; /* Bordas arredondadas */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra */
+            text-align: center; /* Centraliza o texto */
+            z-index: 1000; /* Garante que o alerta fique acima de outros elementos */
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+
+        /* Estilo do botão de fechar (opcional) */
+        .alert button {
+            background-color: white;
+            color: #4CAF50;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .alert.fade-out {
+            opacity: 0;
+        }
+        .modal-bg.fade-out {
+            opacity: 0; /* Torna o modal transparente */
+        }
+    </style>
+</body>
+</html>

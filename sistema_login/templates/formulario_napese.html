@@ -376,8 +376,8 @@
             <div class="form-group">
                 <label for="conhece_se">Conhece o Método Somatic Experiencing®?</label>
                 <select id="conhece_se" name="conhece_se" required>
-                    <option value="true">Sim</option>
-                    <option value="false">Não</option>
+                    <option value="1">Sim</option>
+                    <option value="0">Não</option>
                 </select>
             </div>
         </div>
@@ -430,8 +430,8 @@
             <div class="form-group">
                 <label for="vivenciou_trauma">Você alguma vez vivenciou este tipo de situação?</label>
                 <select id="vivenciou_trauma" name="vivenciou_trauma" required>
-                    <option value="true">Sim</option>
-                    <option value="false">Não</option>
+                    <option value="1">Sim</option>
+                    <option value="0">Não</option>
                 </select>
             </div>
         </div>
@@ -467,8 +467,8 @@
                 <label for="envolveu_violencia">Envolveu morte real ou ameaça de morte, ferimentos graves ou ameaça de ferimentos
                     graves ou violência sexual real ou ameaça de violência sexual?</label>
                 <select id="envolveu_violencia" name="envolveu_violencia">
-                    <option value="true">Sim</option>
-                    <option value="false">Não</option>
+                    <option value="1">Sim</option>
+                    <option value="0">Não</option>
                 </select>
             </div>
         </div>
@@ -685,7 +685,7 @@
 <!-- Adicionar botões de navegação -->
 <div class="form-navigation">
     <button type="button" class="btn-nav btn-prev">Anterior</button>
-    <button type="button" class="btn-nav btn-next">Próximo</button>
+    <button type="button" onclick="enviarrr(this)" class="btn-nav btn-next">Próximo</button>
     <button type="submit" class="btn-nav btn-submit">Enviar</button>
 </div>
 
@@ -768,7 +768,7 @@
 
 
         function toggleDetalhesTrauma() {
-            const isTrauma = vivenciouTrauma.value === 'true';
+            const isTrauma = vivenciouTrauma.value === '1';
             detalhesTrauma.style.display = isTrauma ? 'flex' : 'none';
             detalhesIntro.style.display = isTrauma ? 'block' : 'none';
             document.getElementById('causas-morte-grupo').style.display = isTrauma ? 'flex' : 'none';
