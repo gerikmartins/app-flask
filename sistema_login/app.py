@@ -1679,10 +1679,10 @@ def formulario_terapeuta():
             endereco_consultorio = ''
             if 'endereco_consultorio' in request.form:
                 endereco_consultorio = request.form['endereco_consultorio']
-            consultorio_acessivel = False
+            consultorio_acessivel = 0
             if 'consultorio_acessivel' in request.form:
-                if request.form['consultorio_acessivel'] != 'nao':
-                    consultorio_acessivel = True
+                if request.form['consultorio_acessivel'] != '0':
+                    consultorio_acessivel = 1
             print("Carta path:", carta_path) # Debug log
             # Coletar dados do formulário
             try:
@@ -1706,9 +1706,9 @@ def formulario_terapeuta():
                 'ano_conclusao_sep': int(request.form.get('ano_conclusao_sep',0)),
                 'professores_formacao': request.form['professores_formacao'],
                 'formacao_academica': request.form['formacao_academica'],
-                'participa_grupo_estudo': request.form.get('participa_grupo_estudo') == 'sim',
-                'interesse_producao_cientifica': request.form.get('interesse_producao_cientifica') == 'sim',
-                'associado_abt': request.form.get('associado_abt') == 'sim',
+                'participa_grupo_estudo': request.form.get('participa_grupo_estudo'),
+                'interesse_producao_cientifica': request.form.get('interesse_producao_cientifica'),
+                'associado_abt': request.form.get('associado_abt'),
                 'carta_recomendacao_path': carta_path,
                 'comprovante_sessoes_path': comprovante_path,
                 'sugestoes': request.form.get('sugestoes', ''),
@@ -1716,11 +1716,11 @@ def formulario_terapeuta():
                 'numero_supervisoes_ultimo_ano': numero_supervisoes,
                 'modalidade': request.form['modalidade'],
                 # 'faixa_valor_sessao': request.form['faixa_valor_sessao'],
-                'consultorio_acessivel': request.form.get('consultorio_acessivel') == 'sim',
+                'consultorio_acessivel': request.form.get('consultorio_acessivel'),
                 'observacao_acessibilidade': request.form.get('observacao_acessibilidade', ''),
                 # apagar após adicionar os campos no html
                 'faixa_valor_sessao': '-',
-                'concordou_termos': True
+                'concordou_termos': 1
             }
 
             print("Dados coletados:", dados) # Debug log

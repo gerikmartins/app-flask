@@ -121,8 +121,8 @@
                         <div class="form-group">
                             <label for="consultorio_acessivel">Seu consultório tem acesso facilitado para pessoas com mobilidade reduzida?</label>
                             <select id="consultorio_acessivel" name="consultorio_acessivel" required onchange="toggleOutroAcesso()">
-                                <option value="sim">Sim</option>
-                                <option value="nao">Não</option>
+                                <option value="1">Sim</option>
+                                <option value="0">Não</option>
                                 <option value="outro">Outro</option>
                             </select>
                         </div>
@@ -191,8 +191,8 @@
                         <div class="form-group">
                             <label for="participa_grupo_estudo">Você participa atualmente de grupos de estudo em SE?</label>
                             <select id="participa_grupo_estudo" name="participa_grupo_estudo" required>
-                                <option value="sim">Sim</option>
-                                <option value="nao">Não</option>
+                                <option value="1">Sim</option>
+                                <option value="0">Não</option>
                             </select>
                         </div>
                     </div>
@@ -201,8 +201,8 @@
                         <div class="form-group">
                             <label for="supervisao_casos">Você participa de sessões de supervisão de casos? </label>
                             <select id="supervisao_casos" name="supervisao_casos" required onchange="toggleNumeroSupervisoes()">
-                                <option value="sim">Sim</option>
-                                <option value="nao">Não</option>
+                                <option value="1">Sim</option>
+                                <option value="0">Não</option>
                             </select>
                         </div>
                         <div class="form-group" id="numero-supervisoes-group" style="display: none;">
@@ -222,8 +222,8 @@
                         <div class="form-group">
                             <label for="interesse_producao_cientifica">Gostaria de participar da produção científica da ABT?</label>
                             <select id="interesse_producao_cientifica" name="interesse_producao_cientifica" required>
-                                <option value="sim">Sim</option>
-                                <option value="nao">Não</option>
+                                <option value="1">Sim</option>
+                                <option value="0">Não</option>
                             </select>
                         </div>
                     </div>
@@ -261,8 +261,8 @@
                         <div class="form-group">
                             <label for="associado_abt">É associado da ABT?</label>
                             <select id="associado_abt" name="associado_abt" required>
-                                <option value="sim">Sim</option>
-                                <option value="nao">Não</option>
+                                <option value="1">Sim</option>
+                                <option value="0">Não</option>
                             </select>
                         </div>
                     </div>
@@ -385,7 +385,7 @@
             const numeroSupervisoesGroup = document.getElementById('numero-supervisoes-group');
             const numeroSupervisoesInput = document.getElementById('numero_supervisoes_ultimo_ano');
             
-            if (supervisaoSelect.value === 'sim') {
+            if (supervisaoSelect.value === '1') {
                 numeroSupervisoesGroup.style.display = 'block';
                 numeroSupervisoesInput.required = true;
             } else {
