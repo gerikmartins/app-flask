@@ -664,10 +664,7 @@ class TerapeutaForm(FlaskForm):
 @app.route('/dashboard-terapeuta')
 @login_required
 def dashboard_terapeuta():
-    if not current_user.is_admin:
-        flash('Acesso não autorizado!', 'error')
-        return redirect(url_for('login'))
-    return "Bem-vindo ao Dashboard do Terapeuta!"
+    return render_template('terapeuta/dashboard.html')
 
 @app.route('/dashboard-paciente')
 @login_required
@@ -1636,15 +1633,15 @@ def formulario_terapeuta():
     # Adicione este print para debug
     print("Method:", request.method)
     if request.method == 'POST':
-        print("Form data:", request.form)  # Debug dos dados do formulário
-        print("Files:", request.files)     # Debug dos arquivos
+        # print("Form data:", request.form)  # Debug dos dados do formulário
+        # print("Files:", request.files)     # Debug dos arquivos
         
         try:
             # Verifica se já existe um formulário preenchido
             conn = conectar_bd()
             cur = conn.cursor()
             
-            print(f"Verificando formulário existente para email: {current_user.email}") # Debug log
+            # print(f"Verificando formulário existente para email: {current_user.email}") # Debug log
             cur.execute("""
                 SELECT id 
                 FROM terapeuta_napese 
@@ -1653,7 +1650,7 @@ def formulario_terapeuta():
 
             
             if cur.fetchone():
-                print("Formulário já preenchido.") # Debug log
+                # print("Formulário já preenchido.") # Debug log
                 flash('Você já preencheu o formulário anteriormente.', 'info')
                 return redirect(url_for('dashboard_terapeuta'))
             
@@ -1683,7 +1680,7 @@ def formulario_terapeuta():
             if 'consultorio_acessivel' in request.form:
                 if request.form['consultorio_acessivel'] != '0':
                     consultorio_acessivel = 1
-            print("Carta path:", carta_path) # Debug log
+            # print("Carta path:", carta_path) # Debug log
             # Coletar dados do formulário
             try:
                 numero_supervisoes = request.form.get('numero_supervisoes_ultimo_ano', '0')
@@ -1706,9 +1703,9 @@ def formulario_terapeuta():
                 'ano_conclusao_sep': int(request.form.get('ano_conclusao_sep',0)),
                 'professores_formacao': request.form['professores_formacao'],
                 'formacao_academica': request.form['formacao_academica'],
-                'participa_grupo_estudo': request.form.get('participa_grupo_estudo'),
-                'interesse_producao_cientifica': request.form.get('interesse_producao_cientifica'),
-                'associado_abt': request.form.get('associado_abt'),
+                'participa_grupo_estudo': request.form.get('participa_grupo_estudo') == '1',
+                'interesse_producao_cientifica': request.form.get('interesse_producao_cientifica') == '1',
+                'associado_abt': request.form.get('associado_abt') == '1',
                 'carta_recomendacao_path': carta_path,
                 'comprovante_sessoes_path': comprovante_path,
                 'sugestoes': request.form.get('sugestoes', ''),
@@ -1716,31 +1713,31 @@ def formulario_terapeuta():
                 'numero_supervisoes_ultimo_ano': numero_supervisoes,
                 'modalidade': request.form['modalidade'],
                 # 'faixa_valor_sessao': request.form['faixa_valor_sessao'],
-                'consultorio_acessivel': request.form.get('consultorio_acessivel'),
+                'consultorio_acessivel': request.form.get('consultorio_acessivel') == '1',
                 'observacao_acessibilidade': request.form.get('observacao_acessibilidade', ''),
                 # apagar após adicionar os campos no html
                 'faixa_valor_sessao': '-',
                 'concordou_termos': 1
             }
 
-            print("Dados coletados:", dados) # Debug log
+            # print("Dados coletados:", dados) # Debug log
 
             # Construir query de inserção
             campos = ', '.join(dados.keys())
-            placeholders = ', '.join([get_pg_placeholder(value) for value in dados.values()])
-            
+            # placeholders = ', '.join([get_pg_placeholder(value) for value in dados.values()])
+            placeholders = ', '.join(['%s'] * len(dados))
             query = f"""
                 INSERT INTO terapeuta_napese ({campos})
                 VALUES ({placeholders})
             """
-            print("Query SQL:", query) # Debug log
+            # print("Query SQL:", query) # Debug log
 
             cur.execute(query, list(dados.values()))
             
             conn.commit()
-            print("Dados inseridos com sucesso!") # Debug log
+            # print("Dados inseridos com sucesso!") # Debug log
             
-            flash('Formulário enviado com sucesso! Aguarde a aprovação do administrador.', 'success')
+            # flash('Formulário enviado com sucesso! Aguarde a aprovação do administrador.', 'success')
             return redirect(url_for('dashboard_terapeuta'))
                 
         except Exception as e:
@@ -1758,15 +1755,19 @@ def formulario_terapeuta():
 
 def get_pg_placeholder(value):
     if isinstance(value, bool):
-        return '%s::boolean'
+        return 'CAST(%s AS TINYINT)'
     elif isinstance(value, int):
-        return '%s::integer'
+        return 'CAST(%s AS INTEGER)'
+        # return '%s::integer'
     elif isinstance(value, float):
-        return '%s::float'
+        return 'CAST(%s AS FLOAT)'
+        # return '%s::float'
     elif value is None:
-        return '%s::text'
+        return 'CAST(%s AS TEXT)'
+        # return '%s::text'
     else:
-        return '%s::text'
+        return 'CAST(%s AS TEXT)'
+        # return '%s::text'
 
 @app.before_request
 def log_request_info():
