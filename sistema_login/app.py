@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_mail import Mail, Message
 from werkzeug.security import check_password_hash, generate_password_hash
-import pymysql
+import MySQLdb
 from flask_wtf import CSRFProtect, FlaskForm, CSRFProtect
 from utils.auth import admin_required, terapeuta_required
 from werkzeug.utils import secure_filename
@@ -72,7 +72,7 @@ class User(UserMixin):
 
 def conectar_bd():
     try:
-        conn = pymysql.connect(
+        conn = MySQLdb.connect(
             database="flask",
             user="root",
             password="mysql",  # Coloque sua senha aqui se houver
