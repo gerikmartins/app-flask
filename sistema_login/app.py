@@ -810,12 +810,17 @@ def cadastro_usuario_terapeuta():
                     tipo_usuario = 'terapeuta'
                     password = request.form.get('senha')
 
+                    # Verificar se o email já existe
+                    conn = conectar_bd()
+                    cur = conn.cursor()
+                    cur.execute("SELECT id FROM usuarios WHERE email = %s", (email,))
+                    if cur.fetchone():
+                        flash('Este email já está cadastrado no sistema. Por favor, use outro email ou faça login.', 'error')
+                        return redirect(url_for('cadastro_usuario_terapeuta'))
+
                     # Gera o hash da senha
                     hashed_password = generate_password_hash(password)
 
-                    conn = conectar_bd()
-                    cur = conn.cursor()
-                        
                     try:
                         # Insere o novo usuário no banco de dados
                         cur.execute("""
