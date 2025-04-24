@@ -1,8 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, Response
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_mail import Mail, Message
+from itsdangerous import URLSafeTimedSerializer
 from werkzeug.security import check_password_hash, generate_password_hash
-import pymysql
+import MySQLdb
 from flask_wtf import CSRFProtect, FlaskForm, CSRFProtect
 from utils.auth import admin_required, terapeuta_required
 from werkzeug.utils import secure_filename
@@ -55,6 +56,8 @@ if not os.path.exists(app.config['UPLOAD_FOLDER']):
 # Adicione estas configurações
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
+serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+
 class User(UserMixin):
     def __init__(self, id, email, tipo_usuario):
         self.id = id
@@ -72,7 +75,7 @@ class User(UserMixin):
 
 def conectar_bd():
     try:
-        conn = pymysql.connect(
+        conn = MySQLdb.connect(
             database="flask",
             user="root",
             password="mysql",  # Coloque sua senha aqui se houver
@@ -268,6 +271,125 @@ def logout():
     except Exception as e:
         print(f"Erro ao realizar logout: {e}")
     return redirect(url_for('selecao_perfil'))  # Redireciona para a página de login
+
+class ResetPasswordForm(FlaskForm):
+    senha = StringField('Senha', validators=[DataRequired()])
+    confirma_senha = StringField('Confirmar Senha', validators=[DataRequired()])
+
+@app.route('/resetar-senha-terapeuta/<token>', methods=['GET', 'POST'])
+def resetar_senha_terapeuta(token):
+    form = ResetPasswordForm()  # Instanciar o formulário
+    
+    try:
+        # Verificar token (expira em 1 hora)
+        email = serializer.loads(token, salt='recuperar-senha', max_age=3600)
+        
+        # Verificar se o email existe no banco
+        conn = conectar_bd()
+        cur = conn.cursor()
+        cur.execute("SELECT id FROM usuarios WHERE email = %s AND tipo_usuario = 'terapeuta'", (email,))
+        usuario = cur.fetchone()
+        cur.close()
+        conn.close()
+        
+        if not usuario:
+            flash('Link de recuperação inválido.', 'error')
+            return redirect(url_for('esqueci_senha_terapeuta'))
+        
+        if request.method == 'POST':
+            if form.validate_on_submit():
+                senha = form.senha.data
+                confirma_senha = form.confirma_senha.data
+                
+                if senha != confirma_senha:
+                    flash('As senhas não coincidem.', 'error')
+                    return render_template('redefinir_senha_terapeuta.html', form=form)
+                
+                # Validar senha com regex
+                import re
+                if not re.match(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$', senha):
+                    flash('A senha deve ter no mínimo 8 caracteres, incluindo letras e números.', 'error')
+                    return render_template('redefinir_senha_terapeuta.html', form=form)
+                
+                try:
+                    conn = conectar_bd()
+                    cur = conn.cursor()
+                    
+                    # Atualizar a senha do usuário
+                    senha_hash = generate_password_hash(senha)
+                    cur.execute("""
+                        UPDATE usuarios 
+                        SET senha = %s 
+                        WHERE email = %s AND tipo_usuario = 'terapeuta'
+                    """, (senha_hash, email))
+                    
+                    conn.commit()
+                    flash('Senha alterada com sucesso! Por favor, faça login com sua nova senha.', 'success')
+                    return redirect(url_for('login_terapeuta'))
+                    
+                except Exception as e:
+                    print(f"Erro ao atualizar senha: {e}")
+                    flash('Erro ao atualizar senha. Por favor, tente novamente.', 'error')
+                    return render_template('redefinir_senha_terapeuta.html', form=form)
+                    
+                finally:
+                    if 'cur' in locals():
+                        cur.close()
+                    if 'conn' in locals():
+                        conn.close()
+        
+        return render_template('redefinir_senha_terapeuta.html', form=form)
+        
+    except Exception as e:
+        print(f"Erro na verificação do token: {e}")
+        flash('O link de recuperação é inválido ou expirou.', 'error')
+        return redirect(url_for('esqueci_senha_terapeuta'))
+
+@app.route('/esqueci-senha-terapeuta', methods=['GET', 'POST'])
+def esqueci_senha_terapeuta():
+    form = FlaskForm()  # Para CSRF protection
+    
+    if request.method == 'POST':
+        email = request.form.get('email')
+        conn = conectar_bd()
+        cur = conn.cursor()
+        # Buscar o terapeuta no banco de dados
+        cur.execute("SELECT id FROM usuarios WHERE email = %s AND tipo_usuario = 'terapeuta'", (email,))
+        terapeuta = cur.fetchone()
+        cur.close()
+        conn.close()
+        if terapeuta:
+            # Gerar token seguro
+            token = serializer.dumps(email, salt='recuperar-senha')
+            
+            # Criar link de recuperação
+            reset_link = url_for(
+                'resetar_senha_terapeuta',
+                token=token,
+                _external=True
+            )
+            
+            # Criar e enviar email
+            msg = Message(
+                'Recuperação de Senha - NAPESE',
+                sender=app.config['MAIL_USERNAME'],
+                recipients=[email]
+            )
+            
+            msg.html = render_template(
+                '/email/recuperar_senha.html',
+                reset_link=reset_link
+            )
+            
+            mail.send(msg)
+            
+            flash('Um email com instruções para recuperar sua senha foi enviado.', 'success')
+            return redirect(url_for('login_terapeuta'))
+        else:
+            flash('Email não encontrado em nossa base de dados.', 'error')
+            return redirect(url_for('esqueci_senha_terapeuta'))
+    
+    return render_template('esqueci_senha_terapeuta.html', form=form)
 
 @app.route('/cadastro', methods=['GET', 'POST'])
 def cadastro():

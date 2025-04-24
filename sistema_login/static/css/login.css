@@ -98,15 +98,18 @@ body {
 .login-links {
     text-align: center;
     margin-top: 15px;
-    display: flex;
+    display: block;
     justify-content: center;
     gap: 20px;
 }
 
 .login-links a {
+    display: block;
+    width: 100%;
     color: #4dabf7;
     text-decoration: none;
     font-size: 0.9rem;
+    margin-bottom: 20px;
 }
 
 .login-links a:hover {

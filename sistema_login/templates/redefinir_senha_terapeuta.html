@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redefinir Senha - NAPESE</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cadastro_terapeuta.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="shortcut icon" type="imagex/png" href="{{ url_for('static', filename='images/logo_subfooter.png') }}">
+</head>
+<body>
+    <div class="bg-top"></div>
+    <div class="bg-bottom"></div>
+    
+    <div class="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <div class="logo_container">
+                    <img class="logo_img" id="logo_img" src="{{ url_for('static', filename='images/logo_rodape.png') }}">
+                </div>
+                <h2>Redefinir Senha</h2>
+                <p>Digite sua nova senha</p>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            <i class="fas fa-info-circle"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form id="redefinirSenhaForm" method="POST">
+                {{ form.csrf_token }}
+                
+                <div class="form-group">
+                    <label for="senha">Nova Senha</label>
+                    <input type="password" id="senha" name="senha" required minlength="8">
+                    <span id="passwordError" class="error-message"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirma_senha">Confirmar Nova Senha</label>
+                    <input type="password" id="confirma_senha" name="confirma_senha" required minlength="8">
+                    <span id="confirmPasswordError" class="error-message"></span>
+                </div>
+
+                <button type="submit" class="login-button">Alterar Senha</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('redefinirSenhaForm').onsubmit = function(event) {
+            const password = document.getElementById('senha');
+            const confirmPassword = document.getElementById('confirma_senha');
+            const passwordError = document.getElementById('passwordError');
+            const confirmPasswordError = document.getElementById('confirmPasswordError');
+
+            password.classList.remove('error-border');
+            confirmPassword.classList.remove('error-border');
+
+            // Expressão regular para validar a senha
+            const regex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+
+            // Validação da senha
+            if (!regex.test(password.value)) {
+                passwordError.textContent = "A senha deve ter no mínimo 8 caracteres, incluindo letras e números.";
+                password.classList.add('error-border');
+                event.preventDefault();
+                return false;
+            } else {
+                passwordError.textContent = "";
+            }
+
+            // Validação de confirmação de senha
+            if (password.value !== confirmPassword.value) {
+                confirmPasswordError.textContent = "As senhas não coincidem.";
+                confirmPassword.classList.add('error-border');
+                event.preventDefault();
+                return false;
+            } else {
+                confirmPasswordError.textContent = "";
+            }
+
+            return true;
+        }
+    </script>
+</body>
+</html> 

@@ -6,12 +6,13 @@ Flask-Login==0.6.3
 Flask-Mail==0.10.0
 Flask-SQLAlchemy==3.1.1
 Flask-WTF==1.2.2
+Flask-JWT-Extended==4.7.1
 itsdangerous==2.2.0
-Jinja2==3.1.4
+Jinja2==3.1.6
 MarkupSafe==3.0.2
 openpyxl==3.1.2
 pillow==11.1.0
-PyMySQL==1.1.1
+mysqlclient==2.2.7
 cryptography==44.0.1
 python-dotenv==1.0.0
 reportlab==4.2.5
