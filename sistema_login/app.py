@@ -813,7 +813,7 @@ def cadastro_usuario_terapeuta():
                     # Verificar se o email já existe
                     conn = conectar_bd()
                     cur = conn.cursor()
-                    cur.execute("SELECT id FROM usuarios WHERE email = %s", (email,))
+                    cur.execute("SELECT id FROM usuarios WHERE email = %s AND tipo_usuario = 'terapeuta'", (email,))
                     if cur.fetchone():
                         flash('Este email já está cadastrado no sistema. Por favor, use outro email ou faça login.', 'error')
                         return redirect(url_for('cadastro_usuario_terapeuta'))
