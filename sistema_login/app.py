@@ -40,6 +40,12 @@ app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 mail = Mail(app)
 
+app.config['DB_USER'] = os.getenv('DB_USER')
+app.config['DB_NAME'] = os.getenv('DB_NAME')
+app.config['DB_PASSWORD'] = os.getenv('DB_PASSWORD')
+app.config['DB_HOST'] = os.getenv('DB_HOST')
+app.config['DB_PORT'] = os.getenv('DB_PORT')
+
 app.config['SECRET_KEY'] = '1235'  # Mude para uma chave segura
 app.config['UPLOAD_FOLDER'] = 'uploads/cartas_recomendacao'
 app.config['UPLOAD_FOLDER_COMPROVANTE'] = 'uploads/comprovantes_sessoes'
@@ -76,11 +82,11 @@ class User(UserMixin):
 def conectar_bd():
     try:
         conn = MySQLdb.connect(
-            database="flask",
-            user="root",
-            password="mysql",  # Coloque sua senha aqui se houver
-            host="localhost",
-            port=3306
+            database= os.getenv('DB_NAME'),
+            user= os.getenv('DB_USER'),
+            password= os.getenv('DB_PASSWORD'),  # Coloque sua senha aqui se houver
+            host= os.getenv('DB_HOST'),
+            port= int(os.getenv('DB_PORT'))
         )
 
         cur = conn.cursor()
@@ -865,120 +871,135 @@ def admin_usuarios():
         flash('Acesso não autorizado!', 'error')
         return redirect(url_for('dashboard'))
     
-    page = request.args.get('page', 1, type=int)
-    page_pacientes_pendentes = request.args.get('page_pacientes_pendentes', 1, type=int)
-    page_terapeutas_pendentes = request.args.get('page_terapeutas_pendentes', 1, type=int)
-    per_page = 5  # Número de usuários por página
-    offset = (page - 1) * per_page
-
     conn = conectar_bd()
     cur = conn.cursor()
     
     try:
-        # Recupera a contagem total de usuários
-        cur.execute("SELECT COUNT(*) FROM usuarios LEFT JOIN formulario_napese ON usuarios.email = formulario_napese.email AND usuarios.tipo_usuario = 'paciente' where (usuarios.tipo_usuario <> 'paciente' and usuarios.status = true) or (usuarios.tipo_usuario = 'paciente' and formulario_napese.aprovado = 'aprovado' and usuarios.status = true)")
-        total_usuarios = cur.fetchone()[0]
-
-        # Recupera os usuários para a página atual
-        cur.execute("SELECT usuarios.id, usuarios.email, usuarios.tipo_usuario, usuarios.data_criacao FROM usuarios LEFT JOIN formulario_napese ON usuarios.email = formulario_napese.email LEFT JOIN terapeuta_napese ON usuarios.email = terapeuta_napese.email AND usuarios.tipo_usuario = 'terapeuta' where (usuarios.tipo_usuario = 'terapeuta' and terapeuta_napese.status = 'aprovado' and usuarios.status = true) or (usuarios.tipo_usuario = 'paciente' and formulario_napese.aprovado = 'aprovado' and usuarios.status = true) or (usuarios.tipo_usuario <> 'terapeuta' and usuarios.tipo_usuario <> 'paciente' and usuarios.status = true) order by id LIMIT %s OFFSET %s", (per_page, offset))
+        # Buscar usuários ativos (admin, terapeuta e paciente)
+        cur.execute("""
+            SELECT 
+                u.id, 
+                COALESCE(t.nome_completo, p.nome_completo, u.email) as nome_completo,
+                u.email, 
+                u.tipo_usuario, 
+                u.data_criacao 
+            FROM usuarios u
+            LEFT JOIN terapeuta_napese t ON u.email = t.email AND u.tipo_usuario = 'terapeuta'
+            LEFT JOIN formulario_napese p ON u.email = p.email AND u.tipo_usuario = 'paciente'
+            WHERE u.status = true 
+            AND (
+                (u.tipo_usuario = 'admin')
+                OR (u.tipo_usuario = 'terapeuta' AND t.status = 'aprovado')
+                OR (u.tipo_usuario = 'paciente' AND p.aprovado = 'aprovado')
+            )
+            ORDER BY u.tipo_usuario, nome_completo
+        """)
+        
         usuarios = cur.fetchall()
-
-        # Formata os dados
         usuarios_formatados = [
-            {'id': usuario[0], 'email': usuario[1], 'tipo_usuario': usuario[2], 'data_cadastro': usuario[3].strftime("%d/%m/%Y")}
+            {
+                'id': usuario[0],
+                'nome_completo': usuario[1],
+                'email': usuario[2],
+                'tipo_usuario': usuario[3],
+                'data_cadastro': usuario[4].strftime("%d/%m/%Y")
+            }
             for usuario in usuarios
         ]
 
-        # Configuração da paginação
-        has_prev = page > 1
-        has_next = offset + per_page < total_usuarios
-        total_pages = ceil(total_usuarios / per_page)
-
-        paginacao = {
-            'items': usuarios_formatados,
-            'has_prev': has_prev,
-            'has_next': has_next,
-            'page': page,
-            'pages': total_pages,
-            'prev_num': page - 1,
-            'next_num': page + 1,
-        }
-
-        # -----------------
-        # Recupera a contagem total de pacientes pendentes de aprovação
-        cur.execute("SELECT COUNT(*) FROM usuarios LEFT JOIN formulario_napese ON usuarios.email = formulario_napese.email AND usuarios.tipo_usuario = 'paciente' where (usuarios.tipo_usuario = 'paciente' and formulario_napese.aprovado = 'pendente' and usuarios.status = true)")
-        total_pacientes_pendentes = cur.fetchone()[0]
-
-        # Recupera os pacientes pendentes de aprovação para a página atual
-        cur.execute("SELECT usuarios.id, usuarios.email, formulario_napese.nome_completo, usuarios.data_criacao FROM usuarios LEFT JOIN formulario_napese ON usuarios.email = formulario_napese.email AND usuarios.tipo_usuario = 'paciente' where (usuarios.tipo_usuario = 'paciente' and formulario_napese.aprovado = 'pendente' and usuarios.status = true) order by id LIMIT %s OFFSET %s", (per_page, offset))
+        # Buscar pacientes pendentes
+        cur.execute("""
+            SELECT usuarios.id, usuarios.email, formulario_napese.nome_completo, usuarios.data_criacao 
+            FROM usuarios 
+            LEFT JOIN formulario_napese ON usuarios.email = formulario_napese.email 
+            WHERE usuarios.tipo_usuario = 'paciente' 
+            AND formulario_napese.aprovado = 'pendente' 
+            AND usuarios.status = true 
+            ORDER BY usuarios.data_criacao DESC
+        """)
+        
         pacientes_pendentes = cur.fetchall()
-
-        # Formata os dados
         pacientes_pendentes_formatados = [
-            {'id': usuario[0], 'email': usuario[1], 'nome_completo': usuario[2], 'data_cadastro': usuario[3].strftime("%d/%m/%Y %H:%M")}
-            for usuario in pacientes_pendentes
+            {
+                'id': paciente[0],
+                'email': paciente[1],
+                'nome_completo': paciente[2],
+                'data_cadastro': paciente[3].strftime("%d/%m/%Y %H:%M")
+            }
+            for paciente in pacientes_pendentes
         ]
 
-        # Configuração da paginação
-        has_prev_pacientes = page > 1
-        has_next_pacientes = offset + per_page < total_pacientes_pendentes
-        total_pages_pacientes_pendentes = ceil(total_pacientes_pendentes / per_page)
-
-        paginacao_pacientes = {
-            'items': pacientes_pendentes_formatados,
-            'has_prev': has_prev_pacientes,
-            'has_next': has_next_pacientes,
-            'page': page_pacientes_pendentes,
-            'pages': total_pages_pacientes_pendentes,
-            'prev_num': page_pacientes_pendentes - 1,
-            'next_num': page_pacientes_pendentes + 1,
-        }
-
-        # -----------------
-        # Recupera a contagem total de terapeutas pendentes de aprovação
-        cur.execute("SELECT COUNT(*) FROM usuarios LEFT JOIN terapeuta_napese ON usuarios.email = terapeuta_napese.email AND usuarios.tipo_usuario = 'terapeuta' where (usuarios.tipo_usuario = 'terapeuta' and terapeuta_napese.status = 'pendente' and usuarios.status = true)")
-        total_terapeutas_pendentes = cur.fetchone()[0]
-
-        # Recupera os pacientes pendentes de aprovação para a página atual
-        cur.execute("SELECT usuarios.id, usuarios.email, terapeuta_napese.nome_completo, usuarios.data_criacao FROM usuarios LEFT JOIN terapeuta_napese ON usuarios.email = terapeuta_napese.email AND usuarios.tipo_usuario = 'terapeuta' where (usuarios.tipo_usuario = 'terapeuta' and terapeuta_napese.status = 'pendente' and usuarios.status = true) order by id LIMIT %s OFFSET %s", (per_page, offset))
+        # Buscar terapeutas pendentes
+        cur.execute("""
+            SELECT usuarios.id, usuarios.email, terapeuta_napese.nome_completo, usuarios.data_criacao 
+            FROM usuarios 
+            LEFT JOIN terapeuta_napese ON usuarios.email = terapeuta_napese.email 
+            WHERE usuarios.tipo_usuario = 'terapeuta' 
+            AND terapeuta_napese.status = 'pendente' 
+            AND usuarios.status = true 
+            ORDER BY usuarios.data_criacao DESC
+        """)
+        
         terapeutas_pendentes = cur.fetchall()
-
-        # Formata os dados
         terapeutas_pendentes_formatados = [
-            {'id': usuario[0], 'email': usuario[1], 'nome_completo': usuario[2], 'data_cadastro': usuario[3].strftime("%d/%m/%Y %H:%M")}
-            for usuario in terapeutas_pendentes
+            {
+                'id': terapeuta[0],
+                'email': terapeuta[1],
+                'nome_completo': terapeuta[2],
+                'data_cadastro': terapeuta[3].strftime("%d/%m/%Y %H:%M")
+            }
+            for terapeuta in terapeutas_pendentes
         ]
 
-        # Configuração da paginação
-        has_prev_terapeutas = page > 1
-        has_next_terapeutas = offset + per_page < total_terapeutas_pendentes
-        total_pages_terapeutas_pendentes = ceil(total_terapeutas_pendentes / per_page)
+        # Buscar vínculos entre terapeutas e pacientes
+        cur.execute("""
+            SELECT 
+                t.nome_completo as nome_terapeuta,
+                p.nome_completo as nome_paciente,
+                tp.data_criacao as data_vinculo,
+                tp.status as status_vinculo
+            FROM terapeutas_pacientes tp
+            INNER JOIN usuarios ut ON tp.terapeuta_id = ut.id
+            INNER JOIN usuarios up ON tp.paciente_id = up.id
+            INNER JOIN terapeuta_napese t ON ut.email = t.email
+            INNER JOIN formulario_napese p ON up.email = p.email
+            ORDER BY t.nome_completo, p.nome_completo
+        """)
+        
+        vinculos = cur.fetchall()
+        vinculos_formatados = [
+            {
+                'nome_terapeuta': vinculo[0],
+                'nome_paciente': vinculo[1],
+                'data_vinculo': vinculo[2].strftime("%d/%m/%Y"),
+                'status_vinculo': 'Ativo' if vinculo[3] else 'Inativo'
+            }
+            for vinculo in vinculos
+        ]
 
-        paginacao_terapeutas = {
-            'items': terapeutas_pendentes_formatados,
-            'has_prev': has_prev_terapeutas,
-            'has_next': has_next_terapeutas,
-            'page': page_terapeutas_pendentes,
-            'pages': total_pages_terapeutas_pendentes,
-            'prev_num': page_terapeutas_pendentes - 1,
-            'next_num': page_terapeutas_pendentes + 1,
-        }
+        return render_template(
+            'admin/usuarios.html',
+            usuarios={'items': usuarios_formatados},
+            pacientes_pendentes={'items': pacientes_pendentes_formatados},
+            terapeutas_pendentes={'items': terapeutas_pendentes_formatados},
+            vinculos={'items': vinculos_formatados},
+            form=FlaskForm()
+        )
 
     except Exception as e:
         print(f"Erro ao buscar usuários: {e}")
         flash('Erro ao carregar usuários.', 'error')
-        paginacao = {
-            'items': [],
-            'has_prev': False,
-            'has_next': False,
-            'page': 1,
-            'pages': 1,
-        }
+        return render_template(
+            'admin/usuarios.html',
+            usuarios={'items': []},
+            pacientes_pendentes={'items': []},
+            terapeutas_pendentes={'items': []},
+            vinculos={'items': []},
+            form=FlaskForm()
+        )
     finally:
         cur.close()
         conn.close()
-
-    return render_template('admin/usuarios.html', usuarios=paginacao, pacientes_pendentes=paginacao_pacientes, terapeutas_pendentes=paginacao_terapeutas, form=FlaskForm())
 
 @app.route('/editar-usuario', methods=['POST'])
 @login_required
@@ -1290,7 +1311,7 @@ def definir_status_terapeuta(terapeuta_napese_id, aprovado):
         """, (aprovado,terapeuta_napese_id,))
         conn.commit()
         if aprovado == 'aprovado':
-            flash('Terapeuta aprovado com sucesso!', 'success')
+            # flash('Terapeuta aprovado com sucesso!', 'success')
             return redirect(url_for('admin_usuarios'))
         else:
             flash('Terapeuta reprovado!', 'success')
@@ -1324,7 +1345,7 @@ def definir_status_paciente(formulario_napese_id, aprovado):
         """, (aprovado,formulario_napese_id,))
         conn.commit()
         if aprovado == 'aprovado':
-            flash('Paciente aprovado com sucesso!', 'success')
+            # flash('Paciente aprovado com sucesso!', 'success')
             return redirect(url_for('admin_usuarios'))
         else:
             flash('Paciente reprovado!', 'success')
@@ -1394,7 +1415,7 @@ def vincular_paciente():
                 WHERE id = %s
             """, (vinculo_inativo[0],))
             conn.commit()
-            flash('Paciente vinculado com sucesso!', 'success')
+            # flash('Paciente vinculado com sucesso!', 'success')
         else:
             # Caso contrário, cria um novo vínculo
             cur.execute("""
@@ -1402,7 +1423,7 @@ def vincular_paciente():
                 VALUES (%s, %s, true)
             """, (terapeuta_id, paciente_id))
             conn.commit()
-            flash('Paciente vinculado com sucesso!', 'success')
+            # flash('Paciente vinculado com sucesso!', 'success')
         # Buscar dados do formulário do paciente
         cur.execute("""
             SELECT 
@@ -1485,7 +1506,8 @@ def vincular_paciente():
                 'conheceu_outro': paciente_dados[41],
                 'cep': paciente_dados[42],
                 'renda_familiar': paciente_dados[43],
-                'num_dependentes': paciente_dados[44]
+                'num_dependentes': paciente_dados[44],
+                'impacto_soma': int(paciente_dados[30])+int(paciente_dados[23])+int(paciente_dados[24])+int(paciente_dados[25])+int(paciente_dados[26])+int(paciente_dados[29])+int(paciente_dados[28])+int(paciente_dados[27])
             }
             msg = Message('Vinculo de um novo paciente', sender=os.getenv('MAIL_USERNAME'), recipients=[terapeuta_email[0]])
             msg.html = render_template("email/vincular_paciente_terapeuta.html",dados=dados_formatados)

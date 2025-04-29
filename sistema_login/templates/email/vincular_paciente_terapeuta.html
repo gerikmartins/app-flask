@@ -384,7 +384,12 @@
                 <span class="label">No último mês, quando você foi incomodado por ter dificuldades para se concentrar?</span>
                 <span class="value">{{ ['De modo nenhum', 'Um pouco', 'Moderadamente', 'Muito', 'Extremamente'][dados.impacto_concentracao] }}</span>
             </div>
-        </div>
+
+            <div class="form-group">
+                <span class="label">Resultado da soma:</span>
+                <span class="value">{{ dados.impacto_soma }}</span>
+            </div>
+        </div> 
     </div>
 </body>
 </html>
