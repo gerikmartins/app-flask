@@ -29,6 +29,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Tabl
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from threading import Thread
+from enum import Enum
 
 # Carregar variáveis de ambiente do arquivo .env
 load_dotenv()
@@ -68,6 +69,38 @@ if not os.path.exists(app.config['UPLOAD_FOLDER']):
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+
+class ImpactoEnum(Enum):
+    ONE = (0, "De modo nenhum")
+    TWO = (1, "Um pouco")
+    THREE = (2,"Moderadamente")
+    FOUR = (3, "Muito")
+    FIVE = (4, "Extremamente")
+
+    def __init__(self, codigo, descricao):
+        self.codigo = codigo
+        self.descricao = descricao
+
+    @classmethod
+    def traducao_impacto(cls, codigo):
+        for item in cls:
+            if item.codigo == codigo:
+                return item
+        return None
+
+def traducao_impacto(number):
+  """Translates a number to its text representation using the NumberText enum.
+
+  Args:
+    number: An integer.
+
+  Returns:
+    The text representation of the number if found, otherwise None.
+  """
+  try:
+    return ImpactoEnum(number).name
+  except ValueError:
+    return None
 
 class User(UserMixin):
     def __init__(self, id, email, tipo_usuario):
@@ -1531,17 +1564,18 @@ def gerar_pdf_e_enviar_email(dados_email, terapeuta_email):
             story.append(t)
             story.append(Spacer(1, 20))
 
+
             # Impactos
             story.append(Paragraph('Impactos', subtitle_style))
             impactos_data = [
-                [Paragraph('Impacto das Lembranças:', normal_style), Paragraph(str(dados_email['impacto_lembracas']), normal_style)],
-                [Paragraph('Impacto da Evitação:', normal_style), Paragraph(str(dados_email['impacto_evitacao']), normal_style)],
-                [Paragraph('Impacto nas Crenças:', normal_style), Paragraph(str(dados_email['impacto_crencas']), normal_style)],
-                [Paragraph('Impacto na Apreensão:', normal_style), Paragraph(str(dados_email['impacto_apreensao']), normal_style)],
-                [Paragraph('Impacto na Concentração:', normal_style), Paragraph(str(dados_email['impacto_concentracao']), normal_style)],
-                [Paragraph('Impacto no Humor:', normal_style), Paragraph(str(dados_email['impacto_chateado']), normal_style)],
-                [Paragraph('Impacto na Evitação de Gatilhos:', normal_style), Paragraph(str(dados_email['impacto_evitar_gatilhos']), normal_style)],
-                [Paragraph('Impacto no Interesse:', normal_style), Paragraph(str(dados_email['impacto_perda_interesse']), normal_style)],
+                [Paragraph('Impacto das Lembranças:', normal_style), Paragraph(str(ImpactoEnum.traducao_impacto(dados_email['impacto_lembracas']).descricao), normal_style)],
+                [Paragraph('Impacto da Evitação:', normal_style), Paragraph(ImpactoEnum.traducao_impacto(dados_email['impacto_evitacao']).descricao, normal_style)],
+                [Paragraph('Impacto nas Crenças:', normal_style), Paragraph(ImpactoEnum.traducao_impacto(dados_email['impacto_crencas']).descricao, normal_style)],
+                [Paragraph('Impacto na Apreensão:', normal_style), Paragraph(ImpactoEnum.traducao_impacto(dados_email['impacto_apreensao']).descricao, normal_style)],
+                [Paragraph('Impacto na Concentração:', normal_style), Paragraph(ImpactoEnum.traducao_impacto(dados_email['impacto_concentracao']).descricao, normal_style)],
+                [Paragraph('Impacto no Humor:', normal_style), Paragraph(ImpactoEnum.traducao_impacto(dados_email['impacto_chateado']).descricao, normal_style)],
+                [Paragraph('Impacto na Evitação de Gatilhos:', normal_style), Paragraph(ImpactoEnum.traducao_impacto(dados_email['impacto_evitar_gatilhos']).descricao, normal_style)],
+                [Paragraph('Impacto no Interesse:', normal_style), Paragraph(ImpactoEnum.traducao_impacto(dados_email['impacto_perda_interesse']).descricao, normal_style)],
                 [Paragraph('Soma dos Impactos:', normal_style), Paragraph(str(dados_email['impacto_soma']), normal_style)]
             ]
             t = Table(impactos_data, colWidths=[2*inch, 4*inch])
