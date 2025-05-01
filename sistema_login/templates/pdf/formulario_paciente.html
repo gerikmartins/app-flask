@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulário do Paciente</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .header h1 {
+            color: #2c5282;
+            margin-bottom: 10px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        .section h2 {
+            color: #2c5282;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #2c5282;
+        }
+
+        .info-group {
+            margin-bottom: 15px;
+        }
+
+        .info-group label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+            color: #4a5568;
+        }
+
+        .info-group p {
+            margin: 0;
+            padding: 8px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Formulário do Paciente</h1>
+        <p>Data de Preenchimento: {{ dados.data_preenchimento }}</p>
+    </div>
+
+    <div class="section">
+        <h2>Dados Pessoais</h2>
+        <div class="info-group">
+            <label>Nome Completo</label>
+            <p>{{ dados.nome_completo }}</p>
+        </div>
+        <div class="info-group">
+            <label>Email</label>
+            <p>{{ dados.email }}</p>
+        </div>
+        <div class="info-group">
+            <label>Telefones</label>
+            <p>{{ dados.telefones }}</p>
+        </div>
+        <div class="info-group">
+            <label>Data de Nascimento</label>
+            <p>{{ dados.data_nascimento }}</p>
+        </div>
+        <div class="info-group">
+            <label>Gênero</label>
+            <p>{{ dados.genero }}</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Endereço</h2>
+        <div class="info-group">
+            <label>Endereço Completo</label>
+            <p>{{ dados.endereco_completo }}</p>
+        </div>
+        <div class="info-group">
+            <label>CEP</label>
+            <p>{{ dados.cep }}</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Informações Acadêmicas</h2>
+        <div class="info-group">
+            <label>Curso</label>
+            <p>{{ dados.curso }}</p>
+        </div>
+        <div class="info-group">
+            <label>Período</label>
+            <p>{{ dados.periodo }}</p>
+        </div>
+        <div class="info-group">
+            <label>Turno</label>
+            <p>{{ dados.turno }}</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Informações Adicionais</h2>
+        <div class="info-group">
+            <label>Motivo da Busca</label>
+            <p>{{ dados.motivo_busca }}</p>
+        </div>
+        <div class="info-group">
+            <label>Expectativas</label>
+            <p>{{ dados.expectativas }}</p>
+        </div>
+        <div class="info-group">
+            <label>Observações</label>
+            <p>{{ dados.observacoes }}</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Documento gerado automaticamente pelo sistema NAPESE</p>
+    </div>
+</body>
+</html> 

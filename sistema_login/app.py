@@ -24,6 +24,11 @@ from dotenv import load_dotenv
 from flask import send_from_directory
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill, Font
+import tempfile
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from threading import Thread
 
 # Carregar variáveis de ambiente do arquivo .env
 load_dotenv()
@@ -1365,169 +1370,382 @@ def definir_status_paciente(formulario_napese_id, aprovado):
         cur.close()
         conn.close()
 
-@app.route('/vincular_paciente', methods=['POST'])
-@login_required
-def vincular_paciente():
-    if not current_user.is_authenticated or not current_user.is_admin():  # Verifica se o usuário está autenticado e é admin
-        flash('Acesso não autorizado!', 'error')
-        return redirect(url_for('admin_usuarios'))
-
-    terapeuta_id = request.form.get('terapeuta_id')
-    paciente_email = request.form.get('novo_paciente')
-
-    if not terapeuta_id or not paciente_email:
-        flash('Dados incompletos!', 'error')
-        return redirect(url_for('admin_usuarios'))
-
-    conn = conectar_bd()
-    cur = conn.cursor()
-
-    try:
-        # Verificar se o paciente existe
-        cur.execute("SELECT id FROM usuarios WHERE email = %s", (paciente_email,))
-        paciente = cur.fetchone()
-        if not paciente:
-            flash('Paciente não encontrado!', 'error')
-            return redirect(url_for('admin_usuarios'))
-
-        paciente_id = paciente[0]
-
-        # Verificar se já existe um vínculo ativo
-        cur.execute("""
-            SELECT 1 FROM terapeutas_pacientes 
-            WHERE terapeuta_id = %s AND paciente_id = %s AND status = true
-        """, (terapeuta_id, paciente_id))
-        if cur.fetchone():
-            flash('Paciente já está vinculado!', 'error')
-            return redirect(url_for('admin_usuarios'))
-
-        # Verificar se já existe um vínculo inativo
-        cur.execute("""
-            SELECT id FROM terapeutas_pacientes 
-            WHERE terapeuta_id = %s AND paciente_id = %s AND status = false
-        """, (terapeuta_id, paciente_id))
-        vinculo_inativo = cur.fetchone()
-        if vinculo_inativo:
-            # Se o vínculo inativo existe, atualize o status para true
-            cur.execute("""
-                UPDATE terapeutas_pacientes 
-                SET status = true 
-                WHERE id = %s
-            """, (vinculo_inativo[0],))
-            conn.commit()
-            # flash('Paciente vinculado com sucesso!', 'success')
-        else:
-            # Caso contrário, cria um novo vínculo
-            cur.execute("""
-                INSERT INTO terapeutas_pacientes (terapeuta_id, paciente_id, status) 
-                VALUES (%s, %s, true)
-            """, (terapeuta_id, paciente_id))
-            conn.commit()
-            # flash('Paciente vinculado com sucesso!', 'success')
-        # Buscar dados do formulário do paciente
-        cur.execute("""
-            SELECT 
-                nome_completo, cpf, telefones, data_nascimento, 
-                cidade, estado, genero, profissao, 
-                preferencia_atendimento, sintomas_relevantes,
-                medicacoes, substancias_psicoativas,
-                historico_acidentes, historico_cirurgias,
-                dores, acompanhamento_psiquiatrico,
-                acompanhamento_psicologico, tecnicas_corporais,
-                motivo_procura, vivenciou_trauma,
-                descricao_evento, tempo_decorrido,
-                envolveu_violencia, impacto_lembracas,
-                impacto_evitacao, impacto_crencas,
-                impacto_apreensao, impacto_concentracao,
-                impacto_chateado, impacto_evitar_gatilhos,
-                impacto_perda_interesse, acidente_violencia,
-                causas_naturais, nao_se_aplica, conheceu_site_trauma,
-                conheceu_instagram, conheceu_indicacao, conheceu_treinamentos,
-                conheceu_google, conheceu_rede_social, conheceu_psicologo,
-                conheceu_outro, cep, renda_familiar, num_dependentes
-            FROM formulario_napese 
-            WHERE email = %s
-        """, (paciente_email,))
-        paciente_dados = cur.fetchone()
-        print("terapeuta_idterapeuta_id:------- "+terapeuta_id)
-        cur.execute("SELECT email FROM usuarios WHERE id = %s", (terapeuta_id,))
-        terapeuta_email = cur.fetchone()
-        if not terapeuta_email:
-            flash('Terapeuta não encontrado!', 'error')
-            return redirect(url_for('admin_usuarios'))
-        print("EMAIL:------- "+terapeuta_email[0])
-
-        if not paciente_dados:
-            flash('Dados do formulário do paciente não encontrados!', 'error')
-            return redirect(url_for('admin_usuarios'))
+def enviar_email_async(app, msg):
+    with app.app_context():
         try:
-            dados_formatados = {
-                'nome_completo': paciente_dados[0],
-                'cpf': paciente_dados[1],
-                'telefones': paciente_dados[2],
-                'data_nascimento': paciente_dados[3],
-                'cidade': paciente_dados[4],
-                'estado': paciente_dados[5],
-                'genero': paciente_dados[6],
-                'profissao': paciente_dados[7],
-                'preferencia_atendimento': paciente_dados[8],
-                'sintomas_relevantes': paciente_dados[9],
-                'medicacoes': paciente_dados[10],
-                'substancias_psicoativas': paciente_dados[11],
-                'historico_acidentes': paciente_dados[12],
-                'historico_cirurgias': paciente_dados[13],
-                'dores': paciente_dados[14],
-                'acompanhamento_psiquiatrico': paciente_dados[15],
-                'acompanhamento_psicologico': paciente_dados[16],
-                'tecnicas_corporais': paciente_dados[17],
-                'motivo_procura': paciente_dados[18],
-                'vivenciou_trauma': paciente_dados[19],
-                'descricao_evento': paciente_dados[20],
-                'tempo_decorrido': paciente_dados[21],
-                'envolveu_violencia': paciente_dados[22],
-                'impacto_lembracas': paciente_dados[23],
-                'impacto_evitacao': paciente_dados[24],
-                'impacto_crencas': paciente_dados[25],
-                'impacto_apreensao': paciente_dados[26],
-                'impacto_concentracao': paciente_dados[27],
-                'impacto_chateado': paciente_dados[28],
-                'impacto_evitar_gatilhos': paciente_dados[29],
-                'impacto_perda_interesse': paciente_dados[30],
-                'acidente_violencia': paciente_dados[31],
-                'causas_naturais': paciente_dados[32],
-                'nao_se_aplica': paciente_dados[33],
-                'conheceu_site_trauma': paciente_dados[34],
-                'conheceu_instagram': paciente_dados[35],
-                'conheceu_indicacao': paciente_dados[36],
-                'conheceu_treinamentos': paciente_dados[37],
-                'conheceu_google': paciente_dados[38],
-                'conheceu_rede_social': paciente_dados[39],
-                'conheceu_psicologo': paciente_dados[40],
-                'conheceu_outro': paciente_dados[41],
-                'cep': paciente_dados[42],
-                'renda_familiar': paciente_dados[43],
-                'num_dependentes': paciente_dados[44],
-                'impacto_soma': int(paciente_dados[30])+int(paciente_dados[23])+int(paciente_dados[24])+int(paciente_dados[25])+int(paciente_dados[26])+int(paciente_dados[29])+int(paciente_dados[28])+int(paciente_dados[27])
-            }
-            msg = Message('Vinculo de um novo paciente', sender=os.getenv('MAIL_USERNAME'), recipients=[terapeuta_email[0]])
-            msg.html = render_template("email/vincular_paciente_terapeuta.html",dados=dados_formatados)
-            print("Enviando email...")
             mail.send(msg)
+            print("Email enviado com sucesso!")
         except Exception as e:
-            print(f"Erro ao enviar email: {e}")
-            flash('Erro ao enviar email!', 'error')
-            return redirect(url_for('admin_usuarios'))
+            print(f"Erro ao enviar email: {str(e)}")
 
-        return redirect(url_for('admin_usuarios'))
+def gerar_pdf_e_enviar_email(dados_email, terapeuta_email):
+    try:
+        # Criamos um contexto da aplicação
+        ctx = app.app_context()
+        ctx.push()
+
+        try:
+            # Gera o PDF usando ReportLab
+            buffer = BytesIO()
+            doc = SimpleDocTemplate(buffer, pagesize=letter)
+            styles = getSampleStyleSheet()
+            story = []
+
+            # Estilos personalizados
+            title_style = ParagraphStyle(
+                'CustomTitle',
+                parent=styles['Heading1'],
+                fontSize=16,
+                spaceAfter=30,
+                textColor=colors.HexColor('#96d232'),
+                alignment=1  # Centralizado
+            )
+
+            subtitle_style = ParagraphStyle(
+                'CustomSubtitle',
+                parent=styles['Heading2'],
+                fontSize=12,
+                spaceAfter=15,
+                textColor=colors.HexColor('#333333'),
+                alignment=0  # Alinhado à esquerda
+            )
+
+            normal_style = ParagraphStyle(
+                'CustomNormal',
+                parent=styles['Normal'],
+                fontSize=10,
+                spaceAfter=10,
+                textColor=colors.HexColor('#666666')
+            )
+
+            # Título principal
+            story.append(Paragraph('Formulário do Paciente', title_style))
+            story.append(Spacer(1, 20))
+
+            # Dados Pessoais
+            story.append(Paragraph('Dados Pessoais', subtitle_style))
+            personal_data = [
+                [Paragraph('Nome Completo:', normal_style), Paragraph(dados_email['nome_completo'], normal_style)],
+                [Paragraph('Email:', normal_style), Paragraph(dados_email['email'], normal_style)],
+                [Paragraph('Telefones:', normal_style), Paragraph(dados_email['telefones'], normal_style)],
+                [Paragraph('Data de Nascimento:', normal_style), Paragraph(dados_email['data_nascimento'].strftime('%d/%m/%Y') if isinstance(dados_email['data_nascimento'], (datetime.date, datetime.datetime)) else dados_email['data_nascimento'], normal_style)],
+                [Paragraph('Gênero:', normal_style), Paragraph(dados_email['genero'], normal_style)],
+                [Paragraph('Profissão:', normal_style), Paragraph(dados_email['profissao'], normal_style)],
+                [Paragraph('Cidade/Estado:', normal_style), Paragraph(f"{dados_email['cidade']}/{dados_email['estado']}", normal_style)],
+                [Paragraph('CEP:', normal_style), Paragraph(dados_email['cep'], normal_style)]
+            ]
+            t = Table(personal_data, colWidths=[2*inch, 4*inch])
+            t.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#f5f5f5')),
+                ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#333333')),
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, -1), 10),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+                ('BACKGROUND', (1, 0), (1, -1), colors.white),
+                ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#e0e0e0')),
+                ('LEFTPADDING', (0, 0), (-1, -1), 6),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ]))
+            story.append(t)
+            story.append(Spacer(1, 20))
+
+            # Informações de Atendimento
+            story.append(Paragraph('Informações de Atendimento', subtitle_style))
+            atendimento_data = [
+                [Paragraph('Preferência de Atendimento:', normal_style), Paragraph(dados_email['preferencia_atendimento'], normal_style)],
+                [Paragraph('Renda Familiar:', normal_style), Paragraph(dados_email['renda_familiar'], normal_style)],
+                [Paragraph('Número de Dependentes:', normal_style), Paragraph(dados_email['num_dependentes'], normal_style)]
+            ]
+            t = Table(atendimento_data, colWidths=[2*inch, 4*inch])
+            t.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#f5f5f5')),
+                ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#333333')),
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, -1), 10),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+                ('BACKGROUND', (1, 0), (1, -1), colors.white),
+                ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#e0e0e0')),
+                ('LEFTPADDING', (0, 0), (-1, -1), 6),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ]))
+            story.append(t)
+            story.append(Spacer(1, 20))
+
+            # Histórico de Saúde
+            story.append(Paragraph('Histórico de Saúde', subtitle_style))
+            saude_data = [
+                [Paragraph('Sintomas Relevantes:', normal_style), Paragraph(dados_email['sintomas_relevantes'], normal_style)],
+                [Paragraph('Medicações:', normal_style), Paragraph(dados_email['medicacoes'], normal_style)],
+                [Paragraph('Substâncias Psicoativas:', normal_style), Paragraph(dados_email['substancias_psicoativas'], normal_style)],
+                [Paragraph('Histórico de Acidentes:', normal_style), Paragraph(dados_email['historico_acidentes'], normal_style)],
+                [Paragraph('Histórico de Cirurgias:', normal_style), Paragraph(dados_email['historico_cirurgias'], normal_style)],
+                [Paragraph('Dores:', normal_style), Paragraph(dados_email['dores'], normal_style)],
+                [Paragraph('Acompanhamento Psiquiátrico:', normal_style), Paragraph(dados_email['acompanhamento_psiquiatrico'], normal_style)],
+                [Paragraph('Acompanhamento Psicológico:', normal_style), Paragraph(dados_email['acompanhamento_psicologico'], normal_style)],
+                [Paragraph('Técnicas Corporais:', normal_style), Paragraph(dados_email['tecnicas_corporais'], normal_style)]
+            ]
+            t = Table(saude_data, colWidths=[2*inch, 4*inch])
+            t.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#f5f5f5')),
+                ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#333333')),
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, -1), 10),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+                ('BACKGROUND', (1, 0), (1, -1), colors.white),
+                ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#e0e0e0')),
+                ('LEFTPADDING', (0, 0), (-1, -1), 6),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ]))
+            story.append(t)
+            story.append(Spacer(1, 20))
+
+            # Informações sobre Trauma
+            story.append(Paragraph('Informações sobre Trauma', subtitle_style))
+            trauma_data = [
+                [Paragraph('Vivenciou Trauma:', normal_style), Paragraph('Sim' if dados_email['vivenciou_trauma'] else 'Não', normal_style)],
+                [Paragraph('Descrição do Evento:', normal_style), Paragraph(dados_email['descricao_evento'], normal_style)],
+                [Paragraph('Tempo Decorrido:', normal_style), Paragraph(dados_email['tempo_decorrido'], normal_style)],
+                [Paragraph('Envolveu Violência:', normal_style), Paragraph('Sim' if dados_email['envolveu_violencia'] else 'Não', normal_style)],
+                [Paragraph('Motivo da Procura:', normal_style), Paragraph(dados_email['motivo_procura'], normal_style)]
+            ]
+            t = Table(trauma_data, colWidths=[2*inch, 4*inch])
+            t.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#f5f5f5')),
+                ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#333333')),
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, -1), 10),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+                ('BACKGROUND', (1, 0), (1, -1), colors.white),
+                ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#e0e0e0')),
+                ('LEFTPADDING', (0, 0), (-1, -1), 6),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ]))
+            story.append(t)
+            story.append(Spacer(1, 20))
+
+            # Impactos
+            story.append(Paragraph('Impactos', subtitle_style))
+            impactos_data = [
+                [Paragraph('Impacto das Lembranças:', normal_style), Paragraph(str(dados_email['impacto_lembracas']), normal_style)],
+                [Paragraph('Impacto da Evitação:', normal_style), Paragraph(str(dados_email['impacto_evitacao']), normal_style)],
+                [Paragraph('Impacto nas Crenças:', normal_style), Paragraph(str(dados_email['impacto_crencas']), normal_style)],
+                [Paragraph('Impacto na Apreensão:', normal_style), Paragraph(str(dados_email['impacto_apreensao']), normal_style)],
+                [Paragraph('Impacto na Concentração:', normal_style), Paragraph(str(dados_email['impacto_concentracao']), normal_style)],
+                [Paragraph('Impacto no Humor:', normal_style), Paragraph(str(dados_email['impacto_chateado']), normal_style)],
+                [Paragraph('Impacto na Evitação de Gatilhos:', normal_style), Paragraph(str(dados_email['impacto_evitar_gatilhos']), normal_style)],
+                [Paragraph('Impacto no Interesse:', normal_style), Paragraph(str(dados_email['impacto_perda_interesse']), normal_style)],
+                [Paragraph('Soma dos Impactos:', normal_style), Paragraph(str(dados_email['impacto_soma']), normal_style)]
+            ]
+            t = Table(impactos_data, colWidths=[2*inch, 4*inch])
+            t.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#f5f5f5')),
+                ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#333333')),
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, -1), 10),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+                ('BACKGROUND', (1, 0), (1, -1), colors.white),
+                ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#e0e0e0')),
+                ('LEFTPADDING', (0, 0), (-1, -1), 6),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ]))
+            story.append(t)
+
+            # Rodapé
+            story.append(Spacer(1, 30))
+            story.append(Paragraph('Documento gerado automaticamente pelo sistema NAPESE', normal_style))
+            story.append(Paragraph(f"Data de geração: {datetime.datetime.now().strftime('%d/%m/%Y %H:%M')}", normal_style))
+
+            # Gera o PDF
+            doc.build(story)
+            pdf_data = buffer.getvalue()
+            buffer.close()
+
+            # Prepara e envia o email
+            msg = Message(
+                'Novo Paciente Vinculado',
+                sender=app.config['MAIL_USERNAME'],
+                recipients=[terapeuta_email]
+            )
+            msg.html = render_template('email/vincular_paciente_terapeuta_v3.html', dados=dados_email)
+            msg.attach('formulario_paciente.pdf', 'application/pdf', pdf_data)
+            mail.send(msg)
+            print("Email enviado com sucesso!")
+
+        finally:
+            # Sempre remove o contexto da aplicação ao finalizar
+            ctx.pop()
 
     except Exception as e:
-        print(f"Erro ao vincular paciente: {e}")
-        flash('Erro ao vincular paciente!', 'error')
-        return redirect(url_for('admin_usuarios'))
+        print(f"Erro ao gerar PDF e enviar email: {str(e)}")
 
+@app.route('/vincular_paciente', methods=['POST'])
+def vincular_paciente():
+    try:
+        paciente_id = request.form.get('novo_paciente')
+        terapeuta_id = request.form.get('terapeuta_id')
+        
+        if not paciente_id or not terapeuta_id:
+            return jsonify({'status': 'error', 'message': 'IDs do paciente e terapeuta são obrigatórios'}), 400
+
+        conn = conectar_bd()
+        cur = conn.cursor()
+
+        # Verifica se o paciente existe
+        cur.execute("SELECT email FROM usuarios WHERE id = %s", (paciente_id,))
+        paciente = cur.fetchone()
+        
+        if not paciente:
+            return jsonify({'status': 'error', 'message': 'Paciente não encontrado'}), 404
+        
+        # Verifica se o terapeuta existe
+        cur.execute("SELECT email FROM usuarios WHERE id = %s", (terapeuta_id,))
+        terapeuta = cur.fetchone()
+        
+        if not terapeuta:
+            return jsonify({'status': 'error', 'message': 'Terapeuta não encontrado'}), 404
+
+        # Verifica se já existe um vínculo ativo
+        cur.execute("""
+            SELECT id FROM terapeutas_pacientes 
+            WHERE paciente_id = %s AND terapeuta_id = %s AND status = 1
+        """, (paciente_id, terapeuta_id))
+        vinculo_ativo = cur.fetchone()
+
+        if vinculo_ativo:
+            return jsonify({'status': 'error', 'message': 'Já existe um vínculo ativo entre este paciente e terapeuta'}), 400
+
+        # Verifica se existe um vínculo inativo
+        cur.execute("""
+            SELECT id FROM terapeutas_pacientes 
+            WHERE paciente_id = %s AND terapeuta_id = %s AND status = 0
+        """, (paciente_id, terapeuta_id))
+        vinculo_inativo = cur.fetchone()
+
+        if vinculo_inativo:
+            # Atualiza o vínculo existente para ativo
+            cur.execute("""
+                UPDATE terapeutas_pacientes 
+                SET status = 1, data_criacao = CURRENT_TIMESTAMP 
+                WHERE id = %s
+            """, (vinculo_inativo[0],))
+        else:
+            # Cria um novo vínculo
+            cur.execute("""
+                INSERT INTO terapeutas_pacientes 
+                (paciente_id, terapeuta_id, status, data_criacao) 
+                VALUES (%s, %s, 1, CURRENT_TIMESTAMP)
+            """, (paciente_id, terapeuta_id))
+
+        # Busca dados completos do paciente para o email
+        cur.execute("""
+            SELECT p.nome_completo, p.cpf, p.telefones, p.data_nascimento,
+                p.cidade, p.estado, p.genero, p.profissao, 
+                p.preferencia_atendimento, p.sintomas_relevantes,
+                p.medicacoes, p.substancias_psicoativas,
+                p.historico_acidentes, p.historico_cirurgias,
+                p.dores, p.acompanhamento_psiquiatrico,
+                p.acompanhamento_psicologico, p.tecnicas_corporais,
+                p.motivo_procura, p.vivenciou_trauma,
+                p.descricao_evento, p.tempo_decorrido,
+                p.envolveu_violencia, p.impacto_lembracas,
+                p.impacto_evitacao, p.impacto_crencas,
+                p.impacto_apreensao, p.impacto_concentracao,
+                p.impacto_chateado, p.impacto_evitar_gatilhos,
+                p.impacto_perda_interesse, p.acidente_violencia,
+                p.causas_naturais, p.nao_se_aplica, p.conheceu_site_trauma,
+                p.conheceu_instagram, p.conheceu_indicacao, p.conheceu_treinamentos,
+                p.conheceu_google, p.conheceu_rede_social, p.conheceu_psicologo,
+                p.conheceu_outro, p.cep, p.renda_familiar, p.num_dependentes, p.email
+            FROM formulario_napese p
+            WHERE p.email = %s
+        """, (paciente[0],))
+        paciente_dados = cur.fetchone()
+
+        conn.commit()
+
+        # Formata os dados para o email
+        dados_email = {
+            'nome_completo': paciente_dados[0],
+            'cpf': paciente_dados[1],
+            'email': paciente_dados[45],
+            'telefones': paciente_dados[2],
+            'data_nascimento': paciente_dados[3],
+            'cidade': paciente_dados[4],
+            'estado': paciente_dados[5],
+            'genero': paciente_dados[6],
+            'profissao': paciente_dados[7],
+            'preferencia_atendimento': paciente_dados[8],
+            'sintomas_relevantes': paciente_dados[9],
+            'medicacoes': paciente_dados[10],
+            'substancias_psicoativas': paciente_dados[11],
+            'historico_acidentes': paciente_dados[12],
+            'historico_cirurgias': paciente_dados[13],
+            'dores': paciente_dados[14],
+            'acompanhamento_psiquiatrico': paciente_dados[15],
+            'acompanhamento_psicologico': paciente_dados[16],
+            'tecnicas_corporais': paciente_dados[17],
+            'motivo_procura': paciente_dados[18],
+            'vivenciou_trauma': paciente_dados[19],
+            'descricao_evento': paciente_dados[20],
+            'tempo_decorrido': paciente_dados[21],
+            'envolveu_violencia': paciente_dados[22],
+            'impacto_lembracas': paciente_dados[23],
+            'impacto_evitacao': paciente_dados[24],
+            'impacto_crencas': paciente_dados[25],
+            'impacto_apreensao': paciente_dados[26],
+            'impacto_concentracao': paciente_dados[27],
+            'impacto_chateado': paciente_dados[28],
+            'impacto_evitar_gatilhos': paciente_dados[29],
+            'impacto_perda_interesse': paciente_dados[30],
+            'acidente_violencia': paciente_dados[31],
+            'causas_naturais': paciente_dados[32],
+            'nao_se_aplica': paciente_dados[33],
+            'conheceu_site_trauma': paciente_dados[34],
+            'conheceu_instagram': paciente_dados[35],
+            'conheceu_indicacao': paciente_dados[36],
+            'conheceu_treinamentos': paciente_dados[37],
+            'conheceu_google': paciente_dados[38],
+            'conheceu_rede_social': paciente_dados[39],
+            'conheceu_psicologo': paciente_dados[40],
+            'conheceu_outro': paciente_dados[41],
+            'cep': paciente_dados[42],
+            'renda_familiar': paciente_dados[43],
+            'num_dependentes': paciente_dados[44],
+            'impacto_soma': int(paciente_dados[23]) + int(paciente_dados[24]) + int(paciente_dados[25]) + 
+                           int(paciente_dados[26]) + int(paciente_dados[27]) + int(paciente_dados[28]) + 
+                           int(paciente_dados[29]) + int(paciente_dados[30])
+        }
+
+        # Inicia o processo assíncrono de geração do PDF e envio do email
+        try:
+            thread = Thread(target=gerar_pdf_e_enviar_email, args=(dados_email, terapeuta[0]))
+            thread.daemon = True  # Garante que a thread será encerrada quando o programa principal terminar
+            thread.start()
+            print("Thread de envio de email iniciada")
+        except Exception as e:
+            print(f"Erro ao iniciar thread de email: {str(e)}")
+
+        return jsonify({'status': 'success', 'message': 'Paciente vinculado com sucesso! O email será enviado em breve.'})
+
+    except Exception as e:
+        if 'conn' in locals():
+            conn.rollback()
+        return jsonify({'status': 'error', 'message': f'Erro ao vincular paciente: {str(e)}'}), 500
     finally:
-        cur.close()
-        conn.close()
+        if 'cur' in locals():
+            cur.close()
+        if 'conn' in locals():
+            conn.close()
 
 @app.route('/remover_vinculo', methods=['POST'])
 @login_required
@@ -1561,7 +1779,7 @@ def remover_vinculo():
         )
         conn.commit()
 
-        flash('Vínculo removido com sucesso', 'success')
+        # flash('Vínculo removido com sucesso', 'success')
         return redirect(url_for('admin_usuarios'))
 
     except Exception as e:
@@ -1952,9 +2170,9 @@ def gerar_excel_reprovados_terapeutas():
         
         registros = cur.fetchall()
         
-        if not registros:
-            flash('Não há registros reprovados para exportar!', 'info')
-            return redirect(url_for('admin_usuarios'))
+        # if not registros:
+            # flash('Não há registros reprovados para exportar!', 'info')
+            # return redirect(url_for('admin_usuarios'))
 
         # Criar workbook e definir cabeçalhos
         wb = Workbook()
@@ -2053,9 +2271,9 @@ def gerar_excel_reprovados_pacientes():
         
         registros = cur.fetchall()
 
-        if not registros:
-            flash('Não há registros reprovados para exportar!', 'info')
-            return redirect(url_for('admin_usuarios'))
+        # if not registros:
+            # flash('Não há registros reprovados para exportar!', 'info')
+            # return redirect(url_for('admin_usuarios'))
 
         # Criar um novo workbook
         wb = Workbook()
