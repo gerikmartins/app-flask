@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Novo Paciente Vinculado</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .header h2 {
+            color: #2c5282;
+            margin-bottom: 15px;
+        }
+
+        .content {
+            margin-bottom: 20px;
+        }
+
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Novo Paciente Vinculado</h2>
+    </div>
+
+    <div class="content">
+        <p>Olá,</p>
+        
+        <p>Você foi vinculado a um novo paciente no sistema NAPESE. Os dados completos do formulário do paciente estão disponíveis no arquivo PDF anexo a este email.</p>
+        
+        <p>Dados básicos do paciente:</p>
+        <ul>
+            <li><strong>Nome:</strong> {{ dados.nome_completo }}</li>
+            <li><strong>Email:</strong> {{ dados.email }}</li>
+            <li><strong>Telefone:</strong> {{ dados.telefones }}</li>
+        </ul>
+        
+        <p>Por favor, revise o formulário completo em anexo para conhecer melhor o paciente e iniciar o acompanhamento.</p>
+    </div>
+
+    <div class="footer">
+        <p>Este é um email automático do sistema NAPESE. Por favor, não responda.</p>
+    </div>
+</body>
+</html> 

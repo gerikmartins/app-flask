@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resumo do Formulário</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h3 {
+            color: #2c5282;
+            border-bottom: 2px solid #2c5282;
+            padding-bottom: 5px;
+            margin-top: 25px;
+        }
+        
+        .form-section {
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .label {
+            color: #666;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .value {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .textarea-value {
+            white-space: pre-wrap;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .header h2 {
+            color: #2c5282;
+            margin-bottom: 15px;
+        }
+
+        .header p {
+            color: #4a5568;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Novo Paciente Vinculado</h2>
+        <p>Você foi vinculado a um novo paciente. Abaixo seguem os dados cadastrais completos para sua análise.</p>
+    </div>
+
+    <div>
+        <h3>Dados Pessoais</h3>
+        <div class="form-section">
+            <div class="form-group">
+                <span class="label">Nome Completo:</span>
+                <span class="value">{{ dados.nome_completo }}</span>
+            </div>
+
+            <div class="form-group">
+                <span class="label">Email:</span>
+                <span class="value">{{ dados.email }}</span>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">CPF:</span>
+                <span class="value">{{ dados.cpf }}</span>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">Telefones:</span>
+                <span class="value">{{ dados.telefones }}</span>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">Data de Nascimento:</span>
+                <span class="value">{{ dados.data_nascimento }}</span>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">Endereço:</span>
+                <span class="value">CEP: {{ dados.cep }} - {{ dados.cidade }}/{{ dados.estado }}</span>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">Gênero:</span>
+                <span class="value">{{ dados.genero }}</span>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">Profissão:</span>
+                <span class="value">{{ dados.profissao }}</span>
+            </div>
+        </div>
+
+        <h3>Preferências</h3>
+        <div class="form-section">
+            <div class="form-group">
+                <span class="label">Preferência de Atendimento:</span>
+                <span class="value">{{ dados.preferencia_atendimento }}</span>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">Renda Familiar:</span>
+                <span class="value">{{ dados.renda_familiar }}</span>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">Número de Dependentes:</span>
+                <span class="value">{{ dados.num_dependentes }}</span>
+            </div>
+        </div>
+
+        <h3>Como Conheceu o NAPESE</h3>
+        <div class="form-section">
+            {% if dados.conheceu_site_trauma %}
+            <div class="form-group">
+                <span class="value">• Site traumatemcura.com.br</span>
+            </div>
+            {% endif %}
+            
+            {% if dados.conheceu_instagram %}
+            <div class="form-group">
+                <span class="value">• Instagram</span>
+            </div>
+            {% endif %}
+            
+            {% if dados.conheceu_indicacao %}
+            <div class="form-group">
+                <span class="value">• Indicação</span>
+            </div>
+            {% endif %}
+            
+            {% if dados.conheceu_treinamentos %}
+            <div class="form-group">
+                <span class="value">• Treinamentos</span>
+            </div>
+            {% endif %}
+            
+            {% if dados.conheceu_google %}
+            <div class="form-group">
+                <span class="value">• Google</span>
+            </div>
+            {% endif %}
+            
+            {% if dados.conheceu_rede_social %}
+            <div class="form-group">
+                <span class="value">• Rede Social</span>
+            </div>
+            {% endif %}
+            
+            {% if dados.conheceu_psicologo %}
+            <div class="form-group">
+                <span class="value">• Psicólogo</span>
+            </div>
+            {% endif %}
+            
+            {% if dados.conheceu_outro %}
+            <div class="form-group">
+                <span class="label">Outro:</span>
+                <span class="value">{{ dados.conheceu_outro }}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <h3>Sintomas e Histórico Médico</h3>
+        <div class="form-section">
+            <div class="form-group">
+                <span class="label">Quais os sintomas relevantes que você tem sentido no último mês?</span>
+                <div class="textarea-value">{{ dados.sintomas_relevantes }}</div>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">Toma alguma medicação? Qual?</span>
+                <div class="textarea-value">{{ dados.medicacoes }}</div>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">Uso de substância psicoativa (álcool e outras drogas)?</span>
+                <div class="textarea-value">{{ dados.substancias_psicoativas }}</div>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">Já sofreu algum acidente?</span>
+                <div class="textarea-value">{{ dados.historico_acidentes }}</div>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">Já passou por algum procedimento cirúrgico?</span>
+                <div class="textarea-value">{{ dados.historico_cirurgias }}</div>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">Sente algum tipo de dor (aguda ou crônica)?</span>
+                <div class="textarea-value">{{ dados.dores }}</div>
+            </div>
+        </div>
+
+        <h3>Acompanhamento Profissional</h3>
+        <div class="form-section">
+            <div class="form-group">
+                <span class="label">Tem tido acompanhamento psiquiátrico?</span>
+                <span class="value">{{ dados.acompanhamento_psiquiatrico }}</span>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">Tem tido acompanhamento psicológico?</span>
+                <span class="value">{{ dados.acompanhamento_psicologico }}</span>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">Já recebeu ou trabalhou com alguma técnica corporal?</span>
+                <div class="textarea-value">{{ dados.tecnicas_corporais }}</div>
+            </div>
+        </div>
+
+        <h3>Histórico de Trauma</h3>
+        <div class="form-section">
+            <div class="form-group">
+                <span class="label">Conhece o Método Somatic Experiencing®?</span>
+                <span class="value">{{ 'Sim' if dados.conhece_se else 'Não' }}</span>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">Qual o motivo da sua procura pelo atendimento?</span>
+                <div class="textarea-value">{{ dados.motivo_procura }}</div>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">Vivenciou Trauma?</span>
+                <span class="value">{{ 'Sim' if dados.vivenciou_trauma else 'Não' }}</span>
+            </div>
+
+            {% if dados.vivenciou_trauma %}
+            <div class="form-group">
+                <span class="label">Descrição do Evento:</span>
+                <div class="textarea-value">{{ dados.descricao_evento }}</div>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">Tempo Decorrido:</span>
+                <span class="value">{{ dados.tempo_decorrido }}</span>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">Envolveu morte real ou ameaça de morte, ferimentos graves ou ameaça de ferimentos
+                    graves ou violência sexual real ou ameaça de violência sexual?</span>
+                <span class="value">{{ 'Sim' if dados.envolveu_violencia else 'Não' }}</span>
+            </div>
+            {% if dados.acidente_violencia or dados.causas_naturais or dados.nao_se_aplica %}
+            <div class="form-group">
+                <span class="label">Se o evento envolveu a morte de um membro próximo da família ou amigo próximo, foi
+                    devido a algum tipo de acidente ou violência, ou foi devido a causas naturais?</span>
+                    {% if dados.acidente_violencia %}
+                    <div class="form-group">
+                        <span class="value">• Acidente ou violência</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if dados.causas_naturais %}
+                    <div class="form-group">
+                        <span class="value">• Causas naturais.</span>
+                    </div>
+                    {% endif %}
+                    {% if dados.nao_se_aplica %}
+                    <div class="form-group">
+                        <span class="value">• Não se aplica (O evento não envolveu a morte de um membro próximo da família ou amigo
+                            próximo).</span>
+                    </div>
+                    {% endif %}
+            </div>
+            {% endif %}
+            {% endif %}
+        </div>
+        {% if dados.vivencia_direta or dados.vivencia_testemunha or dados.vivencia_familiar_amigo or dados.vivencia_trabalho or dados.vivencia_nenhuma or dados.vivencia_outro %}
+        <h3>Vivências</h3>
+        <div class="form-section">
+            {% if dados.vivencia_direta %}
+            <div class="form-group">
+                <span class="value">• Aconteceu comigo diretamente</span>
+            </div>
+            {% endif %}
+            
+            {% if dados.vivencia_testemunha %}
+            <div class="form-group">
+                <span class="value">• Eu testemunhei este evento.</span>
+            </div>
+            {% endif %}
+            
+            {% if dados.vivencia_familiar_amigo %}
+            <div class="form-group">
+                <span class="value">• Eu fiquei sabendo que o evento aconteceu com um membro próximo da família ou amigo próximo.</span>
+            </div>
+            {% endif %}
+            
+            {% if dados.vivencia_trabalho %}
+            <div class="form-group">
+                <span for="value">• Eu fui exposto repetidamente a detalhes deste evento como parte do meu trabalho.</span>
+            </div>
+            {% endif %}
+            
+            {% if dados.vivencia_nenhuma %}
+            <div class="form-group">
+                <span for="value">• Não experimentei nenhum evento particularmente estressante.</span>
+            </div>
+            {% endif %}
+            
+            {% if dados.vivencia_outro %}
+            <div class="form-group">
+                <span class="label">Outro:</span>
+                <div class="textarea-value">{{ dados.vivencia_outro }}</div>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <h3>Impactos no Último Mês</h3>
+        <div class="form-section">
+            <div class="form-group">
+                <span class="label">No último mês, quando você foi incomodado por lembranças indesejáveis, perturbadoras e
+                    repetitivas da experiência estressante?</span>
+                <span class="value">{{ ['De modo nenhum', 'Um pouco', 'Moderadamente', 'Muito', 'Extremamente'][dados.impacto_lembracas] }}</span>
+            </div>
+
+            <div class="form-group">
+                <span class="label">No último mês, quando você foi incomodado por sentir-se muito chateado quando algo
+                    lembra você da experiência estressante?</span>
+                <span class="value">{{ ['De modo nenhum', 'Um pouco', 'Moderadamente', 'Muito', 'Extremamente'][dados.impacto_chateado] }}</span>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">Tentar evitar lembranças externas da experiência estressante:</span>
+                <span class="value">{{ ['De modo nenhum', 'Um pouco', 'Moderadamente', 'Muito', 'Extremamente'][dados.impacto_evitacao] }}</span>
+            </div>
+
+            <div class="form-group">
+                <span class="label">No último mês, quando você foi incomodado por evitar lembranças externas da
+                    experiência estressante (por exemplo, pessoas, lugares, conversas, atividades, objetos ou
+                    situações)?</span>
+                <span class="value">{{ ['De modo nenhum', 'Um pouco', 'Moderadamente', 'Muito', 'Extremamente'][dados.impacto_evitar_gatilhos] }}</span>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">No último mês, quando você foi incomodado por ter crenças negativas intensas sobre
+                    você, outras pessoas ou o mundo? (Por exemplo, ter pensamentos tais como: “Eu sou ruim”, “existe algo seriamente errado comigo”,
+                    “ninguém é confiável”, “o mundo todo é perigoso”.)</span>
+                <span class="value">{{ ['De modo nenhum', 'Um pouco', 'Moderadamente', 'Muito', 'Extremamente'][dados.impacto_crencas] }}</span>
+            </div>
+
+            <div class="form-group">
+                <span class="label">No último mês, quando você foi incomodado por perder o interesse em atividades que
+                    você costumava apreciar?</span>
+                <span class="value">{{ ['De modo nenhum', 'Um pouco', 'Moderadamente', 'Muito', 'Extremamente'][dados.impacto_perda_interesse] }}</span>
+            </div>
+            
+            <div class="form-group">
+                <span class="label">No último mês, quando você foi incomodado por ficar “super” alerta, vigilante ou de
+                    sobreaviso?</span>
+                <span class="value">{{ ['De modo nenhum', 'Um pouco', 'Moderadamente', 'Muito', 'Extremamente'][dados.impacto_apreensao] }}</span>
+            </div>
+
+            <div class="form-group">
+                <span class="label">No último mês, quando você foi incomodado por ter dificuldades para se concentrar?</span>
+                <span class="value">{{ ['De modo nenhum', 'Um pouco', 'Moderadamente', 'Muito', 'Extremamente'][dados.impacto_concentracao] }}</span>
+            </div>
+
+            <div class="form-group">
+                <span class="label">Resultado da soma:</span>
+                <span class="value">{{ dados.impacto_soma }}</span>
+            </div>
+        </div> 
+    </div>
+</body>
+</html>

@@ -335,7 +335,7 @@
                 
                 <div class="vincular-novo">
                     <h4><i class="fas fa-user-plus"></i> Adicionar Novo Paciente</h4>
-                    <form id="vincularPacientesForm" action="{{ url_for('vincular_paciente') }}" method="POST">
+                    <form id="vincularPacientesForm" onsubmit="vincularPaciente(event)">
                         {{ form.csrf_token }}
                         <input type="hidden" id="terapeuta_id" name="terapeuta_id">
                         <div class="select-wrapper">
@@ -776,7 +776,6 @@
                     if (data.error) {
                         alert(data.error);
                     } else {
-                        console.log(data[0].id + " ----------------------");
                         document.getElementById('avaliar_terapeuta_id').value = data[0].id;
                         document.getElementById('terapeuta_nome_completo').value = data[0].nome_completo;
                         document.getElementById('terapeuta_cidade').value = data[0].cidade;
@@ -1148,7 +1147,7 @@
                     } else {
                         data.forEach(paciente => {
                             const option = document.createElement('option');
-                            option.value = paciente.email;
+                            option.value = paciente.id;
                             option.textContent = paciente.email;
                             selectPaciente.appendChild(option);
                         });
@@ -1482,6 +1481,32 @@
 
         // Adicionar variável de página atual para vínculos
         let vinculosCurrentPage = 1;
+
+        function vincularPaciente(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(document.getElementById('vincularPacientesForm'));
+            
+            fetch('{{ url_for("vincular_paciente") }}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                    window.location.reload();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                alert('Erro ao vincular paciente. Por favor, tente novamente.');
+            });
+        }
     </script>
 </body>
 </html>
